@@ -47,8 +47,8 @@ const Factoring = (() => {
   }
 
   /* ---- Economy knobs (tune here) ---- */
-  const PRACTICE_REWARD = { 2: 3, 3: 5, 4: 8 };
-  const practiceReward = diceCount => PRACTICE_REWARD[diceCount] || 5;
+  const PRACTICE_REWARD = 20; // chips for every solved practice round, whatever the dice setting
+  const practiceReward = () => PRACTICE_REWARD;
 
   /** More prime factors = harder number = bigger multiplier. A prime sum pays 1x. */
   const wagerMultiplier = factors => 1 + 0.5 * (factors.length - 1);
@@ -57,7 +57,7 @@ const Factoring = (() => {
   return {
     isPrime, primesUpTo, primeFactors, product, rollDice,
     isValidFactorization, toExponentForm,
-    practiceReward, wagerMultiplier, wagerPayout,
+    PRACTICE_REWARD, practiceReward, wagerMultiplier, wagerPayout,
   };
 })();
 

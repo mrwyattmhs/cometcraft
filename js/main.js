@@ -77,13 +77,25 @@
   viewPencil.position.set(0.32, -0.28, -0.55);
   camera.add(viewPencil);
 
+  // a graphing calculator takes the pencil's place in the lower-right of the view (one accessory at a time)
+  const viewCalc = new THREE.Group();
+  viewCalc.rotation.order = 'YXZ';
+  viewCalc.rotation.set(-0.3, -0.35, 0.08);
+  viewCalc.position.set(0.36, -0.32, -0.62);
+  camera.add(viewCalc);
+  let hasCalc = false;
+
   /* ---------- what the student is wearing, and the pet trailing them ---------- */
   const follower = Pets.createFollower(scene);
   const behind = () => ({ x: Player.x + Math.sin(Player.yaw) * 1.2, z: Player.z + Math.cos(Player.yaw) * 1.2 });
 
   function applyOutfit(o) {
     Avatar.dress(me, o);
-    Avatar.setPencilColor(viewPencil, o.pencil.color);
+    const calc = o.accessory.kind === 'calculator';
+    if (!calc) Avatar.setPencilColor(viewPencil, o.accessory.color);
+    viewCalc.clear();
+    hasCalc = calc;
+    if (calc) viewCalc.add(Avatar.makeCalculator(o.accessory.color, 1.25));
     const at = behind();
     follower.set(o.pet, at.x, at.z);
   }
@@ -187,7 +199,8 @@
     // player avatar + camera
     const seen = Player.third || !!showcase;
     me.visible = seen;
-    viewPencil.visible = !seen;
+    viewPencil.visible = !seen && !hasCalc;
+    viewCalc.visible = !seen && hasCalc;
     me.position.set(Player.x, 0, Player.z);
     me.rotation.y = showcase ? showcase.face + Math.sin(t * 0.9) * 0.35 : Player.yaw + Math.PI;
     Avatar.animate(me, showcase ? 0 : Player.moveAmt, Player.bobT * 2.2);
@@ -205,6 +218,7 @@
     } else {
       camera.position.set(Player.x, Player.eye + bob, Player.z);
       viewPencil.position.y = -0.28 + Math.sin(Player.bobT * 9) * 0.012 * Player.moveAmt;
+      viewCalc.position.y = -0.32 + Math.sin(Player.bobT * 9 + 1) * 0.012 * Player.moveAmt;
     }
 
     // nearest interactable within reach
@@ -227,5 +241,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, hub, casino, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, viewPencil, viewCalc, hub, casino, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

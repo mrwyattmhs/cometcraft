@@ -1,5 +1,5 @@
 /* The shop windows and the closet. One panel serves all of them:
-     Pencil Shop   pencils
+     Accessories   pencils and graphing calculators
      Style Shop    shirts, pants, hats, shoes
      Pet Corner    pets
      Closet (C)    everything you own, to switch outfits
@@ -10,16 +10,34 @@
 const Shop = (() => {
   const $ = id => document.getElementById(id);
 
+  // a tab shows one slot, or one kind within a slot (Pencils and Calculators both fill the accessory slot)
+  const TAB = (label, slot, kind = null) => ({ key: kind ? `${slot}:${kind}` : slot, label, slot, kind });
   const SHOPS = {
-    pencils: { title: 'Pencil Shop', blurb: 'Pick a pencil color. Try it on first, then buy it.', slots: ['pencil'] },
-    style: { title: 'Style Shop', blurb: 'Shirts, pants, hats, and shoes. Try anything on before you buy.', slots: ['shirt', 'pants', 'hat', 'shoes'] },
-    pets: { title: 'Pet Corner', blurb: 'A pet follows you around the village and into the casino.', slots: ['pet'] },
+    accessories: {
+      title: 'Accessories Shop',
+      blurb: 'Pencils and graphing calculators. You hold one at a time, so a calculator replaces your pencil.',
+      tabs: [TAB('Pencils', 'accessory', 'pencil'), TAB('Calculators', 'accessory', 'calculator')],
+    },
+    style: {
+      title: 'Style Shop',
+      blurb: 'Shirts, pants, hats, and shoes. Try anything on before you buy.',
+      tabs: [TAB('Shirts', 'shirt'), TAB('Pants', 'pants'), TAB('Hats', 'hat'), TAB('Shoes', 'shoes')],
+    },
+    pets: {
+      title: 'Pet Corner',
+      blurb: 'A pet follows you around the village and into the casino.',
+      tabs: [TAB('Pets', 'pet')],
+    },
   };
-  const CLOSET = { title: 'Closet', blurb: 'Everything you own. Pick what to wear.', slots: Catalog.SLOTS };
+  const CLOSET = {
+    title: 'Closet',
+    blurb: 'Everything you own. Pick what to wear.',
+    tabs: Catalog.SLOTS.map(slot => TAB(Catalog.SLOT_LABEL[slot], slot)),
+  };
 
   let def = null;
   let mode = 'shop';          // shop | closet
-  let tab = null;
+  let tab = null;             // the open tab (one of def.tabs)
   let previews = {};          // slot -> item id being tried on (not owned, not saved)
   let confirmId = null;       // the item whose Buy button is waiting for a second click
   let wired = false;
@@ -128,13 +146,13 @@ const Shop = (() => {
 
     const tabs = $('shop-tabs');
     tabs.innerHTML = '';
-    tabs.classList.toggle('hidden', def.slots.length < 2);
-    def.slots.forEach(slot => {
-      const b = button(Catalog.SLOT_LABEL[slot], 'btn small tab' + (slot === tab ? ' selected' : ''), () => {
-        tab = slot; confirmId = null; setMsg(''); render();
+    tabs.classList.toggle('hidden', def.tabs.length < 2);
+    def.tabs.forEach(t => {
+      const b = button(t.label, 'btn small tab' + (t === tab ? ' selected' : ''), () => {
+        tab = t; confirmId = null; setMsg(''); render();
       });
       b.setAttribute('role', 'tab');
-      b.setAttribute('aria-selected', slot === tab ? 'true' : 'false');
+      b.setAttribute('aria-selected', t === tab ? 'true' : 'false');
       tabs.appendChild(b);
     });
 
@@ -144,7 +162,7 @@ const Shop = (() => {
 
     const list = $('shop-items');
     list.innerHTML = '';
-    Catalog.forSlot(tab, { includeNone: mode === 'closet' })
+    Catalog.forSlot(tab.slot, { includeNone: mode === 'closet', kind: tab.kind })
       .filter(it => mode === 'shop' || Store.owns(it.id))
       .forEach(it => list.appendChild(card(it, chips)));
     if (!list.children.length) list.appendChild(el('li', 'item empty', 'Nothing here yet. Buy something in a shop.'));
@@ -161,7 +179,7 @@ const Shop = (() => {
 
   function show(d, m) {
     wire();
-    def = d; mode = m; tab = d.slots[0];
+    def = d; mode = m; tab = d.tabs[0];
     previews = {}; confirmId = null;
     $('shop').classList.remove('hidden');
     UI.setOpen('shop', true);

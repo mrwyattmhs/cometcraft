@@ -1,20 +1,23 @@
 /* Pure data and rules for the shops and the closet (no DOM, no THREE, unit tested in Node).
 
    Everything a student can own is one entry in ITEMS. Each item fills one slot:
-   shirt, pants, hat, shoes, pencil, or pet. The first item in each slot (FREE) is the
-   free starter, so nobody is ever stuck without a look. Basic items cost 400 chips,
-   and special items cost more. Add fancy items later by adding rows here. */
+   shirt, pants, hat, shoes, accessory, or pet. A student holds ONE accessory at a time,
+   either a pencil or a graphing calculator (an item's `kind`), so equipping a calculator
+   replaces the pencil. The FREE item in each slot is the free starter, so nobody is ever
+   stuck without a look. Basic items cost 400 chips, graphing calculators 600, and special
+   items more. Add fancy items later by adding rows here. */
 const Catalog = (() => {
   const BASIC = 400;
+  const GRAPHING = 600;  // a graphing calculator
   const SPECIAL = 1000;
 
-  const SLOTS = ['shirt', 'pants', 'hat', 'shoes', 'pencil', 'pet'];
-  const SLOT_LABEL = { shirt: 'Shirts', pants: 'Pants', hat: 'Hats', shoes: 'Shoes', pencil: 'Pencils', pet: 'Pets' };
+  const SLOTS = ['shirt', 'pants', 'hat', 'shoes', 'accessory', 'pet'];
+  const SLOT_LABEL = { shirt: 'Shirts', pants: 'Pants', hat: 'Hats', shoes: 'Shoes', accessory: 'Accessories', pet: 'Pets' };
 
   /** The free starter for each slot. Everyone owns these and starts wearing them. */
   const FREE = {
     shirt: 'shirt-blue', pants: 'pants-navy', hat: 'hat-none',
-    shoes: 'shoes-dark', pencil: 'pencil-yellow', pet: 'pet-none',
+    shoes: 'shoes-dark', accessory: 'pencil-yellow', pet: 'pet-none',
   };
 
   /** Pets for sale. (Remy, the calico cat who roams the village, is not for sale.) */
@@ -30,7 +33,11 @@ const Catalog = (() => {
   };
 
   const items = [];
-  const add = (slot, key, name, extra = {}) => items.push({ id: `${slot}-${key}`, slot, name, price: BASIC, ...extra });
+  // an item's id is prefix-key; the prefix defaults to its slot (accessories use pencil- and calculator-)
+  const add = (slot, key, name, extra = {}) => {
+    const { prefix, ...rest } = extra;
+    items.push({ id: `${prefix || slot}-${key}`, slot, name, price: BASIC, ...rest });
+  };
   const colored = (slot, rows, extra = {}) => rows.forEach(([key, name, color]) => add(slot, key, name, { color, ...extra }));
   const cap = s => s[0].toUpperCase() + s.slice(1);
 
@@ -63,11 +70,18 @@ const Catalog = (() => {
     ['pink', 'Pink Sneakers', 0xf06fb0],
   ]);
 
-  colored('pencil', [
+  colored('accessory', [
     ['yellow', 'Yellow Pencil', 0xf2c230], ['red', 'Red Pencil', 0xd94a4a], ['blue', 'Blue Pencil', 0x2f6fdb],
     ['green', 'Green Pencil', 0x3fae5a], ['pink', 'Pink Pencil', 0xf06fb0], ['purple', 'Purple Pencil', 0x8a4fd0],
     ['black', 'Black Pencil', 0x2b2b30],
-  ]);
+  ], { kind: 'pencil', prefix: 'pencil' });
+
+  colored('accessory', [
+    ['black', 'Black Graphing Calculator', 0x26282d], ['blue', 'Blue Graphing Calculator', 0x2f6fdb],
+    ['red', 'Red Graphing Calculator', 0xd94a4a], ['green', 'Green Graphing Calculator', 0x3fae5a],
+    ['pink', 'Pink Graphing Calculator', 0xf06fb0], ['purple', 'Purple Graphing Calculator', 0x8a4fd0],
+    ['teal', 'Teal Graphing Calculator', 0x2fb5b0], ['orange', 'Orange Graphing Calculator', 0xe8742a],
+  ], { kind: 'calculator', prefix: 'calculator', price: GRAPHING, glyph: 'fx' });
 
   add('pet', 'none', 'No pet', { none: true });
   Object.entries(PET_KINDS).forEach(([kind, variants]) => variants.forEach(v => {
@@ -78,8 +92,9 @@ const Catalog = (() => {
   const find = id => byId.get(id);
   Object.values(FREE).forEach(id => { find(id).price = 0; });
 
-  /** Items in a slot, in shop order. "None" entries only show up in the closet. */
-  const forSlot = (slot, { includeNone = false } = {}) => items.filter(i => i.slot === slot && (includeNone || !i.none));
+  /** Items in a slot, in shop order, optionally just one kind (pencil or calculator). "None" entries only show up in the closet. */
+  const forSlot = (slot, { includeNone = false, kind = null } = {}) =>
+    items.filter(i => i.slot === slot && (includeNone || !i.none) && (!kind || i.kind === kind));
 
   /** Turn { slot: itemId } into what the avatar and pet builders need. Unknown ids fall back to the free starter. */
   function outfitFor(ids) {
@@ -88,20 +103,20 @@ const Catalog = (() => {
       return it && it.slot === slot ? it : find(FREE[slot]);
     };
     const shirt = pick('shirt'), pants = pick('pants'), hat = pick('hat');
-    const shoes = pick('shoes'), pencil = pick('pencil'), pet = pick('pet');
+    const shoes = pick('shoes'), accessory = pick('accessory'), pet = pick('pet');
     return {
       shirt: { color: shirt.color, emblem: shirt.emblem || null },
       pants: { color: pants.color },
       shoes: { color: shoes.color },
       hat: hat.none ? null : { type: hat.type, color: hat.color },
-      pencil: { color: pencil.color },
+      accessory: { kind: accessory.kind, color: accessory.color },   // what is in your hand: a pencil or a calculator
       pet: pet.none ? null : { kind: pet.kind, variant: pet.variant },
     };
   }
 
   const canAfford = (chips, item) => chips >= item.price;
 
-  return { BASIC, SPECIAL, SLOTS, SLOT_LABEL, FREE, PET_KINDS, ITEMS: items, find, forSlot, outfitFor, canAfford };
+  return { BASIC, GRAPHING, SPECIAL, SLOTS, SLOT_LABEL, FREE, PET_KINDS, ITEMS: items, find, forSlot, outfitFor, canAfford };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Catalog;

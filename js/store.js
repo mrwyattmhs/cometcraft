@@ -17,28 +17,39 @@ const Store = (() => {
   let state = fresh();
   const listeners = [];
 
-  /** Older saves lack the shop fields, and a save can hold ids we no longer sell. Repair, never lose chips. */
+  /** Older saves lack the shop fields, and a save can hold ids we no longer sell. Repair, never lose chips.
+      Saves from when pencils and calculators were separate slots keep everything they bought: the ids are
+      unchanged, and whichever of the two was in use becomes the one accessory (the calculator, if both,
+      since it replaces the pencil). */
   function normalize() {
     state.chips = Math.max(Number.isFinite(state.chips) ? state.chips : 100, MIN_CHIPS);
     const owned = Array.isArray(state.owned) ? state.owned.filter(id => C.find(id)) : [];
     state.owned = [...new Set([...FREE_IDS, ...owned])];
-    const eq = { ...C.FREE, ...(state.equipped && typeof state.equipped === 'object' ? state.equipped : {}) };
+
+    const raw = state.equipped && typeof state.equipped === 'object' ? { ...state.equipped } : {};
+    if (!raw.accessory) {
+      const calc = raw.calculator, pencil = raw.pencil;
+      raw.accessory = calc && calc !== 'calculator-none' ? calc : pencil;
+    }
+    const eq = {};
     C.SLOTS.forEach(slot => {
-      const it = C.find(eq[slot]);
-      if (!it || it.slot !== slot || !state.owned.includes(it.id)) eq[slot] = C.FREE[slot];
+      const it = C.find(raw[slot]);
+      eq[slot] = it && it.slot === slot && state.owned.includes(it.id) ? it.id : C.FREE[slot];
     });
     state.equipped = eq;
   }
 
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) state = { ...fresh(), ...JSON.parse(raw) };
-  } catch (e) { /* storage unavailable: play without saving */ }
-  normalize();
-
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
   }
+
+  let hadSave = false;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) { state = { ...fresh(), ...JSON.parse(raw) }; hadSave = true; }
+  } catch (e) { /* storage unavailable, or the save was damaged: play on with what we can recover */ }
+  normalize();
+  if (hadSave) save(); // write the repaired / migrated save straight back
 
   function set(patch) {
     Object.assign(state, patch);

@@ -192,6 +192,186 @@ const World = (() => {
     interact(zone, s.x + s.facing * 4.6, s.z, 2.4, `Browse the ${def.title}`, onUse);
   }
 
+  /* ---------- village pieces ---------- */
+  function addLamp(zone, x, z) {
+    const g = zone.group, dark = lambert(0x2b2b30);
+    box(g, dark, 0.2, 3.4, 0.2, x, 1.7, z);
+    box(g, dark, 0.7, 0.12, 0.7, x, 3.9, z);
+    box(g, glow(0xfff2b0), 0.5, 0.5, 0.5, x, 3.6, z);
+    solid(zone, x, z, 0.5, 0.5);
+  }
+
+  /** A park bench facing north (toward the lake): the back is on the south side. */
+  function addBench(zone, x, z) {
+    const g = zone.group;
+    box(g, 'planks', 2.2, 0.18, 0.7, x, 0.55, z);
+    box(g, 'planks', 2.2, 0.6, 0.12, x, 0.95, z + 0.32);
+    [-0.9, 0.9].forEach(dx => box(g, 'log', 0.15, 0.5, 0.6, x + dx, 0.25, z));
+    solid(zone, x, z, 2.4, 0.9);
+  }
+
+  /** The road down the middle: asphalt with a yellow center line, curbs, sidewalks, a crosswalk,
+      and a paved forecourt where it ends at the casino. */
+  function buildRoad(zone) {
+    const g = zone.group;
+    const z0 = -14, z1 = 32, len = z1 - z0, mid = (z0 + z1) / 2;
+    flat(g, 'asphalt', 8, len, 0, 0.03, mid);
+    [-5.2, 5.2].forEach(x => flat(g, 'paving', 2.4, len, x, 0.02, mid));            // sidewalks
+    [-4.15, 4.15].forEach(x => box(g, 'stone', 0.3, 0.18, len, x, 0.09, mid));      // curbs
+    flat(g, 'paving', 16, 6, 0, 0.02, -17);                                         // forecourt
+    for (let z = 30; z >= -12; z -= 4) {
+      if (Math.abs(z - 10) < 2.5) continue;                                         // not through the crosswalk
+      box(g, glow(0xf2c230), 0.22, 0.02, 2, 0, 0.05, z);                            // dashed center line
+    }
+    for (let i = 0; i < 6; i++) box(g, glow(0xf4f4f4), 0.7, 0.02, 3, -3.25 + i * 1.3, 0.05, 10); // crosswalk
+    [22, 12, 2, -8].forEach(z => [-5.2, 5.2].forEach(x => addLamp(zone, x, z)));
+  }
+
+  /** A hotel wall block: sandstone with a window grid on the sides, plain stone on the roof. */
+  function hotelBox(g, w, h, d, x, y, z) {
+    const m = new T.Mesh(new T.BoxGeometry(w, h, d), [
+      Tex.mat('hotel', d, h), Tex.mat('hotel', d, h),
+      Tex.mat('stone', w, d), Tex.mat('stone', w, d),
+      Tex.mat('hotel', w, h), Tex.mat('hotel', w, h),
+    ]);
+    m.position.set(x, y, z);
+    g.add(m);
+    return m;
+  }
+
+  /** The casino as a mini grand hotel: a stepped crescent of sandstone (tall center tower, two lower
+      wings each side), gold trim, a window on every other block, and a columned porte-cochere over
+      the entrance. The door, its interaction spot, and the drop-off point are where they always were. */
+  function buildCasinoFront(zone, actions) {
+    const g = zone.group;
+    const gold = lambert(0xc9a24a), goldGlow = glow(0xffd36b);
+
+    // front = the z of the face you see; every section ends at z = -32
+    const sections = [
+      { x: 0, w: 16, h: 14, front: -20 },                                   // center tower
+      { x: -14, w: 12, h: 12, front: -23 }, { x: 14, w: 12, h: 12, front: -23 },   // inner wings
+      { x: -25, w: 10, h: 8, front: -26 }, { x: 25, w: 10, h: 8, front: -26 },     // outer wings
+    ];
+    sections.forEach(sec => {
+      const d = sec.front + 32;                               // depth from the front face back to z = -32
+      const cz = sec.front - d / 2;
+      hotelBox(g, sec.w, sec.h, d, sec.x, sec.h / 2, cz);
+      box(g, gold, sec.w + 0.5, 0.5, d + 0.5, sec.x, sec.h + 0.25, cz);      // gold cornice
+      solid(zone, sec.x, cz, sec.w + 0.2, d + 0.2);
+    });
+    [-8, 8].forEach(x => box(g, gold, 0.5, 14, 0.5, x, 7, -19.9));            // gold piers on the tower corners
+
+    // the grand entrance: a glowing gold frame, the door, and a sign above it
+    box(g, goldGlow, 4.2, 5.0, 0.1, 0, 2.5, -19.95);
+    box(g, glow(0x1b1208), 3.6, 4.6, 0.2, 0, 2.3, -19.85);
+    const sign = makeSign({
+      w: 14, h: 2.4, title: 'PRIME TIME CASINO', sub: 'factor it. wager it. win it.',
+      fg: '#ffd36b', bg: '#10162b', border: '#ffd36b', subColor: '#8fd8ff',
+    });
+    sign.position.set(0, 9.6, -19.95);
+    g.add(sign);
+
+    // porte-cochere: a gold canopy on two columns, with warm lights underneath
+    box(g, gold, 13, 0.4, 4.4, 0, 5.4, -17.8);
+    box(g, goldGlow, 13, 0.12, 0.14, 0, 5.2, -15.62);
+    [-4, -1.3, 1.3, 4].forEach(x => box(g, glow(0xfff2b0), 0.5, 0.05, 0.5, x, 5.17, -17.8));
+    [-5.5, 5.5].forEach(x => {
+      box(g, lambert(0xe3cfa0), 0.9, 5.2, 0.9, x, 2.6, -16);
+      box(g, gold, 1.3, 0.3, 1.3, x, 0.15, -16);
+      box(g, gold, 1.3, 0.3, 1.3, x, 5.1, -16);
+      solid(zone, x, -16, 1.1, 1.1);
+    });
+    interact(zone, 0, -18.2, 2.2, 'Enter the Casino', actions.enterCasino);
+  }
+
+  /** A water surface that slowly drifts. */
+  function waterSurface(w, d) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 16;
+    const g = c.getContext('2d');
+    g.fillStyle = '#2b9be0';
+    g.fillRect(0, 0, 16, 16);
+    [[2, 3], [9, 1], [5, 9], [12, 12], [14, 6], [1, 13]].forEach(([x, y]) => { g.fillStyle = '#6cc3f2'; g.fillRect(x, y, 3, 1); });
+    [[6, 5], [11, 9], [3, 14]].forEach(([x, y]) => { g.fillStyle = '#1f82c4'; g.fillRect(x, y, 2, 1); });
+    const tex = new T.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = T.RepeatWrapping;
+    tex.magFilter = T.NearestFilter;
+    tex.minFilter = T.NearestFilter;
+    tex.repeat.set(w / 2, d / 2);
+    const mesh = new T.Mesh(new T.PlaneGeometry(w, d), new T.MeshBasicMaterial({ map: tex }));
+    mesh.rotation.x = -Math.PI / 2;
+    return { mesh, tex };
+  }
+
+  /** A big stone-rimmed lake with dancing jets, on the east side in front of the right wing, the way a
+      grand hotel has its fountains out front. It is solid, so it is something to look at, not walk in. */
+  function buildFountain(zone) {
+    const g = zone.group;
+    const x0 = 9, x1 = 32, z0 = -22, z1 = -5, rimT = 0.8;
+    const w = x1 - x0, d = z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+    const gold = lambert(0xc9a24a);
+
+    // stone rim with a gold edge, and a deep blue basin floor
+    box(g, 'stone', w, 0.7, rimT, cx, 0.35, z0 + rimT / 2);
+    box(g, 'stone', w, 0.7, rimT, cx, 0.35, z1 - rimT / 2);
+    box(g, 'stone', rimT, 0.7, d - 2 * rimT, x0 + rimT / 2, 0.35, cz);
+    box(g, 'stone', rimT, 0.7, d - 2 * rimT, x1 - rimT / 2, 0.35, cz);
+    box(g, gold, w + 0.1, 0.08, 0.16, cx, 0.74, z1 - 0.1);                  // gold lip along the front edge
+    box(g, lambert(0x1c5f8a), w - 2 * rimT, 0.1, d - 2 * rimT, cx, 0.05, cz);
+    const water = waterSurface(w - 2 * rimT, d - 2 * rimT);
+    water.mesh.position.set(cx, 0.42, cz);
+    g.add(water.mesh);
+
+    // the dancing jets: a wave sweeps across three rows, and a tall jet rises in the middle
+    const jets = [];
+    const colGeo = new T.BoxGeometry(1, 1, 1);
+    colGeo.translate(0, 0.5, 0);                                            // grows up from its base
+    const colMat = new T.MeshBasicMaterial({ color: 0xe6f6ff, transparent: true, opacity: 0.78 });
+    const puffMat = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+    const addJet = (x, z, { width = 0.3, base = 1, amp = 4, speed = 2, phase = 0, lean = 0 }) => {
+      const pivot = new T.Group();
+      pivot.position.set(x, 0.42, z);
+      pivot.rotation.z = lean;                                              // leaning toward the middle makes arches
+      const col = new T.Mesh(colGeo, colMat);
+      col.scale.set(width, 1, width);
+      const puff = new T.Mesh(new T.BoxGeometry(width * 2.4, width * 1.7, width * 2.4), puffMat);
+      pivot.add(col, puff);
+      g.add(pivot);
+      jets.push({ x, z, pivot, col, puff, base, amp, speed, phase, height: base });
+    };
+    const rows = [-8.5, -13.5, -18.5];
+    rows.forEach((jz, r) => {
+      for (let i = 0; i < 8; i++) {
+        const jx = 12.4 + i * 2.5;
+        if (r === 1 && (i === 3 || i === 4)) continue;                      // room for the big one
+        addJet(jx, jz, {
+          base: 1 + r * 0.6, amp: 2.5 + r * 1.6, speed: 2, phase: -i * 0.6 + r * 1.4,
+          lean: ((jx - cx) / 12) * 0.28,
+        });
+      }
+    });
+    addJet(cx, rows[1], { width: 0.7, base: 3, amp: 7, speed: 1.1, phase: 0 });
+
+    const place = t => jets.forEach(j => {
+      j.height = j.base + j.amp * (0.5 + 0.5 * Math.sin(t * j.speed + j.phase));
+      j.col.scale.y = j.height;
+      j.puff.position.y = j.height;
+      j.puff.rotation.y = t * 2 + j.phase;
+    });
+    place(0);
+    zone.animated.push((dt, t) => {
+      place(t);
+      water.tex.offset.set(t * 0.03, t * 0.015);
+    });
+
+    solid(zone, cx, cz, w + 0.4, d + 0.4);
+    zone.fountain = { x0, x1, z0, z1, jets };
+
+    // a paved walk along the south edge, with benches facing the water
+    flat(g, 'paving', w + 2, 3, cx, 0.02, z1 + 1.5);
+    [14, 20.5, 27].forEach(bx => addBench(zone, bx, z1 + 2));
+  }
+
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
       spawn: { x: 0, z: 20, yaw: 0 },
@@ -207,44 +387,33 @@ const World = (() => {
     g.add(sun);
 
     flat(g, 'grass', 160, 160, 0, 0, 0);
-    flat(g, 'path', 6, 44, 0, 0.03, 2);
+    buildRoad(zone);
 
-    // shops face the main path
+    // all four shops are on the west side of the road, facing it
     const spots = [
-      { id: 'pencils', x: -9, z: 6, facing: 1 },
-      { id: 'style', x: -9, z: -6, facing: 1 },
-      { id: 'hints', x: 9, z: 6, facing: -1 },
-      { id: 'pets', x: 9, z: -6, facing: -1 },
+      { id: 'style', x: -11, z: 16, facing: 1 },
+      { id: 'accessories', x: -11, z: 7, facing: 1 },
+      { id: 'pets', x: -11, z: -2, facing: 1 },
+      { id: 'hints', x: -11, z: -11, facing: 1 },
     ];
     spots.forEach(s => buildShop(zone, s, CONTENT.shops[s.id], () => actions.openShop(s.id)));
 
-    // casino front
-    box(g, 'brick', 20, 9, 12, 0, 4.5, -26);
-    box(g, 'wallDark', 21, 0.8, 13, 0, 9.4, -26);
-    box(g, glow(0xff4fd8), 4.0, 4.8, 0.1, 0, 2.4, -19.95);
-    box(g, glow(0x120a1c), 3.4, 4.4, 0.2, 0, 2.2, -19.85);
-    const casinoSign = makeSign({
-      w: 14, h: 2.2, title: 'PRIME TIME CASINO', sub: 'factor it. wager it. win it.',
-      fg: '#ff4fd8', bg: '#12081e', border: '#38e8ff', subColor: '#38e8ff',
-    });
-    casinoSign.position.set(0, 7.0, -19.95);
-    g.add(casinoSign);
-    [-10.3, 10.3].forEach(x => box(g, glow(0x38e8ff), 0.4, 9, 0.4, x, 4.5, -19.9));
-    solid(zone, 0, -26, 20.2, 12.2);
-    interact(zone, 0, -18.2, 2.2, 'Enter the Casino', actions.enterCasino);
+    buildCasinoFront(zone, actions);   // straight ahead at the end of the road
+    buildFountain(zone);               // off to the right
 
-    // notice board near the spawn
-    box(g, 'log', 0.3, 2.2, 0.3, -5.2, 1.1, 16);
-    box(g, 'log', 0.3, 2.2, 0.3, -2.8, 1.1, 16);
-    box(g, 'planks', 2.9, 1.4, 0.2, -4, 1.7, 16);
+    // notice board on the right-hand sidewalk near the spawn, facing the starting point
+    box(g, 'log', 0.3, 2.2, 0.3, 6.2, 1.1, 17);
+    box(g, 'log', 0.3, 2.2, 0.3, 8.8, 1.1, 17);
+    box(g, 'planks', 2.9, 1.4, 0.2, 7.5, 1.7, 17);
     const board = makeSign({ w: 2.5, h: 1.0, title: 'HOW TO PLAY', fg: '#3a2412', bg: '#e8d7a8', border: '#8a6a34' });
-    board.position.set(-4, 1.7, 16.12);
+    board.position.set(7.5, 1.7, 17.12);
     g.add(board);
-    solid(zone, -4, 16, 3.2, 0.6);
-    interact(zone, -4, 17.6, 2.0, 'Read the notice board', actions.readBoard);
+    solid(zone, 7.5, 17, 3.2, 0.6);
+    interact(zone, 7.5, 18.6, 2.0, 'Read the notice board', actions.readBoard);
 
-    // trees, fence, clouds
-    [[-22, -12], [-26, 2], [-22, 14], [-29, 24], [-30, -20], [22, -14], [27, 4], [21, 16], [29, 26], [31, -18], [-14, 26], [14, 28], [-16, -25]]
+    // trees on either side, then the fence and the clouds
+    [[-20, -14], [-25, -3], [-21, 10], [-27, 21], [-18, 27], [-30, -12],
+     [14, 15], [24, 9], [29, 21], [19, 26], [31, 2], [12, 27]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;

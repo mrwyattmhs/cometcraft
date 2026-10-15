@@ -135,6 +135,89 @@ const Avatar = (() => {
     return root;
   }
 
+  /* ---------- a graphing calculator (TI-84 style) ---------- */
+  const shade = (hex, f) => {
+    const r = Math.round(((hex >> 16) & 255) * f), g = Math.round(((hex >> 8) & 255) * f), b = Math.round((hex & 255) * f);
+    return (r << 16) | (g << 8) | b;
+  };
+
+  const calcTextures = new Map();
+  /** The front of the calculator, drawn in pixels: a screen with a little parabola on it, a row of
+      function keys, the arrow pad, and the number keys. The body color shows around everything. */
+  function calcTexture(body) {
+    if (calcTextures.has(body)) return calcTextures.get(body);
+    const W = 34, H = 54;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const css = n => '#' + n.toString(16).padStart(6, '0');
+    const box = (color, x, y, w, h) => { g.fillStyle = color; g.fillRect(x, y, w, h); };
+    box(css(body), 0, 0, W, H);
+    box(css(shade(body, 0.7)), 0, 0, W, 1); box(css(shade(body, 0.7)), 0, 0, 1, H);   // edge shading
+    box(css(shade(body, 0.55)), 0, H - 1, W, 1); box(css(shade(body, 0.55)), W - 1, 0, 1, H);
+
+    // screen: dark bezel, pale green-gray LCD, axes, and a parabola
+    box('#16181c', 3, 3, 28, 18);
+    box('#b9c9a5', 5, 5, 24, 14);
+    box('#8ea07c', 5, 13, 24, 1);                       // x axis
+    box('#8ea07c', 17, 5, 1, 14);                       // y axis
+    for (let x = -6; x <= 6; x++) box('#26352a', 17 + x, 16 - Math.round(x * x * 0.28), 1, 1);
+
+    // function keys across the top, then 2nd / alpha and an arrow pad
+    for (let i = 0; i < 5; i++) box('#c9ccd2', 4 + i * 6, 24, 4, 2);
+    box('#5d9be6', 4, 28, 6, 3); box('#c9ccd2', 11, 28, 6, 3); box('#c9ccd2', 18, 28, 4, 3);
+    box('#6cc07a', 4, 32, 6, 3); box('#c9ccd2', 11, 32, 6, 3); box('#c9ccd2', 18, 32, 4, 3);
+    box('#16181c', 24, 31, 8, 3); box('#16181c', 26.5, 28, 3, 9);                      // arrow pad
+    box('#5a5e66', 27, 32, 2, 1);
+
+    // number keys (light), operator keys (dark), and ENTER (blue)
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 5; col++) {
+        const color = row === 3 && col === 4 ? '#5d9be6' : col >= 3 ? '#3b3e45' : '#ececf0';
+        box(color, 3 + col * 6, 38 + row * 4, 5, 3);
+      }
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.magFilter = THREE.NearestFilter;
+    tex.minFilter = THREE.NearestFilter;
+    calcTextures.set(body, tex);
+    return tex;
+  }
+
+  /** A graphing calculator, 0.17 x 0.27 x 0.03 at scale 1. The screen side faces +z. */
+  function makeCalculator(color, scale = 1) {
+    const side = lambert(color);
+    const front = new THREE.MeshLambertMaterial({ map: calcTexture(color) });
+    const back = lambert(shade(color, 0.8));
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.27, 0.03), [side, side, side, side, front, back]);
+    const g = new THREE.Group();
+    g.add(mesh);
+    g.scale.setScalar(scale);
+    g.userData.calcColor = color;
+    return g;
+  }
+
+  /** Hold a calculator in the right hand, screen facing forward, where the pencil would be
+      (or put it away with null). The pencil is hidden by setAccessory while this is out. */
+  function setCalculator(root, calc) {
+    const arm = root.userData.parts.armR;
+    if (root.userData.calc) { arm.remove(root.userData.calc); root.userData.calc = null; }
+    if (!calc) return;
+    const g = makeCalculator(calc.color);
+    g.position.set(0, -0.58, 0.14);   // just in front of the hand
+    g.rotation.x = 0.85;              // cancels the raised arm (-0.85) so the screen faces forward and stands upright
+    arm.add(g);
+    root.userData.calc = g;
+  }
+
+  /** accessory: { kind: 'pencil' | 'calculator', color }. One at a time: a calculator replaces the pencil. */
+  function setAccessory(root, acc) {
+    const calc = acc && acc.kind === 'calculator';
+    root.userData.pencil.visible = !calc;
+    if (!calc && acc) setPencilColor(root.userData.pencil, acc.color);
+    setCalculator(root, calc ? { color: acc.color } : null);
+  }
+
   /* ---------- dressing: shirt emblem, hats, and the whole outfit ---------- */
   const M_GLYPH = ['#...#', '##.##', '#.#.#', '#...#', '#...#']; // a block M, 13 blocks
 
@@ -188,7 +271,7 @@ const Avatar = (() => {
     m.shoe.color.setHex(outfit.shoes.color);
     setEmblem(root, outfit.shirt.emblem);
     setHat(root, outfit.hat);
-    setPencilColor(root.userData.pencil, outfit.pencil.color);
+    setAccessory(root, outfit.accessory);
   }
 
   /** moving: 0..1 blend between idle and walking. t: seconds. */
@@ -202,5 +285,5 @@ const Avatar = (() => {
     p.body.position.y = Math.abs(Math.sin(t * 9)) * 0.035 * moving;
   }
 
-  return { make, animate, makePencil, setPencilColor, dress, setEmblem, setHat, randomLook, defaultLook: { skin: 0xf1c9a5, hair: 0x5a3a1a, shirt: 0x2f6fdb, pants: 0x2b3a67, pack: 0xd94a4a } };
+  return { make, animate, makePencil, setPencilColor, makeCalculator, setCalculator, setAccessory, dress, setEmblem, setHat, randomLook, defaultLook: { skin: 0xf1c9a5, hair: 0x5a3a1a, shirt: 0x2f6fdb, pants: 0x2b3a67, pack: 0xd94a4a } };
 })();

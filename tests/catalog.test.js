@@ -9,7 +9,9 @@ assert.strictEqual(new Set(ids).size, ids.length, 'item ids are unique');
 C.ITEMS.forEach(i => {
   assert.ok(C.SLOTS.includes(i.slot), `${i.id} has a valid slot`);
   assert.ok(i.name && Number.isInteger(i.price) && i.price >= 0, `${i.id} has a name and a whole-number price`);
-  assert.ok(i.id.startsWith(i.slot + '-'), `${i.id} id starts with its slot`);
+  const prefix = i.slot === 'accessory' ? i.kind : i.slot; // accessories keep their old pencil-/calculator- ids
+  assert.ok(i.id.startsWith(prefix + '-'), `${i.id} id starts with ${prefix}-`);
+  if (i.slot === 'accessory') assert.ok(['pencil', 'calculator'].includes(i.kind), `${i.id} is a pencil or a calculator`);
   if (!i.none) assert.ok(Number.isInteger(i.color), `${i.id} has a color`);
 });
 
@@ -22,15 +24,32 @@ Object.entries(C.FREE).forEach(([slot, id]) => {
 });
 assert.ok(C.find('hat-none').none && C.find('pet-none').none, 'you can wear no hat and have no pet');
 
-// prices: everything basic is 400, the M tee is 1000, only free starters are 0
+// prices: basic items 400, graphing calculators 600, the M tee 1000, only free starters are 0
 C.ITEMS.forEach(i => {
   const free = Object.values(C.FREE).includes(i.id);
   if (free) assert.strictEqual(i.price, 0);
   else if (i.id === 'shirt-kelly-m') assert.strictEqual(i.price, 1000);
+  else if (i.kind === 'calculator') assert.strictEqual(i.price, 600, `${i.id} is a graphing calculator`);
   else assert.strictEqual(i.price, 400, `${i.id} is a basic item`);
 });
 assert.strictEqual(C.BASIC, 400);
+assert.strictEqual(C.GRAPHING, 600);
 assert.strictEqual(C.SPECIAL, 1000);
+
+// graphing calculators: several colors, all 600, nobody gets one free, and no two look alike
+const calcs = C.forSlot('accessory', { kind: 'calculator' });
+assert.ok(calcs.length >= 8, `eight calculator colors (${calcs.length})`);
+calcs.forEach(c => { assert.strictEqual(c.price, 600); assert.ok(/Graphing Calculator$/.test(c.name), c.name); assert.ok(Number.isInteger(c.color)); assert.strictEqual(c.slot, 'accessory'); });
+assert.strictEqual(new Set(calcs.map(c => c.color)).size, calcs.length, 'every calculator is a different color');
+assert.ok(!C.ITEMS.some(i => i.id === 'calculator-none'), 'there is no separate "no calculator": it is one accessory slot now');
+
+// ONE accessory: pencils and calculators share a single slot, so equipping one replaces the other
+assert.ok(C.SLOTS.includes('accessory') && !C.SLOTS.includes('pencil') && !C.SLOTS.includes('calculator'));
+assert.strictEqual(C.SLOT_LABEL.accessory, 'Accessories');
+assert.strictEqual(C.FREE.accessory, 'pencil-yellow', 'you start holding the free yellow pencil');
+assert.deepStrictEqual(new Set(C.forSlot('accessory').map(i => i.kind)), new Set(['pencil', 'calculator']));
+assert.strictEqual(C.forSlot('accessory').length, 15);
+assert.ok(!C.forSlot('accessory', { includeNone: true }).some(i => i.none), 'you always hold something');
 
 // the Kelly green M shirt
 const m = C.find('shirt-kelly-m');
@@ -42,7 +61,8 @@ assert.strictEqual(C.ITEMS.filter(i => i.emblem).length, 1, 'only one shirt carr
 
 // the basics from the plan are all there
 const count = slot => C.forSlot(slot).length;
-assert.ok(count('shirt') >= 10 && count('pants') >= 8 && count('hat') >= 7 && count('shoes') >= 7 && count('pencil') >= 7);
+assert.ok(count('shirt') >= 10 && count('pants') >= 8 && count('hat') >= 7 && count('shoes') >= 7);
+assert.strictEqual(C.forSlot('accessory', { kind: 'pencil' }).length, 7, 'seven pencils');
 assert.strictEqual(count('pet'), 10, 'three dogs, four cats, three rabbits');
 assert.strictEqual(C.forSlot('pet').filter(p => p.kind === 'dog').length, 3);
 assert.strictEqual(C.forSlot('pet').filter(p => p.kind === 'cat').length, 4);
@@ -53,9 +73,13 @@ C.forSlot('pet').forEach(p => {
 });
 C.forSlot('hat').forEach(h => assert.ok(['cap', 'beanie'].includes(h.type), `${h.id} has a model`));
 // no two items in a slot look the same
-['shirt', 'pants', 'hat', 'shoes', 'pencil'].forEach(slot => {
+['shirt', 'pants', 'hat', 'shoes'].forEach(slot => {
   const keys = C.forSlot(slot, { includeNone: false }).map(i => `${i.type || ''}${i.color}`);
   assert.strictEqual(new Set(keys).size, keys.length, `no duplicate looks among ${slot}`);
+});
+['pencil', 'calculator'].forEach(kind => {
+  const colors = C.forSlot('accessory', { kind }).map(i => i.color);
+  assert.strictEqual(new Set(colors).size, colors.length, `no duplicate colors among the ${kind}s`);
 });
 C.forSlot('pet').forEach((p, i, all) => assert.ok(all.filter(q => q.kind === p.kind && q.color === p.color).length === 1));
 assert.ok(!C.forSlot('hat').some(h => h.none) && C.forSlot('hat', { includeNone: true }).some(h => h.none), 'None only shows in the closet');
@@ -64,18 +88,20 @@ assert.ok(!C.forSlot('hat').some(h => h.none) && C.forSlot('hat', { includeNone:
 const starter = C.outfitFor({ ...C.FREE });
 assert.deepStrictEqual(starter, {
   shirt: { color: 0x2f6fdb, emblem: null }, pants: { color: 0x2b3a67 }, shoes: { color: 0x2a2a2a },
-  hat: null, pencil: { color: 0xf2c230 }, pet: null,
+  hat: null, accessory: { kind: 'pencil', color: 0xf2c230 }, pet: null,
 }, 'the starter outfit matches the original avatar');
-const fancy = C.outfitFor({ ...C.FREE, shirt: 'shirt-kelly-m', hat: 'hat-cap-red', pet: 'pet-cat-orange', pencil: 'pencil-pink' });
+const fancy = C.outfitFor({ ...C.FREE, shirt: 'shirt-kelly-m', hat: 'hat-cap-red', pet: 'pet-cat-orange', accessory: 'pencil-pink' });
 assert.deepStrictEqual(fancy.shirt, { color: 0x4cbb17, emblem: 'M' });
 assert.deepStrictEqual(fancy.hat, { type: 'cap', color: 0xd94a4a });
 assert.deepStrictEqual(fancy.pet, { kind: 'cat', variant: 'orange' });
-assert.strictEqual(fancy.pencil.color, 0xf06fb0);
+assert.deepStrictEqual(fancy.accessory, { kind: 'pencil', color: 0xf06fb0 });
+assert.deepStrictEqual(C.outfitFor({ ...C.FREE, accessory: 'calculator-teal' }).accessory, { kind: 'calculator', color: 0x2fb5b0 }, 'a calculator is the one accessory');
 // bad ids and wrong-slot ids fall back to the starter
-const bad = C.outfitFor({ shirt: 'nope', pants: 'shirt-red', hat: undefined, shoes: null, pencil: 'pet-dog-black', pet: 'x' });
+const bad = C.outfitFor({ shirt: 'nope', pants: 'shirt-red', hat: undefined, shoes: null, accessory: 'pet-dog-black', pet: 'x' });
 assert.deepStrictEqual(bad, starter);
 assert.ok(C.canAfford(400, C.find('hat-cap-red')) && !C.canAfford(399, C.find('hat-cap-red')));
 assert.ok(C.canAfford(1000, m) && !C.canAfford(999, m));
+assert.ok(C.canAfford(600, C.find('calculator-black')) && !C.canAfford(599, C.find('calculator-black')));
 
 /* ---------- the save state ---------- */
 function freshStore(saved) {
@@ -128,6 +154,30 @@ assert.strictEqual(S.get().practiceWins, 12);
 assert.deepStrictEqual(S.get().equipped, C.FREE);
 assert.ok(S.owns('shirt-blue') && S.owns('pet-none'));
 
+// saves from when pencils and calculators were separate slots keep everything they bought
+({ S } = freshStore({ chips: 900, owned: ['hat-cap-red', 'pencil-pink'], equipped: { hat: 'hat-cap-red', pencil: 'pencil-pink', shirt: 'shirt-blue', pants: 'pants-navy', shoes: 'shoes-dark', calculator: 'calculator-none', pet: 'pet-none' } }));
+assert.strictEqual(S.get().equipped.accessory, 'pencil-pink', 'the pencil you were using is your accessory');
+assert.ok(!('pencil' in S.get().equipped) && !('calculator' in S.get().equipped), 'the old slots are gone');
+assert.ok(S.owns('hat-cap-red') && S.owns('pencil-pink') && S.get().chips === 900);
+({ S } = freshStore({ chips: 500, owned: ['pencil-pink', 'calculator-blue'], equipped: { pencil: 'pencil-pink', calculator: 'calculator-blue' } }));
+assert.strictEqual(S.get().equipped.accessory, 'calculator-blue', 'had both out: the calculator replaces the pencil');
+assert.ok(S.owns('pencil-pink') && S.owns('calculator-blue'), 'but you still own the pencil');
+({ S } = freshStore({ owned: ['calculator-blue'], equipped: { calculator: 'calculator-blue', pencil: 'pencil-yellow' } }));
+assert.strictEqual(S.get().equipped.accessory, 'calculator-blue');
+({ S } = freshStore({ owned: [], equipped: { calculator: 'calculator-blue' } }));   // equipped but never owned
+assert.strictEqual(S.get().equipped.accessory, 'pencil-yellow', 'not owned: back to the free pencil');
+({ S } = freshStore({ owned: ['calculator-none', 'calculator-red'], equipped: { calculator: 'calculator-none' } }));
+assert.strictEqual(S.get().equipped.accessory, 'pencil-yellow', 'the old "no calculator" means the pencil');
+assert.ok(S.owns('calculator-red') && !S.owns('calculator-none'));
+// in the new world: buy a calculator, it replaces the pencil, switch back freely
+({ S } = freshStore({ chips: 700 }));
+assert.strictEqual(S.spend(600), true); S.own('calculator-blue');
+assert.strictEqual(S.equip('accessory', 'calculator-blue'), true);
+assert.strictEqual(S.get().equipped.accessory, 'calculator-blue');
+assert.strictEqual(S.equip('accessory', 'pencil-yellow'), true, 'the free pencil is always yours to pick back up');
+assert.strictEqual(S.get().equipped.accessory, 'pencil-yellow');
+assert.strictEqual(S.equip('pencil', 'pencil-yellow'), false, 'there is no pencil slot any more');
+
 // a damaged save is repaired, never trusted
 ({ S } = freshStore({ chips: 300, owned: ['hat-cap-red', 'ghost-item', 42], equipped: { shirt: 'shirt-kelly-m', hat: 'hat-cap-red', pants: 'shirt-red', pet: 'pet-dog-golden' } }));
 assert.ok(S.owns('hat-cap-red') && !S.owns('ghost-item'));
@@ -146,7 +196,7 @@ assert.deepStrictEqual(S.get().equipped, C.FREE);
 let calls = 0;
 S.onChange(() => { calls++; });
 const base = calls;
-S.spend(10); S.own('pencil-red'); S.equip('pencil', 'pencil-red');
+S.spend(10); S.own('pencil-red'); S.equip('accessory', 'pencil-red');
 assert.strictEqual(calls - base, 3);
 S.reset();
 assert.strictEqual(S.get().chips, 100);

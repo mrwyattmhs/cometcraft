@@ -57,6 +57,23 @@ const Tex = (() => {
         px(g, 'rgba(236,192,72,.85)', pts.map(([dx, dy]) => [8 + dx, 8 + dy]));
       },
     },
+    asphalt: { base: [58, 60, 66], v: 7 },
+    paving: {
+      base: [206, 196, 176], v: 6,
+      draw: g => px(g, 'rgba(120,108,90,.35)', [[0, 0, 16, 1], [0, 8, 16, 1], [0, 0, 1, 16], [8, 0, 1, 16]]),
+    },
+    // sandstone hotel wall: one window per 2 x 2 blocks (a 32 px tile that spans 2 blocks)
+    hotel: {
+      size: 32, span: 2, base: [214, 192, 152], v: 5,
+      draw: g => {
+        px(g, 'rgba(120,98,64,.30)', [[0, 31, 32, 1], [0, 0, 32, 1]]);                 // floor lines
+        px(g, '#efe3c4', [[7, 4, 18, 24]]);                                            // cream frame
+        px(g, '#27406a', [[8, 5, 16, 22]]);                                            // glass
+        px(g, '#4d78ad', [[9, 6, 3, 6], [12, 6, 2, 3]]);                               // reflection
+        px(g, '#efe3c4', [[15, 5, 2, 22], [8, 15, 16, 2]]);                            // mullions
+        px(g, '#a8946a', [[6, 28, 20, 2]]);                                            // sill
+      },
+    },
     wallDark: {
       base: [50, 33, 74], v: 6,
       draw: g => {
@@ -73,7 +90,7 @@ const Tex = (() => {
   function paint(name) {
     if (canvases[name]) return canvases[name];
     const def = DEFS[name];
-    const s = 16;
+    const s = def.size || 16;
     const c = document.createElement('canvas');
     c.width = c.height = s;
     const g = c.getContext('2d');
@@ -97,7 +114,8 @@ const Tex = (() => {
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.magFilter = THREE.NearestFilter;
     t.minFilter = THREE.NearestMipmapLinearFilter;
-    t.repeat.set(rx, ry);
+    const span = DEFS[name].span || 1;   // a tile that covers several blocks repeats less often
+    t.repeat.set(rx / span, ry / span);
     const m = new THREE.MeshLambertMaterial({ map: t });
     mats.set(key, m);
     return m;

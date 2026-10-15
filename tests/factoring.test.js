@@ -51,6 +51,8 @@ for (let i = 0; i < 500; i++) {
 assert.strictEqual(F.wagerMultiplier([37]), 1);
 assert.strictEqual(F.wagerPayout(10, F.primeFactors(37)), 10);
 assert.strictEqual(F.wagerPayout(10, F.primeFactors(48)), 30);
-assert.strictEqual(F.practiceReward(3), 5);
+// practice pays a flat 20 chips for every solved round, whatever the dice setting
+[2, 3, 4].forEach(n => assert.strictEqual(F.practiceReward(n), 20));
+assert.strictEqual(F.PRACTICE_REWARD, 20);
 
 console.log('factoring tests passed');
