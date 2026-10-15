@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Prime Time: a voxel math casino</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=9">
+</head>
+<body>
+  <canvas id="view"></canvas>
+
+  <div id="hud" aria-live="off">
+    <div id="wallet"><span class="coin" aria-hidden="true"></span><span id="chips">0</span> chips</div>
+    <div id="controls-hint">WASD move &middot; mouse look &middot; Shift run &middot; E interact &middot; C closet &middot; V camera</div>
+    <div id="crosshair" aria-hidden="true"></div>
+    <div id="prompt" class="hidden"></div>
+    <div id="toast" role="status"></div>
+  </div>
+
+  <div id="start-screen">
+    <div class="start-card mc-panel">
+      <h1>Prime Time</h1>
+      <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
+      <button id="play" class="btn primary" type="button">Play</button>
+      <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
+      <p class="fine build">Build 9</p>
+    </div>
+  </div>
+
+  <div id="dialog" class="overlay hidden"></div>
+
+  <div id="craft" class="overlay hidden" data-state="idle" data-mode="practice">
+    <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="craft-title">
+      <header class="craft-head">
+        <h2 id="craft-title">Practice Table</h2>
+        <div class="craft-meta">
+          <label class="dice-pick">Dice
+            <select id="dice-count">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+            </select>
+          </label>
+          <span id="craft-wallet" class="wallet-chip">0 chips</span>
+          <button id="craft-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <section class="felt" aria-label="Dice">
+        <div id="dice-row" class="dice-row"></div>
+        <div id="dice-sum" class="dice-sum"></div>
+      </section>
+
+      <div class="target">Craft the number <strong id="target">?</strong></div>
+
+      <div class="craft-body">
+        <div class="grid-wrap">
+          <div id="grid" class="grid" aria-label="Crafting grid"></div>
+          <div class="arrow" aria-hidden="true"></div>
+          <div id="output" class="slot output" aria-label="Product of the primes in the grid">
+            <span id="output-val"></span>
+          </div>
+        </div>
+        <div class="inv-wrap">
+          <h3>Prime gems</h3>
+          <div id="inventory" class="inventory"></div>
+        </div>
+      </div>
+
+      <div id="bet-row" class="bet-row hidden">
+        <span>Bet</span>
+        <button class="btn small bet" type="button" data-bet="10">10</button>
+        <button class="btn small bet" type="button" data-bet="25">25</button>
+        <button class="btn small bet" type="button" data-bet="50">50</button>
+        <button class="btn small bet" type="button" data-bet="100">100</button>
+      </div>
+
+      <div id="craft-msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div class="craft-actions">
+        <button id="btn-clear" class="btn" type="button">Clear grid</button>
+        <button id="btn-craft" class="btn primary" type="button">Craft</button>
+        <button id="btn-next" class="btn primary hidden" type="button">Next throw</button>
+      </div>
+
+      <div id="result" class="result hidden"></div>
+    </div>
+  </div>
+
+  <div id="tri" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="tri-title">
+      <header class="craft-head">
+        <h2 id="tri-title">Trinomial Table</h2>
+        <div class="craft-meta">
+          <span id="tri-wallet" class="wallet-chip">0 chips</span>
+          <button id="tri-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <div id="tri-wager" class="wager-line"></div>
+
+      <section class="felt" aria-label="Trinomial to factor">
+        <div id="tri-poly" class="poly"></div>
+      </section>
+
+      <div class="tri-body">
+        <div id="tri-bench" class="bench"></div>
+        <div class="inv-wrap">
+          <h3>Blocks</h3>
+          <div id="tri-inventory" class="inventory"></div>
+        </div>
+      </div>
+
+      <div id="tri-bet-row" class="tri-bets">
+        <p class="bet-prompt">Place your wager first. A bigger wager deals a harder trinomial and pays more.</p>
+        <div id="tri-bets" class="bet-grid"></div>
+        <p id="tri-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock the bigger wagers.</p>
+      </div>
+
+      <div id="tri-msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div id="tri-result" class="result hidden"></div>
+
+      <div class="craft-actions">
+        <button id="tri-clear" class="btn" type="button">Clear blocks</button>
+        <button id="tri-craft" class="btn primary" type="button">Craft</button>
+        <button id="tri-next" class="btn primary hidden" type="button">Place next wager</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="shop" class="overlay shop-overlay hidden">
+    <aside class="mc-panel shop-panel" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+      <header class="craft-head">
+        <h2 id="shop-title">Shop</h2>
+        <div class="craft-meta">
+          <span id="shop-wallet" class="wallet-chip">0 chips</span>
+          <button id="shop-close" class="btn small" type="button">Close</button>
+        </div>
+      </header>
+      <p id="shop-blurb" class="hint"></p>
+      <div id="shop-tabs" class="tabs" role="tablist"></div>
+      <div id="shop-try" class="try-line hidden">
+        <span id="shop-try-text"></span>
+        <button id="shop-try-stop" class="btn small" type="button">Stop trying</button>
+      </div>
+      <ul id="shop-items" class="items"></ul>
+      <div id="shop-msg" class="msg" role="status" aria-live="polite"></div>
+    </aside>
+  </div>
+
+  <div id="rad" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="rad-title">
+      <header class="craft-head">
+        <h2 id="rad-title">Radical Table</h2>
+        <div class="craft-meta">
+          <span id="rad-wallet" class="wallet-chip">0 chips</span>
+          <button id="rad-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <div id="rad-wager" class="wager-line"></div>
+
+      <div id="rad-bet-row" class="tri-bets">
+        <p class="bet-prompt">Place your wager first. A bigger wager deals a bigger square root and pays more.</p>
+        <div id="rad-bets" class="bet-grid"></div>
+        <p id="rad-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock the bigger wagers.</p>
+      </div>
+
+      <section id="rad-felt" class="felt" aria-label="Square root to simplify">
+        <div id="rad-radicand" class="poly"></div>
+      </section>
+
+      <div class="bench">
+        <div id="rad-s1" class="step">
+          <h3>Step 1: factor</h3>
+          <p id="rad-hint1" class="hint"></p>
+          <div id="rad-factors" class="rad-row"></div>
+          <div class="craft-actions"><button id="rad-done1" class="btn primary" type="button">Done factoring</button></div>
+        </div>
+
+        <div id="rad-s2" class="step">
+          <h3>Step 2: pair up</h3>
+          <p class="hint">Click two equal numbers to pair them. Click a pair to split it again.</p>
+          <div class="rewrite">
+            <div class="rewrite-label" id="rad-pair-count"></div>
+            <div id="rad-pairing" class="rad-row"></div>
+          </div>
+          <div class="craft-actions">
+            <button id="rad-back2" class="btn" type="button">Change factors</button>
+            <button id="rad-done2" class="btn primary" type="button">Done pairing</button>
+          </div>
+        </div>
+
+        <div id="rad-s3" class="step">
+          <h3>Step 3: simplify</h3>
+          <p class="hint">Each pair sends one number outside the radical. Multiply what goes outside, and multiply what stays inside.</p>
+          <div class="rewrite"><div id="rad-summary" class="rad-row"></div></div>
+          <div id="rad-answer" class="rad-row answer-row"></div>
+          <div class="craft-actions"><button id="rad-back3" class="btn" type="button">Change pairs</button></div>
+        </div>
+
+        <div id="rad-inv-wrap" class="inv-wrap">
+          <h3 id="rad-inv-title">Prime gems</h3>
+          <div id="rad-inventory" class="inventory"></div>
+        </div>
+      </div>
+
+      <div id="rad-msg" class="msg" role="status" aria-live="polite"></div>
+      <div id="rad-result" class="result hidden"></div>
+
+      <div class="craft-actions">
+        <button id="rad-craft" class="btn primary" type="button">Craft</button>
+        <button id="rad-next" class="btn primary hidden" type="button">Place next wager</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="par" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel par-panel" role="dialog" aria-modal="true" aria-labelledby="par-title">
+      <header class="craft-head">
+        <h2 id="par-title">Parabola Table</h2>
+        <div class="craft-meta">
+          <span id="par-wallet" class="wallet-chip">0 chips</span>
+          <button id="par-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <div id="par-wager" class="wager-line"></div>
+
+      <div id="par-bet-row" class="tri-bets">
+        <p class="bet-prompt">Place your wager first. It costs 50 chips to graph a parabola, and a correct sketch pays double.</p>
+        <div id="par-bets" class="bet-grid"></div>
+        <p id="par-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock this one.</p>
+      </div>
+
+      <div id="par-main" class="par-main">
+        <div class="par-left">
+          <section id="par-felt" class="felt" aria-label="Polynomial to graph">
+            <div id="par-poly" class="poly"></div>
+          </section>
+
+          <div id="par-steps" class="bench">
+            <div id="par-r1" class="step"></div>
+            <div id="par-r2" class="step"></div>
+            <div id="par-r3" class="step"></div>
+          </div>
+
+          <div id="par-inv-wrap" class="inv-wrap">
+            <h3>Numbers</h3>
+            <div id="par-inventory" class="inventory"></div>
+          </div>
+
+          <div id="par-result" class="result hidden"></div>
+        </div>
+
+        <div class="par-right">
+          <div id="par-graph" class="par-graph"></div>
+        </div>
+      </div>
+
+      <div id="par-msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div class="craft-actions">
+        <button id="par-craft" class="btn primary" type="button">Craft</button>
+        <button id="par-next" class="btn primary hidden" type="button">Place next wager</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vtx" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel par-panel" role="dialog" aria-modal="true" aria-labelledby="vtx-title">
+      <header class="craft-head">
+        <h2 id="vtx-title">Vertex Table</h2>
+        <div class="craft-meta">
+          <span id="vtx-wallet" class="wallet-chip">0 chips</span>
+          <button id="vtx-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <div id="vtx-wager" class="wager-line"></div>
+
+      <div id="vtx-bet-row" class="tri-bets">
+        <p class="bet-prompt">Place your wager first. It costs 50 chips to graph a parabola from vertex form, and a correct sketch pays double.</p>
+        <div id="vtx-bets" class="bet-grid"></div>
+        <p id="vtx-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock this one.</p>
+      </div>
+
+      <div id="vtx-main" class="par-main">
+        <div class="par-left">
+          <section id="vtx-felt" class="felt" aria-label="Equation to graph">
+            <div id="vtx-poly" class="poly"></div>
+          </section>
+
+          <div id="vtx-steps" class="bench">
+            <div id="vtx-r1" class="step"></div>
+            <div id="vtx-r2" class="step"></div>
+            <div id="vtx-r3" class="step"></div>
+          </div>
+
+          <div id="vtx-inv-wrap" class="inv-wrap">
+            <h3>Numbers</h3>
+            <div id="vtx-inventory" class="inventory"></div>
+          </div>
+
+          <div id="vtx-result" class="result hidden"></div>
+        </div>
+
+        <div class="par-right">
+          <div id="vtx-graph" class="par-graph"></div>
+        </div>
+      </div>
+
+      <div id="vtx-msg" class="msg" role="status" aria-live="polite"></div>
+
+      <div class="craft-actions">
+        <button id="vtx-craft" class="btn primary" type="button">Craft</button>
+        <button id="vtx-next" class="btn primary hidden" type="button">Place next wager</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/factoring.js?v=9"></script>
+  <script src="js/catalog.js?v=9"></script>
+  <script src="js/store.js?v=9"></script>
+  <script src="js/content.js?v=9"></script>
+  <script src="js/textures.js?v=9"></script>
+  <script src="js/avatar.js?v=9"></script>
+  <script src="js/pets.js?v=9"></script>
+  <script src="js/world.js?v=9"></script>
+  <script src="js/showcase.js?v=9"></script>
+  <script src="js/player.js?v=9"></script>
+  <script src="js/ui.js?v=9"></script>
+  <script src="js/shop.js?v=9"></script>
+  <script src="js/crafting.js?v=9"></script>
+  <script src="js/trinomials.js?v=9"></script>
+  <script src="js/trinomial-game.js?v=9"></script>
+  <script src="js/radicals.js?v=9"></script>
+  <script src="js/radical-game.js?v=9"></script>
+  <script src="js/parabolas.js?v=9"></script>
+  <script src="js/parabola-game.js?v=9"></script>
+  <script src="js/main.js?v=9"></script>
+</body>
+</html>
