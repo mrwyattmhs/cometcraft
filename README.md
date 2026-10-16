@@ -18,7 +18,7 @@ python3 -m http.server 8000
 2. Settings, Pages, "Deploy from a branch", pick `main` and `/ (root)`.
 3. The game goes live at `https://<you>.github.io/<repo>/`.
 
-**If the page looks like an old version after you push:** GitHub Pages caches files for a few minutes, and a browser can mix old and new files. Every file link in `index.html` ends in `?v=12`, so bump that number (all of them, plus `BUILD` in `js/trinomials.js`, `js/trinomial-game.js`, `js/radicals.js`, `js/radical-game.js`, `js/parabolas.js`, and `js/parabola-game.js`) when you push a change. The start screen shows the build number, and the trinomial table tells you to reload if it detects mismatched files.
+**If the page looks like an old version after you push:** GitHub Pages caches files for a few minutes, and a browser can mix old and new files. Every file link in `index.html` ends in `?v=15`, so bump that number (all of them, plus `BUILD` in `js/trinomials.js`, `js/trinomial-game.js`, `js/radicals.js`, `js/radical-game.js`, `js/parabolas.js`, and `js/parabola-game.js`) when you push a change. The start screen shows the build number, and the trinomial table tells you to reload if it detects mismatched files.
 
 ## Controls
 
@@ -34,7 +34,7 @@ python3 -m http.server 8000
 
 ## The game
 
-- **Village hub:** you start on a road that runs straight to the casino. **The four shops are all on your left** (west side), facing the road, with a crosswalk and street lamps along it. **The casino is straight ahead**, a mini grand hotel: a stepped crescent of sandstone with a window on every other block, a tall center tower and lower wings on each side, gold trim, and a columned porte-cochere over the entrance. **A big lake with dancing fountains is on your right**, in front of the right wing: 23 jets ripple in a wave, with a tall one rising in the middle, and there are benches along its edge. The lake is solid, so it is for looking at, not walking in. The notice board stands by the road near the start. Five students wander the village, and so does **Remy**, a light brown and white calico cat with a floating name tag (walk up and press E to pet her; she is not for sale).
+- **Village hub:** you start on a road that runs straight to the casino. **The four shops are all on your left** (west side), facing the road, with a crosswalk and street lamps along it. **The casino is straight ahead**, a mini grand hotel: a stepped crescent of sandstone with a window on every other block, a tall center tower and lower wings on each side, gold trim, and a columned porte-cochere over the entrance. **A big lake with dancing fountains is on your right**, in front of the right wing: 23 jets ripple in a wave, with a tall one rising in the middle, and there are benches along its edge. The lake is solid, so it is for looking at, not walking in. **Across the road from the shops, on the east side, is the Arithmetic Academy**: a red-brick school set back behind a front lawn, with two stories of windows, a flat roof, and a projecting entrance with a stepped gable, columns, steps, and a name sign. A little hedged walkway runs from the sidewalk to the front door (in line with the crosswalk), flowers dot the lawn, and a flagpole flies a rippling flag. The notice board stands by the road near the start. Five students wander the village, and so does **Remy**, a light brown and white calico cat with a floating name tag (walk up and press E to pet her; she is not for sale).
 - **Shops:** spend chips on how your student looks. Basic items cost 400 chips, graphing calculators 600, and the Kelly Green M tee 1000.
   - **Accessories Shop:** pencil colors (400) and **graphing calculators** (600). You hold **one accessory at a time**, so equipping a calculator replaces your pencil (and equipping a pencil puts the calculator away). You keep everything you own and can swap freely in the shop or the closet. The calculators are TI-84-style, in eight colors, with a little parabola on the screen. It's held in the right hand where the pencil was, and shows in the lower right of your first-person view.
   - **Style Shop:** shirts, pants, hats (caps and beanies), and shoes. Includes a **Kelly Green tee with a white block M** on the front.
@@ -42,6 +42,10 @@ python3 -m http.server 8000
   - **Hint Shop:** still a "coming soon" placeholder.
 
   Every slot has a free starter (blue tee, navy pants, dark sneakers, yellow pencil, no hat, no pet), so nobody is ever stuck. **Try on** puts any item on your avatar before you buy, and the camera swings round so you can see it. Buying takes two clicks (Buy, then Confirm), spends exactly the price, and puts the item on. Press **C** anywhere for the closet, which lists only what you own. Everything saves in this browser only (nothing follows a student between devices, and there are no logins).
+- **Arithmetic Academy (inside):** a classroom the same size as the casino, with a green chalkboard (chalk writing and correct sample equations), a number strip, a teacher's desk, sixteen student desks along the side walls, windows, a bookshelf, a spinning globe, a clock, a times-table poster, and a cork board. The way out is a real framed double door (wooden leaves with raised panels, windows, push bars, and hinges), like the school's front entrance. On the north row stand **three timed-practice tables**: **Addition**, **Subtraction**, and **Multiplication**, each with a chalk-colored **+**, **-**, or **×** floating and spinning above it (with a dark green outline and a toned-down fill, so they stand out against the bright room instead of washing out to white). The casino's other two table spots (south side) are kept clear for more games.
+  - **Each table is a 60-second round**, in white chalk on a green board in a wooden frame. A **rules page** comes first (how it works, your best score, and a Start button). When you press Start the countdown begins and problems come one after another: two numbers from 1 to 10, added, subtracted (bigger number first, so never negative), or multiplied.
+  - **Type the answer and press Enter**, or tap the on-screen number pad. Backspace corrects a typo. **Every correct answer pays 1 chip, right away.** A wrong answer earns nothing and you move on (so no guessing your way through one problem), and the correct answer flashes by so you can learn it.
+  - When time is up you see how many you solved, the chips you earned, your personal best (kept separately for each table), and the ones that got away. Leaving mid-round keeps the chips you already earned but does not count as a best.
 - **Casino:** five tables. Three are on the north wall as you walk in: Practice (primes, with dice), Radical (a floating, spinning √), and Trinomial (a floating, spinning ax² + bx + c). Two graphing tables are behind you on the south side, one on each side of the exit door, so you turn around to find them: the Parabola table (standard form, a floating parabola) and the Vertex table (vertex form, a floating a(x - h)² + k), mirror images of each other across the entrance. The floating symbols are built from blocks in `js/world.js`.
 - **Practice table (primes):** throw 2-4 d20s and factor the sum by dropping prime gems into a crafting grid. The product is live and retries are free. **Every solved round pays a flat 20 chips**, whatever the dice setting. The correct factorization is shown as a factor tree afterward.
 - **Radical table:** simplify a square root by pairing prime factors. Same wager-first setup: you pick a bet, and a bigger bet deals a bigger radicand.
@@ -112,12 +116,15 @@ js/
   radical-game.js  the radical table interface
   parabolas.js   pure parabola logic: problems, checking, graph window and curve (unit tested)
   parabola-game.js  the graphing-table engine, used by both the Parabola and Vertex tables
+  arithmetic.js  pure logic for the timed arithmetic rounds: problems, the 60-second clock, scoring (unit tested)
+  arithmetic-game.js  the chalkboard screen: rules page, countdown, number pad, results
   main.js        renderer, input, zone switching
 tests/factoring.test.js
 tests/trinomials.test.js
 tests/radicals.test.js
 tests/parabolas.test.js
 tests/catalog.test.js
+tests/arithmetic.test.js
 ```
 
 ## Adding things
@@ -127,16 +134,17 @@ tests/catalog.test.js
 - **Shop items:** add a row to `js/catalog.js` (`add(...)` or `colored(...)`). Pets also need a palette in `js/pets.js`, and a new hat shape goes in `setHat` in `js/avatar.js`.
 - **Prices:** `BASIC` (400), `GRAPHING` (600), and `SPECIAL` (1000) at the top of `js/catalog.js`.
 - **Sign and shop-building copy:** edit `js/content.js`.
-- **Economy:** `PRACTICE_REWARD` (20) in `js/factoring.js`, the wager tiers (`TIERS`: bet, multiplier, and problem size) in `js/trinomials.js` and `js/radicals.js`, and the parabola table's single `WAGER` and `MULT` in `js/parabolas.js`.
+- **Economy:** `PRACTICE_REWARD` (20) in `js/factoring.js`, `REWARD` (1 chip per correct answer) and `DURATION_MS` (60 seconds) in `js/arithmetic.js`, the wager tiers (`TIERS`: bet, multiplier, and problem size) in `js/trinomials.js` and `js/radicals.js`, and the parabola table's single `WAGER` and `MULT` in `js/parabolas.js`.
 
 ## Tests
 
 ```
 node tests/factoring.test.js
-tests/trinomials.test.js
-tests/radicals.test.js
-tests/parabolas.test.js
-tests/catalog.test.js
+node tests/trinomials.test.js
+node tests/radicals.test.js
+node tests/parabolas.test.js
+node tests/catalog.test.js
+node tests/arithmetic.test.js
 ```
 
 ## Assets and naming

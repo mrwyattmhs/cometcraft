@@ -74,6 +74,33 @@ const Tex = (() => {
         px(g, '#a8946a', [[6, 28, 20, 2]]);                                            // sill
       },
     },
+    // red-brick school wall: 64 px = 4 x 4 blocks = one story, with two tall windows per story
+    schoolBrick: {
+      size: 64, span: 4, base: [158, 72, 60], v: 9,
+      draw: g => {
+        g.fillStyle = 'rgba(222,210,192,.8)';
+        for (let row = 0; row < 16; row++) {
+          g.fillRect(0, row * 4, 64, 1);
+          for (let x = (row % 2) * 8; x < 64; x += 16) g.fillRect(x, row * 4, 1, 4);
+        }
+        [6, 38].forEach(x0 => {
+          px(g, '#f1efe8', [[x0, 17, 20, 30]]);                                   // white frame
+          px(g, '#9cc6e8', [[x0 + 2, 19, 16, 26]]);                               // glass
+          px(g, '#c9e4f6', [[x0 + 3, 20, 3, 8], [x0 + 6, 20, 2, 3]]);            // glint
+          px(g, '#f1efe8', [[x0 + 9, 19, 2, 26], [x0 + 2, 31, 16, 2]]);          // mullions
+          px(g, '#cfc9bb', [[x0 - 1, 47, 22, 2]]);                                // sill
+        });
+      },
+    },
+    schoolWall: {
+      base: [236, 228, 204], v: 3,
+      draw: g => px(g, 'rgba(150,138,110,.12)', [[4, 0, 1, 16], [12, 0, 1, 16]]),
+    },
+    schoolCeiling: { base: [238, 236, 228], v: 2 },
+    chalkTop: {
+      base: [40, 88, 62], v: 5,
+      draw: g => px(g, 'rgba(255,255,255,.11)', [[2, 3, 6, 1], [9, 9, 5, 1], [4, 12, 7, 1], [11, 2, 3, 1]]),   // faint chalk scribbles
+    },
     wallDark: {
       base: [50, 33, 74], v: 6,
       draw: g => {

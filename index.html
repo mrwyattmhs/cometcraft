@@ -6,8 +6,8 @@
   <title>Prime Time: a voxel math casino</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=12">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=15">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -26,7 +26,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 12</p>
+      <p class="fine build">Build 15</p>
     </div>
   </div>
 
@@ -324,26 +324,82 @@
     </div>
   </div>
 
+  <div id="arith" class="overlay hidden" data-stage="rules">
+    <div class="chalk-board" role="dialog" aria-modal="true" aria-labelledby="arith-title">
+      <header class="chalk-head">
+        <h2 id="arith-title">Addition</h2>
+        <div class="chalk-meta">
+          <span id="arith-wallet" class="chalk-chip">0 chips</span>
+          <button id="arith-close" class="chalk-btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <section id="arith-rules" class="chalk-page">
+        <h3>How it works</h3>
+        <ol id="arith-rule-list" class="chalk-rules"></ol>
+        <p id="arith-best" class="chalk-note"></p>
+        <div class="chalk-center"><button id="arith-start" class="chalk-btn big" type="button">Start</button></div>
+      </section>
+
+      <section id="arith-play" class="chalk-page hidden">
+        <div class="chalk-top">
+          <div id="arith-time" class="chalk-time" role="timer" aria-label="Seconds left">60</div>
+          <div class="chalk-bar" aria-hidden="true"><div id="arith-bar"></div></div>
+          <div id="arith-score" class="chalk-score" aria-live="polite">0 correct</div>
+        </div>
+        <div class="chalk-play">
+          <div class="chalk-work">
+            <div id="arith-problem" class="chalk-problem" aria-live="polite">? + ? = ?</div>
+            <div id="arith-answer" class="chalk-answer" aria-label="Your answer"></div>
+            <div id="arith-feedback" class="chalk-feedback" role="status" aria-live="polite"></div>
+          </div>
+          <div id="arith-pad" class="chalk-pad" role="group" aria-label="Number pad"></div>
+        </div>
+      </section>
+
+      <section id="arith-done" class="chalk-page hidden">
+        <h3 class="chalk-over">Time's up!</h3>
+        <div class="chalk-result">
+          <div id="arith-score-big" class="chalk-big">0</div>
+          <div id="arith-score-label" class="chalk-label">problems solved</div>
+        </div>
+        <p id="arith-earned" class="chalk-line"></p>
+        <p id="arith-best-line" class="chalk-line"></p>
+        <p id="arith-missed-count" class="chalk-line"></p>
+        <div id="arith-missed-wrap" class="chalk-missed hidden">
+          <p class="chalk-note">These got away:</p>
+          <ul id="arith-missed"></ul>
+        </div>
+        <div class="chalk-center">
+          <button id="arith-again" class="chalk-btn" type="button">Play again</button>
+          <button id="arith-leave" class="chalk-btn" type="button">Leave table</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/factoring.js?v=12"></script>
-  <script src="js/catalog.js?v=12"></script>
-  <script src="js/store.js?v=12"></script>
-  <script src="js/content.js?v=12"></script>
-  <script src="js/textures.js?v=12"></script>
-  <script src="js/avatar.js?v=12"></script>
-  <script src="js/pets.js?v=12"></script>
-  <script src="js/world.js?v=12"></script>
-  <script src="js/showcase.js?v=12"></script>
-  <script src="js/player.js?v=12"></script>
-  <script src="js/ui.js?v=12"></script>
-  <script src="js/shop.js?v=12"></script>
-  <script src="js/crafting.js?v=12"></script>
-  <script src="js/trinomials.js?v=12"></script>
-  <script src="js/trinomial-game.js?v=12"></script>
-  <script src="js/radicals.js?v=12"></script>
-  <script src="js/radical-game.js?v=12"></script>
-  <script src="js/parabolas.js?v=12"></script>
-  <script src="js/parabola-game.js?v=12"></script>
-  <script src="js/main.js?v=12"></script>
+  <script src="js/factoring.js?v=15"></script>
+  <script src="js/catalog.js?v=15"></script>
+  <script src="js/store.js?v=15"></script>
+  <script src="js/content.js?v=15"></script>
+  <script src="js/textures.js?v=15"></script>
+  <script src="js/avatar.js?v=15"></script>
+  <script src="js/pets.js?v=15"></script>
+  <script src="js/world.js?v=15"></script>
+  <script src="js/showcase.js?v=15"></script>
+  <script src="js/player.js?v=15"></script>
+  <script src="js/ui.js?v=15"></script>
+  <script src="js/shop.js?v=15"></script>
+  <script src="js/crafting.js?v=15"></script>
+  <script src="js/trinomials.js?v=15"></script>
+  <script src="js/trinomial-game.js?v=15"></script>
+  <script src="js/radicals.js?v=15"></script>
+  <script src="js/radical-game.js?v=15"></script>
+  <script src="js/parabolas.js?v=15"></script>
+  <script src="js/parabola-game.js?v=15"></script>
+  <script src="js/arithmetic.js?v=15"></script>
+  <script src="js/arithmetic-game.js?v=15"></script>
+  <script src="js/main.js?v=15"></script>
 </body>
 </html>

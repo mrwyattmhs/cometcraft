@@ -287,3 +287,71 @@ div.pair-box { cursor: default; }
   .die.rolling, .grid.shake, #toast.show { animation: none; }
   #toast.show { opacity: 1; }
 }
+
+/* ---------- the chalkboard practice: white chalk on green ---------- */
+.chalk-board {
+  --chalk: #f4f1e6;
+  width: min(800px, 100%); padding: 18px 28px 26px; color: var(--chalk);
+  font-family: 'Patrick Hand', 'Chalkboard SE', 'Comic Sans MS', cursive; font-size: 26px; line-height: 1.2;
+  background:
+    radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, .08), transparent 45%),
+    radial-gradient(ellipse at 82% 88%, rgba(255, 255, 255, .06), transparent 40%),
+    #2c5b40;
+  border: 16px solid #8a6234; border-radius: 6px;
+  box-shadow: inset 0 0 0 3px #6b4a26, inset 0 0 44px rgba(0, 0, 0, .35), 0 10px 0 rgba(0, 0, 0, .4);
+  text-shadow: 0 0 1px rgba(255, 255, 255, .7), 0 0 6px rgba(255, 255, 255, .16);
+}
+.chalk-board h2 { margin: 0; font-size: 42px; font-weight: 400; }
+.chalk-board h3 { margin: 4px 0 6px; font-size: 32px; font-weight: 400; text-decoration: underline wavy rgba(244, 241, 230, .5); text-underline-offset: 6px; }
+.chalk-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.chalk-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.chalk-chip { padding: 2px 14px; border: 2px dashed var(--chalk); border-radius: 18px; font-size: 24px; }
+.chalk-btn {
+  font: inherit; font-size: 30px; color: var(--chalk); text-shadow: inherit; background: transparent; cursor: pointer;
+  border: 3px solid var(--chalk); border-radius: 10px; padding: 4px 22px;
+}
+.chalk-btn:hover { background: rgba(255, 255, 255, .14); }
+.chalk-btn.big { font-size: 46px; padding: 8px 54px; }
+.chalk-btn.small { font-size: 22px; padding: 1px 14px; }
+.chalk-board :is(.chalk-btn, .chalk-key):focus-visible { outline: 3px dotted #f7e98e; outline-offset: 3px; }
+.chalk-center { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+.chalk-rules { margin: 8px 0 8px 30px; padding: 0; font-size: 29px; line-height: 1.28; }
+.chalk-rules li { margin-bottom: 6px; }
+.chalk-note { margin: 6px 0; font-size: 26px; opacity: .92; }
+
+.chalk-top { display: flex; align-items: center; gap: 18px; }
+.chalk-time { min-width: 90px; font-size: 68px; line-height: 1; }
+.chalk-time.low { color: #f7e98e; animation: chalk-pulse 1s ease-in-out infinite; }
+.chalk-bar { flex: 1; height: 12px; border: 2px solid var(--chalk); border-radius: 8px; overflow: hidden; }
+.chalk-bar > div { height: 100%; width: 100%; background: var(--chalk); transition: width .1s linear; }
+.chalk-score { min-width: 150px; text-align: right; font-size: 32px; }
+.chalk-play { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; margin-top: 10px; }
+.chalk-work { text-align: center; }
+.chalk-problem { font-size: clamp(54px, 11vw, 100px); line-height: 1.05; letter-spacing: 2px; white-space: nowrap; }
+.chalk-answer { min-width: 190px; min-height: 92px; margin: 6px auto 4px; display: inline-block; padding: 0 22px; font-size: clamp(48px, 9vw, 76px); line-height: 92px; border-bottom: 4px solid var(--chalk); }
+.chalk-feedback { min-height: 38px; font-size: 30px; }
+.chalk-feedback.good { color: #f7e98e; }
+.chalk-feedback.bad { color: #f6b0c8; }
+.chalk-feedback.hint { opacity: .85; }
+.chalk-pad { display: grid; grid-template-columns: repeat(3, 76px); gap: 10px; }
+.chalk-key { height: 62px; font: inherit; font-size: 36px; color: var(--chalk); text-shadow: inherit; background: transparent; border: 3px solid var(--chalk); border-radius: 10px; cursor: pointer; }
+.chalk-key:hover { background: rgba(255, 255, 255, .12); }
+.chalk-key:active { background: rgba(255, 255, 255, .26); }
+
+.chalk-over { font-size: 46px !important; text-align: center; }
+.chalk-result { text-align: center; margin: 4px 0 8px; }
+.chalk-big { font-size: 110px; line-height: 1; }
+.chalk-label { font-size: 32px; }
+.chalk-line { margin: 4px 0; text-align: center; font-size: 30px; }
+.chalk-line.new { color: #f7e98e; }
+.chalk-missed { margin: 10px auto 0; max-width: 520px; }
+.chalk-missed ul { margin: 4px 0 0 28px; padding: 0; font-size: 26px; color: #f6b0c8; }
+
+@keyframes chalk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@media (max-width: 760px) {
+  .chalk-board { padding: 12px 14px 18px; border-width: 10px; font-size: 22px; }
+  .chalk-play { grid-template-columns: 1fr; }
+  .chalk-pad { justify-content: center; }
+  .chalk-top { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .chalk-time.low { animation: none; } .chalk-bar > div { transition: none; } }

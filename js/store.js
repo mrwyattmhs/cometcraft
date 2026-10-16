@@ -11,6 +11,7 @@ const Store = (() => {
     practiceWins: 0, wagerWins: 0, wagerLosses: 0,
     trinomialWins: 0, trinomialLosses: 0, radicalWins: 0, radicalLosses: 0,
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0,
+    arithBest: { add: 0, sub: 0, mul: 0 },   // most problems solved in one 60-second round, per table
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
   });
@@ -25,6 +26,10 @@ const Store = (() => {
     state.chips = Math.max(Number.isFinite(state.chips) ? state.chips : 100, MIN_CHIPS);
     const owned = Array.isArray(state.owned) ? state.owned.filter(id => C.find(id)) : [];
     state.owned = [...new Set([...FREE_IDS, ...owned])];
+
+    const best = state.arithBest && typeof state.arithBest === 'object' ? state.arithBest : {};
+    const whole = v => Math.max(0, Math.floor(Number(v)) || 0);
+    state.arithBest = { add: whole(best.add), sub: whole(best.sub), mul: whole(best.mul) };
 
     const raw = state.equipped && typeof state.equipped === 'object' ? { ...state.equipped } : {};
     if (!raw.accessory) {
@@ -65,6 +70,21 @@ const Store = (() => {
     return floored;
   }
 
+  /** Earn chips for doing something well. Adds exactly that many: the 10-chip floor above is for losses,
+      and would otherwise turn a first +1 into +10 for someone who has spent everything. */
+  function earn(amount) {
+    if (!Number.isInteger(amount) || amount <= 0) return false;
+    set({ chips: state.chips + amount });
+    return true;
+  }
+
+  /** Remember the best score for a practice table. Returns true if this is a new best. */
+  function recordBest(op, score) {
+    if (!(op in state.arithBest) || !Number.isInteger(score) || score <= state.arithBest[op]) return false;
+    set({ arithBest: { ...state.arithBest, [op]: score } });
+    return true;
+  }
+
   /** Spend chips on something. Spending is a choice, so it can use every chip (no floor), and it
       never refunds anything. Returns false if the wallet is short. */
   function spend(amount) {
@@ -90,7 +110,7 @@ const Store = (() => {
   return {
     MIN_CHIPS,
     get: () => state,
-    set, addChips, spend, owns, own, equip,
+    set, addChips, earn, recordBest, spend, owns, own, equip,
     onChange: fn => { listeners.push(fn); fn(state); },
     reset: () => set({ ...fresh() }),
   };

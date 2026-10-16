@@ -35,9 +35,12 @@
   const actions = {
     enterCasino: () => setZone(casino, casino.spawn),
     leaveCasino: () => setZone(hub, { x: 0, z: -15.5, yaw: Math.PI }),
+    enterSchool: () => setZone(school, school.spawn),
+    leaveSchool: () => setZone(hub, World.SCHOOL_EXIT),
     openShop: id => (id === 'hints' ? UI.shop(id) : Shop.open(id)),
     petRemy: () => UI.toast('Remy purrs.'),
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
+    openArithmetic: op => ArithmeticGame.open(op),
     openTable: m => {
       if (m === 'trinomial') TrinomialGame.open();
       else if (m === 'radical') RadicalGame.open();
@@ -48,7 +51,8 @@
   };
   const hub = World.buildHub(actions);
   const casino = World.buildCasino(actions);
-  scene.add(hub.group, casino.group);
+  const school = World.buildSchool(actions);
+  scene.add(hub.group, casino.group, school.group);
 
   let zone = hub;
   function setZone(next, spawn) {
@@ -62,6 +66,7 @@
     UI.toast(zone.name);
   }
   casino.group.visible = false;
+  school.group.visible = false;
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
   Player.teleport(hub.spawn.x, hub.spawn.z, hub.spawn.yaw);
@@ -155,6 +160,7 @@
       else if (ParabolaGame.isOpen()) ParabolaGame.close();
       else if (VertexGame.isOpen()) VertexGame.close();
       else if (Shop.isOpen()) Shop.close();
+      else if (ArithmeticGame.isOpen()) ArithmeticGame.close();
       else if (!$('dialog').classList.contains('hidden')) UI.closeDialog();
       return;
     }
@@ -241,5 +247,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, viewPencil, viewCalc, hub, casino, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

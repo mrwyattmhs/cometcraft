@@ -227,12 +227,12 @@ const World = (() => {
     [22, 12, 2, -8].forEach(z => [-5.2, 5.2].forEach(x => addLamp(zone, x, z)));
   }
 
-  /** A hotel wall block: sandstone with a window grid on the sides, plain stone on the roof. */
-  function hotelBox(g, w, h, d, x, y, z) {
+  /** A wall block with a textured side (the hotel's windowed sandstone by default) and a plain stone roof. */
+  function hotelBox(g, w, h, d, x, y, z, name = 'hotel') {
     const m = new T.Mesh(new T.BoxGeometry(w, h, d), [
-      Tex.mat('hotel', d, h), Tex.mat('hotel', d, h),
+      Tex.mat(name, d, h), Tex.mat(name, d, h),
       Tex.mat('stone', w, d), Tex.mat('stone', w, d),
-      Tex.mat('hotel', w, h), Tex.mat('hotel', w, h),
+      Tex.mat(name, w, h), Tex.mat(name, w, h),
     ]);
     m.position.set(x, y, z);
     g.add(m);
@@ -282,6 +282,140 @@ const World = (() => {
       solid(zone, x, -16, 1.1, 1.1);
     });
     interact(zone, 0, -18.2, 2.2, 'Enter the Casino', actions.enterCasino);
+  }
+
+  /** A real double door in a white frame: two wooden leaves with a raised lower panel, a window above a push bar,
+      a steel kick plate, and hinges, and optionally a glass transom. Built facing +z, then turned (rotY) and placed
+      at (x, 0, z). */
+  function buildDoor(g, { x, z, rotY = 0, w = 2.6, h = 4.2, transom = false }) {
+    const d = new T.Group();
+    d.position.set(x, 0, z);
+    d.rotation.y = rotY;
+    d.userData.door = { w, h, transom };
+    const part = (bw, bh, bd, mat, px, py, pz) => {
+      const m = new T.Mesh(new T.BoxGeometry(bw, bh, bd), mat);
+      m.position.set(px, py, pz);
+      d.add(m);
+      return m;
+    };
+    const trim = lambert(0xf2eee4), wood = lambert(0x6a4426), raised = lambert(0x82552f), dark = lambert(0x2b1a0e);
+    const steel = lambert(0xb8bcc4), glass = glow(0xbfe6ff);
+
+    // frame, threshold, and a dark gap behind the leaves (it shows as the seam down the middle)
+    part(w + 0.5, 0.25, 0.24, trim, 0, h + 0.125, 0);
+    [-1, 1].forEach(sd => part(0.25, h + 0.25, 0.24, trim, sd * (w / 2 + 0.125), (h + 0.25) / 2, 0));
+    part(w, 0.06, 0.3, lambert(0xcfc9bb), 0, 0.03, 0.02);
+    part(w, h, 0.1, dark, 0, h / 2, -0.02);
+
+    // where things sit on a leaf, scaled to the door's height
+    const barY = h * 0.46;
+    const panelTop = barY - 0.25, panelBot = 0.45;
+    const winH = h * 0.34, winTop = h - 0.45, winY = winTop - winH / 2;
+    const lw = w / 2 - 0.03;
+    [-1, 1].forEach(sd => {
+      const cx = sd * (w / 4);
+      part(lw, h - 0.05, 0.12, wood, cx, h / 2 + 0.02, 0);                                             // the leaf
+      part(lw - 0.5, panelTop - panelBot, 0.05, raised, cx, (panelTop + panelBot) / 2, 0.075);          // raised lower panel
+      part(lw - 0.4, winH + 0.14, 0.05, dark, cx, winY, 0.07);                                         // window frame
+      part(lw - 0.55, winH, 0.03, glass, cx, winY, 0.095);                                             // window glass
+      part(lw - 0.6, 0.08, 0.1, steel, cx, barY, 0.14);                                                // push bar
+      [-1, 1].forEach(b => part(0.08, 0.14, 0.1, steel, cx + b * (lw / 2 - 0.35), barY, 0.1));         // its brackets
+      part(lw - 0.2, 0.32, 0.04, steel, cx, 0.2, 0.08);                                                // kick plate
+      [0.45, h / 2, h - 0.45].forEach(hy => part(0.1, 0.22, 0.14, dark, sd * (w / 2 - 0.02), hy, 0.02)); // hinges on the outer edges
+    });
+    if (transom) part(w, 0.5, 0.05, glass, 0, h + 0.5, 0);
+    g.add(d);
+    return d;
+  }
+
+  /* ---------- the arithmetic academy: outside ---------- */
+  // where you stand when you walk out the front door, facing back toward the road
+  const SCHOOL_EXIT = { x: 7.5, z: 10, yaw: Math.PI / 2 };
+
+  /** A little pixel flag: stripes, with a blue corner of stars. */
+  function flagTexture() {
+    const c = document.createElement('canvas');
+    c.width = 40; c.height = 26;
+    const g = c.getContext('2d');
+    for (let i = 0; i < 13; i++) { g.fillStyle = i % 2 ? '#f4f1e8' : '#c0352f'; g.fillRect(0, i * 2, 40, 2); }
+    g.fillStyle = '#243f8f';
+    g.fillRect(0, 0, 16, 14);
+    g.fillStyle = '#f4f1e8';
+    for (let r = 0; r < 4; r++) for (let q = 0; q < 5; q++) g.fillRect(2 + q * 3 - (r % 2), 2 + r * 3, 1, 1);
+    const tex = new T.CanvasTexture(c);
+    tex.magFilter = T.NearestFilter;
+    tex.minFilter = T.NearestFilter;
+    return tex;
+  }
+
+  /** A red-brick school across the road from the shops: two stories of windows, a flat roof, and a
+      projecting center entrance with columns, steps, and a stepped gable. It sits back behind a lawn,
+      with a little hedged walkway (lined up with the crosswalk), flowers, and a flagpole. */
+  function buildSchoolFront(zone, actions) {
+    const g = zone.group;
+    const tan = lambert(0xd8c8a0), white = lambert(0xf2eee4), hedge = lambert(0x2f6d34);
+
+    // the main block
+    hotelBox(g, 12, 8, 20, 20, 4, 10, 'schoolBrick');
+    box(g, tan, 12.5, 0.5, 20.5, 20, 8.25, 10);                              // flat roof with a tan cap
+    [5, 15].forEach(z => box(g, lambert(0x55555c), 1.6, 0.8, 1.6, 22, 8.9, z));   // rooftop vents
+    solid(zone, 20, 10, 12.2, 20.2);
+
+    // the entrance pavilion, with a stepped gable on top
+    hotelBox(g, 2, 8.4, 8, 13, 4.2, 10, 'brick');
+    [[8.6, 8.7], [6.6, 9.3], [4.6, 9.9], [2.6, 10.5]].forEach(([w, y]) => box(g, 'brick', 2.4, 0.6, w, 13, y, 10));
+    box(g, tan, 2.6, 0.3, 2.8, 13, 10.95, 10);
+    solid(zone, 13, 10, 2.2, 8.2);
+
+    // double doors under a glass transom, a name sign above, a porch roof on two columns, and three steps
+    buildDoor(g, { x: 11.9, z: 10, rotY: -Math.PI / 2, w: 2.6, h: 3.2, transom: true });   // faces the road
+    const sign = makeSign({ w: 6.4, h: 1.3, title: 'ARITHMETIC ACADEMY', sub: 'practice makes perfect', fg: '#f2efe0', bg: '#244a35', border: '#c9a24a', subColor: '#c9a24a' });
+    sign.position.set(11.95, 6.6, 10);
+    sign.rotation.y = -Math.PI / 2;                                           // faces the road
+    g.add(sign);
+    box(g, tan, 3.4, 0.4, 7.4, 12.3, 4.3, 10);                                // porch roof
+    [7.4, 12.6].forEach(z => {
+      box(g, white, 0.5, 4.1, 0.5, 11.0, 2.05, z);
+      box(g, tan, 0.8, 0.2, 0.8, 11.0, 0.1, z);
+      box(g, tan, 0.8, 0.2, 0.8, 11.0, 4.1, z);
+      solid(zone, 11.0, z, 0.8, 0.8);
+    });
+    [[11.7, 0.6], [11.1, 0.4], [10.5, 0.2]].forEach(([x, h]) => box(g, 'stone', 0.6, h, 3.4, x, h / 2, 10));
+    interact(zone, 10.0, 10, 2.2, 'Enter the Arithmetic Academy', actions.enterSchool);
+
+    // the walkway from the sidewalk, in line with the crosswalk, with low hedges and lamps along it
+    flat(g, 'paving', 4.1, 2, 8.45, 0.02, 10);
+    [8.5, 11.5].forEach(z => { box(g, hedge, 2.6, 0.55, 0.6, 8.7, 0.28, z); solid(zone, 8.7, z, 2.6, 0.6); });
+    [8.0, 12.0].forEach(z => addLamp(zone, 7.2, z));
+    [3.5, 16.5].forEach(z => { box(g, hedge, 0.9, 0.8, 4.4, 13.45, 0.4, z); solid(zone, 13.45, z, 1.0, 4.6); });   // hedges along the wings
+
+    // flowers dotted around the lawn
+    [[9.3, 7.4, 0xd94a4a], [9.9, 12.6, 0xf2c230], [8.3, 7.7, 0xf06fb0], [8.1, 12.4, 0xffffff], [12.6, 3.2, 0xf2c230],
+     [12.4, 16.8, 0xd94a4a], [11.4, 2.3, 0xf06fb0], [11.7, 17.7, 0xffffff], [9.6, 15.0, 0xf2c230], [10.2, 4.0, 0xd94a4a]]
+      .forEach(([x, z, c]) => { box(g, lambert(0x3f8f3a), 0.08, 0.3, 0.08, x, 0.15, z); box(g, lambert(c), 0.3, 0.3, 0.3, x, 0.42, z); });
+
+    // the flagpole, with a flag that ripples in the breeze
+    const fx = 9.5, fz = 5.0;
+    box(g, 'stone', 0.9, 0.4, 0.9, fx, 0.2, fz);
+    box(g, lambert(0xd8d8dc), 0.2, 9, 0.2, fx, 4.9, fz);
+    box(g, lambert(0xc9a24a), 0.4, 0.4, 0.4, fx, 9.6, fz);
+    solid(zone, fx, fz, 0.9, 0.9);
+    const flagGeo = new T.PlaneGeometry(2.6, 1.6, 12, 1);
+    flagGeo.translate(1.3, 0, 0);                                             // hoisted at the pole
+    const flag = new T.Mesh(flagGeo, new T.MeshBasicMaterial({ map: flagTexture(), side: T.DoubleSide }));
+    flag.position.set(fx + 0.1, 8.5, fz);
+    flag.rotation.y = -Math.PI / 2;                                           // flies toward +z, face toward the road
+    g.add(flag);
+    const pos = flagGeo.attributes.position;
+    const hoistX = Array.from({ length: pos.count }, (_, i) => pos.getX(i));
+    const ripple = t => {
+      for (let i = 0; i < pos.count; i++) pos.setZ(i, Math.sin(t * 3.2 + hoistX[i] * 2.4) * 0.2 * (hoistX[i] / 2.6));
+      pos.needsUpdate = true;
+    };
+    ripple(0);
+    zone.animated.push((dt, t) => ripple(t));
+    zone.flag = { mesh: flag, geometry: flagGeo };
+    zone.school = { x0: 11.9, x1: 26.1, z0: -0.1, z1: 20.1, door: { x: 10.0, z: 10 } };
   }
 
   /** A water surface that slowly drifts. */
@@ -400,6 +534,7 @@ const World = (() => {
 
     buildCasinoFront(zone, actions);   // straight ahead at the end of the road
     buildFountain(zone);               // off to the right
+    buildSchoolFront(zone, actions);   // across the road from the shops
 
     // notice board on the right-hand sidewalk near the spawn, facing the starting point
     box(g, 'log', 0.3, 2.2, 0.3, 6.2, 1.1, 17);
@@ -413,7 +548,7 @@ const World = (() => {
 
     // trees on either side, then the fence and the clouds
     [[-20, -14], [-25, -3], [-21, 10], [-27, 21], [-18, 27], [-30, -12],
-     [14, 15], [24, 9], [29, 21], [19, 26], [31, 2], [12, 27]]
+     [31, 2], [29, 21], [19, 26], [12, 27], [30, 12], [9, 23]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;
@@ -510,35 +645,58 @@ const World = (() => {
     return { cells: strokeCells(pts, 15, 14, 0.8), w: 15, h: 14 };
   };
 
+  // the three operation signs floating over the arithmetic tables (strokes sit between cells so they are 2 thick)
+  const plusCells = () => ({ cells: strokeCells([[1, 6], [11, 6], [6, 6], [6, 1], [6, 11]], 12, 12, 0.7), w: 12, h: 12 });
+  const minusCells = () => ({ cells: strokeCells([[1, 6], [11, 6]], 12, 12, 0.7), w: 12, h: 12 });
+  const timesCells = () => ({ cells: strokeCells([[1.5, 1.5], [10.5, 10.5], [6, 6], [1.5, 10.5], [10.5, 1.5]], 12, 12, 0.85), w: 12, h: 12 });
+
   const SYMBOLS = {
     sqrt:      { shape: radicalCells,   u: 0.1,   mirrorBack: false },
     quadratic: { shape: quadraticCells, u: 0.08,  mirrorBack: false },
     parabola:  { shape: parabolaCells,  u: 0.1,   mirrorBack: false },
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
+    plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
+    minus: { shape: minusCells, u: 0.11, mirrorBack: false },
+    times: { shape: timesCells, u: 0.11, mirrorBack: false },
   };
 
   /** Two layers thick so it never vanishes edge-on. (mirrorBack flips the rear layer, but a flipped
       copy shows through the gaps between letters, so the text uses a plain solid slab instead.) */
-  function buildSymbol(kind, color) {
+  /** opts: outline (a color for a dark edge around the whole shape, so it stands out against light walls),
+      outlineWidth (blocks), emissive (glow, 0 for none), tone (scales the fill color down, for bright rooms
+      where pale colors would otherwise clip to white). */
+  function buildSymbol(kind, color, opts = {}) {
+    const { outline = null, outlineWidth = 0.035, emissive = 0.6, tone = 1 } = opts;
     const def = SYMBOLS[kind];
     const { cells, w, h } = def.shape();
     const u = def.u;
-    const mat = new T.MeshLambertMaterial({ color, emissive: color, emissiveIntensity: 0.6 });
+    const fill = tone === 1 ? color : (((((color >> 16) & 255) * tone) << 16) | ((((color >> 8) & 255) * tone) << 8) | ((color & 255) * tone)) >>> 0;
+    const mat = new T.MeshLambertMaterial({ color: fill, emissive: color, emissiveIntensity: emissive });
     const mesh = new T.InstancedMesh(new T.BoxGeometry(u, u, u), mat, cells.length * 2);
     mesh.frustumCulled = false; // instances sit around the origin, which the default bounds ignore
+    // the outline is a slightly bigger copy of every block, drawn inside-out behind it: only a thin dark edge shows
+    const hull = outline === null ? null : new T.InstancedMesh(new T.BoxGeometry(u + 2 * outlineWidth, u + 2 * outlineWidth, u + 2 * outlineWidth),
+      new T.MeshBasicMaterial({ color: outline, side: T.BackSide }), cells.length * 2);
+    if (hull) hull.frustumCulled = false;
     const m = new T.Matrix4();
     let n = 0;
     [0, 1].forEach(layer => {
       cells.forEach(([c, r]) => {
         const col = layer === 1 && def.mirrorBack ? w - 1 - c : c;
         m.makeTranslation((col + 0.5 - w / 2) * u, (r + 0.5 - h / 2) * u, layer === 0 ? u / 2 : -u / 2);
-        mesh.setMatrixAt(n++, m);
+        mesh.setMatrixAt(n, m);
+        if (hull) hull.setMatrixAt(n, m);
+        n++;
       });
     });
     mesh.instanceMatrix.needsUpdate = true;
+    if (hull) hull.instanceMatrix.needsUpdate = true;
     const group = new T.Group();
-    group.add(mesh);
+    group.add(mesh);                     // children[0] is always the colored blocks
+    if (hull) group.add(hull);
     group.userData.size = { w: w * u, h: h * u, cells: cells.length };
+    group.userData.accent = color;
+    group.userData.outline = outline;
     return group;
   }
 
@@ -561,7 +719,7 @@ const World = (() => {
       zone.animated.push(dt => dice.forEach((d, i) => { d.rotation.y += dt * (0.5 + i * 0.15); }));
     } else {
       // a symbol that floats above the table, bobbing gently and turning in place
-      const sym = buildSymbol(prop, accent);
+      const sym = buildSymbol(prop, accent, { outline: opts.symbolOutline ?? null, emissive: opts.symbolEmissive ?? 0.6, tone: opts.symbolTone ?? 1 });
       const baseY = 2.15;
       sym.position.set(x, baseY, z);
       g.add(sym);
@@ -573,7 +731,7 @@ const World = (() => {
       });
     }
 
-    const sign = makeSign({ w: 4.6, h: 1.3, title, sub, fg: color, bg: '#12081e', border: color, subColor: '#e8e0f5' });
+    const sign = makeSign({ w: 4.6, h: 1.3, title, sub, fg: color, bg: opts.signBg || '#12081e', border: color, subColor: opts.signSub || '#e8e0f5' });
     sign.position.set(x, 3.6, z);
     // the sign faces the player: south (+z) for the north-wall tables, north (-z) for the ones behind you
     sign.rotation.y = facing < 0 ? Math.PI : 0;
@@ -646,5 +804,190 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells } };
+  /* ---------- the arithmetic academy: inside ---------- */
+  /** A flat picture made from a canvas drawing (chalkboards, posters, the clock). */
+  function textPlane(w, h, draw, ppu = 64) {
+    const c = document.createElement('canvas');
+    c.width = Math.round(w * ppu);
+    c.height = Math.round(h * ppu);
+    draw(c.getContext('2d'), c);
+    const tex = new T.CanvasTexture(c);
+    tex.anisotropy = 4;
+    return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ map: tex }));
+  }
+  const PX_FONT = px => `${px}px Silkscreen, "Courier New", monospace`;
+
+  /** A student desk with a chair behind it (the student sits on the south side, facing the board). */
+  function addDesk(zone, x, z) {
+    const g = zone.group, light = lambert(0xd9b97e), metal = lambert(0x6b6f78), seat = lambert(0x2f6fdb);
+    box(g, light, 0.95, 0.07, 0.7, x, 0.78, z);                              // top
+    [[-0.4, -0.28], [0.4, -0.28], [-0.4, 0.28], [0.4, 0.28]].forEach(([dx, dz]) => box(g, metal, 0.06, 0.75, 0.06, x + dx, 0.38, z + dz));
+    box(g, seat, 0.5, 0.06, 0.5, x, 0.46, z + 0.8);                          // chair seat
+    box(g, seat, 0.5, 0.5, 0.06, x, 0.78, z + 1.05);                         // chair back
+    [[-0.2, 0.6], [0.2, 0.6], [-0.2, 1.0], [0.2, 1.0]].forEach(([dx, dz]) => box(g, metal, 0.05, 0.43, 0.05, x + dx, 0.22, z + dz));
+    solid(zone, x, z + 0.4, 1.0, 1.7);
+  }
+
+  function buildSchool(actions) {
+    const zone = createZone('Arithmetic Academy', {
+      spawn: { x: 0, z: 3, yaw: 0 },
+      bounds: { minX: -14.4, maxX: 14.4, minZ: -11.4, maxZ: 11.4 },   // the same size as the casino
+      sky: 0xd8d2c0, fog: [0xd8d2c0, 40, 90],
+      wander: { minX: -9, maxX: 9, minZ: 0, maxZ: 9 },
+    });
+    const g = zone.group;
+
+    g.add(new T.HemisphereLight(0xffffff, 0xb8aa88, 0.95));
+    g.add(new T.AmbientLight(0xfff0d8, 0.55));
+
+    flat(g, 'planks', 30, 24, 0, 0, 0);
+    box(g, 'schoolWall', 30, 6, 0.5, 0, 3, -12.25);
+    box(g, 'schoolWall', 30, 6, 0.5, 0, 3, 12.25);
+    box(g, 'schoolWall', 0.5, 6, 24, -15.25, 3, 0);
+    box(g, 'schoolWall', 0.5, 6, 24, 15.25, 3, 0);
+    box(g, 'schoolCeiling', 30.6, 0.3, 24.6, 0, 6.15, 0);
+    [[30, 0.08, 0, 1.3, -11.96], [30, 0.08, 0, 1.3, 11.96]].forEach(([w, d, x, h, z]) => box(g, 'wood', w, h, d, x, h / 2, z));   // wood paneling
+    [-14.96, 14.96].forEach(x => box(g, 'wood', 0.08, 1.3, 24, x, 0.65, 0));
+    [-9, 0, 9].forEach(x => [-6, 3].forEach(z => box(g, glow(0xfffbe8), 3, 0.05, 1.2, x, 5.98, z)));   // ceiling lights
+
+    // the green chalkboard on the north wall, with chalk writing, a tray, and a number strip above
+    box(g, 'wood', 17.2, 4.0, 0.16, 0, 3.2, -11.92);
+    const board = textPlane(16.2, 3.4, (c, cv) => {
+      c.fillStyle = '#2c5b40'; c.fillRect(0, 0, cv.width, cv.height);
+      c.fillStyle = 'rgba(255,255,255,.05)';
+      [[40, 30, 300, 40], [600, 90, 280, 50], [200, 150, 380, 30]].forEach(([x, y, ww, hh]) => c.fillRect(x, y, ww, hh));   // chalk dust
+      c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = '#f4f1e6'; c.font = PX_FONT(cv.height * 0.2);
+      c.fillText('ARITHMETIC PRACTICE', cv.width / 2, cv.height * 0.26);
+      [['7 + 5 = 12', '#f7e98e'], ['9 x 6 = 54', '#f6b0c8'], ['20 / 4 = 5', '#a8d8f0'], ['15 - 8 = 7', '#b9f0b0']].forEach(([t, col], i) => {
+        c.fillStyle = col; c.font = PX_FONT(cv.height * 0.11);
+        c.fillText(t, cv.width * (0.125 + i * 0.25), cv.height * 0.62);
+      });
+      c.fillStyle = '#f4f1e6'; c.fillRect(cv.width * 0.08, cv.height * 0.4, cv.width * 0.84, 3);
+    });
+    board.position.set(0, 3.2, -11.83);
+    g.add(board);
+    box(g, 'wood', 16.4, 0.12, 0.35, 0, 1.4, -11.72);                       // chalk tray
+    [-5, 2.5, 6].forEach(x => box(g, lambert(0xf4f1e6), 0.3, 0.06, 0.08, x, 1.49, -11.7));
+    box(g, lambert(0x3a3a3a), 0.5, 0.1, 0.2, 7.5, 1.51, -11.7);              // eraser
+    const strip = textPlane(16.2, 0.9, (c, cv) => {
+      const cols = ['#d94a4a', '#e8742a', '#e0a030', '#3fae5a', '#2fb5b0', '#2f6fdb', '#8a4fd0', '#f06fb0', '#d94a4a', '#e0a030'];
+      cols.forEach((col, i) => {
+        c.fillStyle = col; c.fillRect(i * cv.width / 10 + 6, 6, cv.width / 10 - 12, cv.height - 12);
+        c.fillStyle = '#ffffff'; c.font = PX_FONT(cv.height * 0.5); c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillText(String(i + 1), (i + 0.5) * cv.width / 10, cv.height / 2 + 2);
+      });
+    });
+    strip.position.set(0, 5.5, -11.97);
+    g.add(strip);
+
+    // the teacher's desk, with an apple and a stack of books, and a chair behind it
+    box(g, 'wood', 3.4, 0.9, 1.4, 0, 0.45, -9.4);
+    box(g, 'planks', 3.6, 0.1, 1.6, 0, 0.95, -9.4);
+    box(g, lambert(0xd94a4a), 0.28, 0.28, 0.28, -1.2, 1.14, -9.4);
+    [[0xd94a4a, 0.7], [0x2f6fdb, 0.62], [0x3fae5a, 0.55]].forEach(([c, w], i) => box(g, lambert(c), w, 0.1, 0.45, 1.1, 1.05 + i * 0.1, -9.4));
+    box(g, lambert(0x6b3a22), 0.9, 0.1, 0.9, 0, 0.55, -10.9);
+    box(g, lambert(0x6b3a22), 0.9, 0.9, 0.1, 0, 1.0, -11.35);
+    solid(zone, 0, -9.4, 3.6, 1.6);
+    solid(zone, 0, -10.9, 1.0, 1.0);
+
+    // student desks in two blocks along the side walls: the middle of the room stays open
+    [[-13.5, -12.3], [12.3, 13.5]].forEach(cols => cols.forEach(x => [0.5, 2.4, 4.3, 6.2].forEach(z => addDesk(zone, x, z))));
+
+    // a bookshelf, a globe, a clock, a times-table poster, and a cork board
+    box(g, 'wood', 3.6, 2.6, 0.6, -12.5, 1.3, -11.7);
+    const bookColors = [0xd94a4a, 0x2f6fdb, 0x3fae5a, 0xe0a030, 0x8a4fd0, 0xf06fb0, 0x2fb5b0];
+    for (let row = 0; row < 3; row++) for (let i = 0; i < 12; i++) {
+      box(g, lambert(bookColors[(i * 3 + row * 5) % bookColors.length]), 0.22, 0.62, 0.3, -13.95 + i * 0.26, 0.5 + row * 0.8, -11.4);
+    }
+    solid(zone, -12.5, -11.7, 3.8, 0.8);
+    box(g, lambert(0x6b3a22), 0.55, 0.08, 0.55, 12.5, 0.04, -10.2);
+    box(g, lambert(0x6b3a22), 0.1, 0.9, 0.1, 12.5, 0.5, -10.2);
+    const globe = new T.Mesh(new T.SphereGeometry(0.5, 14, 10), lambert(0x2f78c8));
+    globe.position.set(12.5, 1.4, -10.2);
+    g.add(globe);
+    [[0.2, 0.3, 0.1], [-0.25, 0.05, 0.3], [0.1, -0.3, 0.3]].forEach(([dx, dy, dz]) => {
+      const land = new T.Mesh(new T.SphereGeometry(0.2, 8, 6), lambert(0x3f9f4a));
+      land.position.set(dx, dy, dz).normalize().multiplyScalar(0.5);
+      globe.add(land);
+    });
+    zone.animated.push(dt => { globe.rotation.y += dt * 0.5; });
+    solid(zone, 12.5, -10.2, 0.9, 0.9);
+
+    const clock = textPlane(1.3, 1.3, (c, cv) => {
+      const r = cv.width / 2;
+      c.fillStyle = '#f4f1e6'; c.beginPath(); c.arc(r, r, r - 2, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#2a2a2a'; c.lineWidth = 6; c.stroke();
+      c.lineWidth = 4;
+      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; c.beginPath(); c.moveTo(r + Math.sin(a) * r * 0.78, r - Math.cos(a) * r * 0.78); c.lineTo(r + Math.sin(a) * r * 0.9, r - Math.cos(a) * r * 0.9); c.stroke(); }
+      c.lineWidth = 6; c.beginPath(); c.moveTo(r, r); c.lineTo(r + Math.sin(Math.PI * 0.6) * r * 0.45, r - Math.cos(Math.PI * 0.6) * r * 0.45); c.stroke();
+      c.lineWidth = 4; c.beginPath(); c.moveTo(r, r); c.lineTo(r + Math.sin(Math.PI * 0.05) * r * 0.7, r - Math.cos(Math.PI * 0.05) * r * 0.7); c.stroke();
+    });
+    clock.position.set(6, 4.6, 11.97);
+    clock.rotation.y = Math.PI;
+    g.add(clock);
+
+    const poster = textPlane(3, 3.2, (c, cv) => {
+      c.fillStyle = '#f7f1d8'; c.fillRect(0, 0, cv.width, cv.height);
+      c.strokeStyle = '#8a4fd0'; c.lineWidth = 6; c.strokeRect(3, 3, cv.width - 6, cv.height - 6);
+      c.fillStyle = '#8a4fd0'; c.font = PX_FONT(cv.height * 0.08); c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText('TIMES TABLE', cv.width / 2, cv.height * 0.1);
+      c.font = PX_FONT(cv.height * 0.07);
+      for (let r = 1; r <= 5; r++) for (let q = 1; q <= 5; q++) {
+        c.fillStyle = (r + q) % 2 ? '#2f6fdb' : '#d94a4a';
+        c.fillText(String(r * q), (q + 0.5) * cv.width / 6.6, cv.height * (0.18 + r * 0.14));
+      }
+    });
+    poster.position.set(-14.97, 3.4, -6);
+    poster.rotation.y = Math.PI / 2;
+    g.add(poster);
+
+    const cork = textPlane(4, 2.6, (c, cv) => {
+      c.fillStyle = '#c89a5c'; c.fillRect(0, 0, cv.width, cv.height);
+      c.strokeStyle = '#8a6a34'; c.lineWidth = 8; c.strokeRect(4, 4, cv.width - 8, cv.height - 8);
+      [['#ffffff', 20, 20], ['#f6b0c8', 110, 30], ['#a8d8f0', 180, 22], ['#f7e98e', 40, 90], ['#b9f0b0', 130, 100], ['#ffffff', 200, 92]].forEach(([col, x, y]) => {
+        c.fillStyle = col; c.fillRect(x, y, 56, 56);
+        c.fillStyle = '#d94a4a'; c.fillRect(x + 26, y + 3, 5, 5);
+      });
+    });
+    cork.position.set(14.97, 3.4, -6);
+    cork.rotation.y = -Math.PI / 2;
+    g.add(cork);
+
+    // tall windows along both side walls, above the desks
+    [0.8, 4.8, 8.8].forEach(z => {
+      [[-14.94, -14.78], [14.94, 14.78]].forEach(([fx, sx]) => {
+        box(g, lambert(0xf2eee4), 0.12, 2.6, 3.4, fx, 3.3, z);
+        box(g, glow(0xbfe6ff), 0.14, 2.2, 3.0, fx * 0.9993, 3.3, z);
+        box(g, lambert(0xf2eee4), 0.16, 2.2, 0.1, fx * 0.999, 3.3, z);
+        box(g, lambert(0xf2eee4), 0.3, 0.1, 3.6, sx, 2.0, z);
+      });
+    });
+
+    // the way out
+    buildDoor(g, { x: 0, z: 11.88, rotY: Math.PI, w: 2.6, h: 4.2 });                     // faces into the room
+    const exit = makeSign({ w: 2.4, h: 0.7, title: 'EXIT', fg: '#52f08f', bg: '#0c2a18', border: '#52f08f' });
+    exit.position.set(0, 4.95, 11.95);
+    exit.rotation.y = Math.PI;
+    g.add(exit);
+    interact(zone, 0, 10.6, 2.0, 'Leave the Academy', actions.leaveSchool);
+
+    // three timed-practice tables on the north row, each with its chalk-colored sign floating above it
+    // bright room: a dark chalkboard-green outline and a toned-down fill keep the floating signs from washing out
+    const chalk = { signBg: '#244a35', signSub: '#f2efe0', symbolOutline: 0x1d4a30, symbolEmissive: 0, symbolTone: 0.68 };
+    buildTable(zone, -9, -4, 'chalkTop', 'ADDITION TABLE', '60 seconds. 1 chip each.', '#f7e98e', () => actions.openArithmetic('add'),
+      { ...chalk, prop: 'plus', accent: 0xf7e98e });
+    buildTable(zone, 0, -4, 'chalkTop', 'SUBTRACTION TABLE', '60 seconds. 1 chip each.', '#f6b0c8', () => actions.openArithmetic('sub'),
+      { ...chalk, prop: 'minus', accent: 0xf6b0c8 });
+    buildTable(zone, 9, -4, 'chalkTop', 'MULTIPLICATION TABLE', '60 seconds. 1 chip each.', '#a8d8f0', () => actions.openArithmetic('mul'),
+      { ...chalk, prop: 'times', accent: 0xa8d8f0 });
+
+    // room for more games: the casino's other two table spots, kept clear on purpose
+    zone.tableSlots = [{ x: -5, z: 8, facing: -1 }, { x: 5, z: 8, facing: -1 }];
+
+    spawnNPCs(zone, 2);
+    return zone;
+  }
+
+  return { buildHub, buildCasino, buildSchool, SCHOOL_EXIT, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells } };
 })();
