@@ -182,19 +182,268 @@ const World = (() => {
     solid(zone, x, z, 1.2, 1.2);
   }
 
+  /* ---------- shop storefronts: each one shows what it sells ---------- */
+  /** The look of each shop: its colors, the picture in its windows, and a tagline under its name. */
+  const SHOP_LOOKS = {
+    accessories: { wall: 0xf4e4a1, trim: 0x27386b, door: 0x27386b, awning: [0xf2c230, 0x27386b], roof: 0x27386b, roofTrim: 0xf2c230,
+      sign: { bg: '#27386b', fg: '#fff3c4', border: '#f2c230', subColor: '#f2c230' }, tag: 'pencils & calculators' },
+    style: { wall: 0xf6cfe0, trim: 0xffffff, door: 0x8a2f6a, awning: [0xff7fb0, 0xffffff], roof: 0x6a2f6a, roofTrim: 0xff7fb0,
+      sign: { bg: '#6a2f6a', fg: '#ffffff', border: '#ff9fc4', subColor: '#ffc2dc' }, tag: 'shirts, pants & hats' },
+    pets: { wall: 0xc8e8b6, trim: 0x6b4423, door: 0x6b4423, awning: [0x4fae5a, 0xffffff], roof: 0x8a5a30, roofTrim: 0x4fae5a,
+      sign: { bg: '#2f6b3a', fg: '#fff6d8', border: '#8fd49a', subColor: '#bfe8c6' }, tag: 'dogs, cats & rabbits' },
+    hints: { wall: 0x463c8a, trim: 0xe8c35a, door: 0x2b2358, awning: [0x7d5fd0, 0xe8c35a], roof: 0x2b2358, roofTrim: 0xe8c35a,
+      sign: { bg: '#1f1a4a', fg: '#ffe69a', border: '#e8c35a', subColor: '#cbbcff' }, tag: 'scrolls & tricks' },
+  };
+
+  /** The picture in a shop window (shapes only, so it reads from across the road). */
+  const SHOP_WINDOWS = {
+    accessories: (c, W, H) => {
+      c.fillStyle = '#f3e7c4'; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#8a5a30'; c.fillRect(0, H * 0.66, W, H * 0.07); c.fillRect(0, H * 0.96, W, H * 0.04);
+      // a cup of pencils
+      c.fillStyle = '#2f5fa8'; c.fillRect(W * 0.07, H * 0.46, W * 0.22, H * 0.2);
+      ['#f2c230', '#e04b4b', '#3fa86a', '#7d5fd0', '#f08a30'].forEach((col, i) => {
+        const x = W * (0.085 + i * 0.04), top = H * (0.18 + (i % 3) * 0.05);
+        c.fillStyle = col; c.fillRect(x, top, W * 0.032, H * 0.3);
+        c.fillStyle = '#e8c79a'; c.beginPath(); c.moveTo(x, top); c.lineTo(x + W * 0.032, top); c.lineTo(x + W * 0.016, top - H * 0.07); c.closePath(); c.fill();
+      });
+      // a graphing calculator, with a curve on its screen
+      c.fillStyle = '#3a3d45'; c.fillRect(W * 0.38, H * 0.22, W * 0.27, H * 0.44);
+      c.fillStyle = '#9be59b'; c.fillRect(W * 0.405, H * 0.26, W * 0.22, H * 0.14);
+      c.strokeStyle = '#1d5a2c'; c.lineWidth = 3; c.beginPath(); c.moveTo(W * 0.42, H * 0.38); c.quadraticCurveTo(W * 0.515, H * 0.2, W * 0.61, H * 0.38); c.stroke();
+      for (let r = 0; r < 3; r++) for (let q = 0; q < 4; q++) { c.fillStyle = r === 0 && q === 3 ? '#f08a30' : '#c9ccd4'; c.fillRect(W * (0.41 + q * 0.055), H * (0.45 + r * 0.063), W * 0.04, H * 0.045); }
+      // a second, smaller calculator and a ruler
+      c.fillStyle = '#2f5fa8'; c.fillRect(W * 0.72, H * 0.4, W * 0.2, H * 0.26);
+      c.fillStyle = '#9be59b'; c.fillRect(W * 0.74, H * 0.43, W * 0.16, H * 0.09);
+      c.fillStyle = '#f2c230'; c.fillRect(W * 0.06, H * 0.8, W * 0.55, H * 0.1);
+      c.fillStyle = '#6b4a14'; for (let i = 0; i < 9; i++) c.fillRect(W * (0.09 + i * 0.06), H * 0.8, 2, H * (i % 2 ? 0.04 : 0.065));
+    },
+    style: (c, W, H) => {
+      c.fillStyle = '#fbe6ef'; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#8a5a30'; c.fillRect(W * 0.04, H * 0.14, W * 0.92, H * 0.045);        // the clothes rail
+      [['#3f8de0', 0.1], ['#4fb86a', 0.36], ['#e04b4b', 0.62]].forEach(([col, x]) => {
+        const sx = W * x, sw = W * 0.26, sy = H * 0.2;
+        c.fillStyle = '#6b6b72'; c.fillRect(sx + sw / 2 - 2, H * 0.13, 4, H * 0.07);          // hanger
+        c.fillStyle = col; c.fillRect(sx + sw * 0.18, sy, sw * 0.64, H * 0.34);               // body
+        c.fillRect(sx, sy, sw * 0.24, H * 0.14); c.fillRect(sx + sw * 0.76, sy, sw * 0.24, H * 0.14);   // sleeves
+        c.fillStyle = '#fbe6ef'; c.fillRect(sx + sw * 0.4, sy, sw * 0.2, H * 0.06);           // neckline
+      });
+      c.fillStyle = '#2b3a67'; c.fillRect(W * 0.1, H * 0.62, W * 0.2, H * 0.28); c.fillRect(W * 0.34, H * 0.62, W * 0.2, H * 0.28);   // pants
+      c.fillStyle = '#e04b4b'; c.fillRect(W * 0.62, H * 0.68, W * 0.26, H * 0.12);          // a cap
+      c.beginPath(); c.arc(W * 0.75, H * 0.68, W * 0.11, Math.PI, 0); c.fill();
+      c.fillStyle = '#ffffff'; c.fillRect(W * 0.62, H * 0.86, W * 0.12, H * 0.07); c.fillRect(W * 0.78, H * 0.86, W * 0.12, H * 0.07);   // sneakers
+    },
+    pets: (c, W, H) => {
+      c.fillStyle = '#e6f5d8'; c.fillRect(0, 0, W, H);
+      const eyes = (x, y, r) => { c.fillStyle = '#2b2b2b'; c.beginPath(); c.arc(x - r * 0.4, y, r * 0.14, 0, Math.PI * 2); c.arc(x + r * 0.4, y, r * 0.14, 0, Math.PI * 2); c.fill(); };
+      // a dog
+      c.fillStyle = '#8a5a30'; c.fillRect(W * 0.04, H * 0.18, W * 0.09, H * 0.3); c.fillRect(W * 0.3, H * 0.18, W * 0.09, H * 0.3);
+      c.fillStyle = '#d9a566'; c.beginPath(); c.arc(W * 0.215, H * 0.42, W * 0.14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#f3dcb4'; c.beginPath(); c.arc(W * 0.215, H * 0.5, W * 0.07, 0, Math.PI * 2); c.fill();
+      eyes(W * 0.215, H * 0.38, W * 0.2); c.fillStyle = '#2b2b2b'; c.fillRect(W * 0.2, H * 0.46, W * 0.03, H * 0.04);
+      // a cat
+      c.fillStyle = '#f0a050';
+      [[0.43, 0.2, 0.5, 0.2, 0.46, 0.34, 0.52], [0.63, 0.2, 0.57, 0.2, 0.6, 0.34, 0.54]].length;
+      c.beginPath(); c.moveTo(W * 0.4, H * 0.14); c.lineTo(W * 0.5, H * 0.3); c.lineTo(W * 0.4, H * 0.34); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(W * 0.66, H * 0.14); c.lineTo(W * 0.56, H * 0.3); c.lineTo(W * 0.66, H * 0.34); c.closePath(); c.fill();
+      c.beginPath(); c.arc(W * 0.53, H * 0.45, W * 0.13, 0, Math.PI * 2); c.fill();
+      eyes(W * 0.53, H * 0.42, W * 0.2); c.fillStyle = '#e8708a'; c.fillRect(W * 0.52, H * 0.47, W * 0.03, H * 0.03);
+      c.strokeStyle = '#2b2b2b'; c.lineWidth = 2; c.beginPath(); c.moveTo(W * 0.4, H * 0.5); c.lineTo(W * 0.3, H * 0.48); c.moveTo(W * 0.66, H * 0.5); c.lineTo(W * 0.76, H * 0.48); c.stroke();
+      // a rabbit
+      c.fillStyle = '#f4f4f4'; c.fillRect(W * 0.78, H * 0.1, W * 0.05, H * 0.28); c.fillRect(W * 0.88, H * 0.1, W * 0.05, H * 0.28);
+      c.beginPath(); c.arc(W * 0.855, H * 0.5, W * 0.1, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#f4a8b8'; c.fillRect(W * 0.79, H * 0.14, W * 0.025, H * 0.2); c.fillRect(W * 0.895, H * 0.14, W * 0.025, H * 0.2);
+      eyes(W * 0.855, H * 0.48, W * 0.14);
+      // a food bowl and a ball on the floor
+      c.fillStyle = '#c0392b'; c.fillRect(W * 0.1, H * 0.82, W * 0.24, H * 0.1);
+      c.fillStyle = '#4aa3ff'; c.beginPath(); c.arc(W * 0.62, H * 0.86, W * 0.07, 0, Math.PI * 2); c.fill();
+    },
+    hints: (c, W, H) => {
+      c.fillStyle = '#1f1a4a'; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#ffe69a'; [[0.08, 0.12], [0.3, 0.08], [0.52, 0.16], [0.9, 0.1], [0.72, 0.06], [0.16, 0.34], [0.94, 0.4]].forEach(([x, y]) => c.fillRect(W * x, H * y, 5, 5));
+      // an unrolled scroll with a few lines of writing
+      c.fillStyle = '#f2e4be'; c.fillRect(W * 0.12, H * 0.26, W * 0.5, H * 0.36);
+      c.fillStyle = '#d9c48c'; c.fillRect(W * 0.08, H * 0.24, W * 0.06, H * 0.4); c.fillRect(W * 0.6, H * 0.24, W * 0.06, H * 0.4);
+      c.fillStyle = '#6b4a14'; [0.34, 0.42, 0.5].forEach((y, i) => c.fillRect(W * 0.18, H * y, W * (0.34 - i * 0.06), 3));
+      // a compass
+      c.fillStyle = '#e8c35a'; c.beginPath(); c.arc(W * 0.8, H * 0.5, W * 0.14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#1f1a4a'; c.beginPath(); c.arc(W * 0.8, H * 0.5, W * 0.115, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#e04b4b'; c.beginPath(); c.moveTo(W * 0.8, H * 0.3); c.lineTo(W * 0.77, H * 0.5); c.lineTo(W * 0.83, H * 0.5); c.closePath(); c.fill();
+      c.fillStyle = '#f4f1e6'; c.beginPath(); c.moveTo(W * 0.8, H * 0.7); c.lineTo(W * 0.77, H * 0.5); c.lineTo(W * 0.83, H * 0.5); c.closePath(); c.fill();
+      // a glowing light bulb
+      c.fillStyle = 'rgba(255,230,120,.35)'; c.beginPath(); c.arc(W * 0.38, H * 0.82, W * 0.14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#ffe66a'; c.beginPath(); c.arc(W * 0.38, H * 0.78, W * 0.085, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#b8b8c4'; c.fillRect(W * 0.34, H * 0.86, W * 0.08, H * 0.07);
+    },
+  };
+
+  /** A striped awning that slopes down away from the wall: one stripe per box, like everything else here. */
+  function awning(g, wallX, y, z, width, colors, f) {
+    const group = new T.Group();
+    const n = 11, w = width / n;
+    for (let i = 0; i < n; i++) {
+      const col = colors[i % 2];
+      const top = new T.Mesh(new T.BoxGeometry(1.15, 0.1, w), lambert(col)); top.position.set(f * 0.575, 0, -width / 2 + w * (i + 0.5));
+      const valance = new T.Mesh(new T.BoxGeometry(0.1, 0.22, w), lambert(col)); valance.position.set(f * 1.15, -0.1, -width / 2 + w * (i + 0.5));
+      group.add(top, valance);
+    }
+    group.rotation.z = -0.2 * f;                      // the outer edge dips
+    group.position.set(wallX, y, z);
+    g.add(group);
+  }
+
+  /** A giant pencil standing on its eraser, tip up. */
+  function bigPencil(g, x, y, z, body) {
+    const stack = [[0.64, 0.4, 0xf08aa0], [0.66, 0.28, 0xc9ccd4], [0.64, 1.5, body], [0.64, 0.3, 0xe8c79a], [0.44, 0.3, 0xe8c79a], [0.24, 0.3, 0xe8c79a], [0.1, 0.2, 0x2b2b2b]];
+    let top = y;
+    stack.forEach(([w, h, col]) => { box(g, lambert(col), w, h, w, x, top + h / 2, z); top += h; });
+  }
+
+  /** The big thing on each shop's roof (and anything out front), so you can tell what it sells from across the road. */
+  const SHOP_PROPS = {
+    accessories(zone, s, f, xf) {
+      const g = zone.group, roof = 4.8, cx = xf - f * 0.45;          // at the roof's front edge, so the roof does not hide them from the road
+      bigPencil(g, cx, roof, s.z - 2.8, 0xf2c230);
+      bigPencil(g, cx, roof, s.z + 2.8, 0xe04b4b);
+      // a giant graphing calculator between them, leaning back a little, with a parabola on its screen
+      const calc = new T.Group();
+      calc.add(new T.Mesh(new T.BoxGeometry(0.4, 2.3, 1.7), lambert(0x3a3d45)));
+      const screen = textPlane(1.4, 0.8, (c, cv) => {
+        c.fillStyle = '#9be59b'; c.fillRect(0, 0, cv.width, cv.height);
+        c.strokeStyle = '#2f7a43'; c.lineWidth = 2; c.beginPath(); c.moveTo(cv.width / 2, 4); c.lineTo(cv.width / 2, cv.height - 4); c.moveTo(4, cv.height * 0.7); c.lineTo(cv.width - 4, cv.height * 0.7); c.stroke();
+        c.strokeStyle = '#1d5a2c'; c.lineWidth = 5; c.beginPath(); c.moveTo(cv.width * 0.12, cv.height * 0.12); c.quadraticCurveTo(cv.width * 0.5, cv.height * 1.3, cv.width * 0.88, cv.height * 0.12); c.stroke();
+      }, 64);
+      screen.rotation.y = f * Math.PI / 2; screen.position.set(f * 0.21, 0.65, 0); calc.add(screen);
+      const keyCols = [0xc9ccd4, 0xc9ccd4, 0xc9ccd4, 0xf08a30];
+      for (let r = 0; r < 4; r++) for (let q = 0; q < 4; q++) {
+        const k = new T.Mesh(new T.BoxGeometry(0.08, 0.22, 0.28), lambert(r === 0 ? keyCols[q] : q === 3 ? 0x4aa3ff : 0xe8e8ee));
+        k.position.set(f * 0.22, -0.05 - r * 0.32, -0.54 + q * 0.36); calc.add(k);
+      }
+      calc.rotation.z = 0.18 * f; calc.position.set(cx, roof + 1.15, s.z);
+      g.add(calc);
+    },
+    style(zone, s, f, xf) {
+      const g = zone.group, roof = 4.8, cx = xf - f * 0.4;
+      // a giant T-shirt on a hanger
+      const shirt = new T.Group();
+      const add = (w, h, d, x, y, z, col, rx = 0) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), lambert(col)); m.position.set(x, y, z); m.rotation.x = rx; shirt.add(m); return m; };
+      add(0.32, 1.55, 1.5, 0, 0.78, 0, 0x4aa3ff);
+      add(0.32, 0.6, 0.75, 0, 1.4, -1.0, 0x4aa3ff, 0.5); add(0.32, 0.6, 0.75, 0, 1.4, 1.0, 0x4aa3ff, -0.5);
+      add(0.34, 0.22, 1.5, 0, 0.72, 0, 0xffffff);
+      add(0.34, 0.24, 0.56, 0, 1.56, 0, 0x2a6ab8);
+      add(0.1, 0.42, 0.1, 0, 1.96, 0, 0x6b6b72); add(0.1, 0.1, 0.55, 0, 2.2, 0, 0x6b6b72);
+      shirt.scale.setScalar(1.2); shirt.position.set(cx, roof, s.z); g.add(shirt);
+      // a cap on one side
+      [[1.2, 0.3], [1.0, 0.3], [0.7, 0.25]].reduce((y, [w, h]) => { box(g, lambert(0xe04b4b), w, h, w, cx, y + h / 2, s.z + 2.8); return y + h; }, roof);
+      box(g, lambert(0xb23a3a), 0.85, 0.1, 1.0, cx + f * 0.7, roof + 0.1, s.z + 2.8);
+      // and a sneaker on the other
+      box(g, lambert(0xffffff), 0.6, 0.25, 1.5, cx, roof + 0.125, s.z - 2.8);
+      box(g, lambert(0x4aa3ff), 0.55, 0.55, 0.9, cx, roof + 0.52, s.z - 3.05);
+      box(g, lambert(0xffffff), 0.55, 0.35, 0.55, cx, roof + 0.42, s.z - 2.4);
+      box(g, lambert(0xe04b4b), 0.58, 0.1, 0.3, cx, roof + 0.74, s.z - 2.65);
+      // two mannequins in front, either side of the door
+      [[-1.55, 0xff7fb0], [1.55, 0x4aa3ff]].forEach(([dz, shirtCol]) => {
+        const mx = xf + f * 0.5, mz = s.z + dz;
+        box(g, lambert(0x3a3a42), 0.55, 0.08, 0.55, mx, 0.04, mz);
+        box(g, lambert(0x2b3a67), 0.2, 0.75, 0.16, mx, 0.45, mz - 0.1); box(g, lambert(0x2b3a67), 0.2, 0.75, 0.16, mx, 0.45, mz + 0.1);
+        box(g, lambert(shirtCol), 0.3, 0.7, 0.48, mx, 1.2, mz);
+        box(g, lambert(0xe8c9a0), 0.3, 0.3, 0.3, mx, 1.7, mz);
+        box(g, lambert(0x3a3a42), 0.34, 0.1, 0.34, mx, 1.9, mz);
+        solid(zone, mx, mz, 0.6, 0.6);
+      });
+    },
+    pets(zone, s, f, xf) {
+      const g = zone.group, roof = 4.8, cx = xf - f * 0.4, brown = lambert(0x7b4a26);
+      // a giant paw print
+      const paw = new T.Group();
+      const part = (w, h, d, x, y, z, col) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), col); m.position.set(x, y, z); paw.add(m); };
+      part(0.32, 0.95, 1.5, 0, 0.55, 0, brown); part(0.32, 0.6, 2.0, 0, 0.5, 0, brown); part(0.34, 0.12, 1.1, 0, 0.9, 0, lambert(0x9a6a3a));
+      [[-1.0, 1.35], [-0.38, 1.75], [0.38, 1.75], [1.0, 1.35]].forEach(([dz, y]) => part(0.32, 0.6, 0.5, 0, y, dz, brown));
+      paw.scale.setScalar(1.3); paw.position.set(cx, roof, s.z); g.add(paw);
+      // two bones standing on the roof
+      [-2.8, 2.8].forEach(dz => {
+        const bone = new T.Group();
+        const white = lambert(0xf6f1e2);
+        const b = (w, h, d, x, y, z) => { const m = new T.Mesh(new T.BoxGeometry(w, h, d), white); m.position.set(x, y, z); bone.add(m); };
+        b(0.28, 0.3, 1.7, 0, 0, 0);
+        [-0.85, 0.85].forEach(z => { b(0.28, 0.3, 0.34, 0, 0.2, z); b(0.28, 0.3, 0.34, 0, -0.2, z); });
+        bone.position.set(cx, roof + 0.55, s.z + dz); g.add(bone);
+      });
+      // a doghouse and a bowl out front
+      const hx = xf + f * 0.55, hz = s.z - 2.4;
+      box(g, 'planks', 1.0, 0.95, 1.2, hx, 0.48, hz);
+      [[1.5, 0.2], [1.1, 0.2], [0.7, 0.2]].forEach(([w, h], i) => box(g, lambert(0xc0392b), 1.15, h, w, hx, 1.05 + i * h, hz));
+      box(g, lambert(0x2b2b2b), 0.05, 0.55, 0.5, hx + f * 0.51, 0.3, hz);
+      box(g, lambert(0xc0392b), 0.35, 0.1, 0.35, hx + f * 0.1, 0.05, hz + 1.0);
+      solid(zone, hx, hz, 1.1, 1.4);
+    },
+    hints(zone, s, f, xf) {
+      const g = zone.group, cx = xf - f * 0.6;
+      // a glowing question mark that floats above the roof and slowly turns; a dark outline keeps it readable against the sky
+      const q = buildSymbol('question', 0xffc83a, { emissive: 0.45, outline: 0x1f1a4a, outlineWidth: 0.05 });
+      q.position.set(cx, 7.6, s.z); g.add(q);
+      zone.animated.push((dt, t) => { q.rotation.y += dt * 0.9; q.position.y = 7.6 + Math.sin(t * 1.6 + s.z) * 0.1; });
+      // lanterns beside the door, and gold stars on the wall
+      [-1.45, 1.45].forEach(dz => {
+        box(g, lambert(0x2b2358), 0.12, 0.12, 0.12, xf + f * 0.14, 3.05, s.z + dz);
+        box(g, glow(0xffd36a), 0.22, 0.4, 0.22, xf + f * 0.26, 2.8, s.z + dz);
+      });
+      [[-2.9, 3.7], [-0.9, 3.9], [1.1, 3.75], [2.9, 3.9], [-3.0, 0.8], [3.0, 0.7]].forEach(([dz, y]) => box(g, glow(0xffe69a), 0.05, 0.2, 0.2, xf + f * 0.16, y, s.z + dz));
+    },
+  };
+
   function buildShop(zone, s, def, onUse) {
-    const g = zone.group;
+    const g = zone.group, look = SHOP_LOOKS[s.id], f = s.facing;
+    const xf = s.x + f * 3;                                   // the wall that faces the road
     box(g, 'planks', 6, 4.2, 7, s.x, 2.1, s.z);
-    box(g, def.roof, 6.8, 0.6, 7.8, s.x, 4.5, s.z);
-    const face = s.x + s.facing * 3;
-    box(g, lambert(0x3a2412), 0.12, 3, 1.8, face + s.facing * 0.06, 1.5, s.z);
-    [-2.4, 2.4].forEach(dz => box(g, glow(0xbfe6ff), 0.1, 1.2, 1.2, face + s.facing * 0.05, 2.4, s.z + dz));
-    const sign = makeSign({ w: 4.4, h: 1.0, title: def.sign, fg: '#fff3c4', bg: '#3a2412', border: '#c89a54' });
-    sign.position.set(face + s.facing * 0.08, 3.65, s.z);
-    sign.rotation.y = s.facing * Math.PI / 2;
-    g.add(sign);
+
+    if (!look) {                                              // a shop without a look gets the plain front
+      box(g, def.roof, 6.8, 0.6, 7.8, s.x, 4.5, s.z);
+      box(g, lambert(0x3a2412), 0.12, 3, 1.8, xf + f * 0.06, 1.5, s.z);
+      [-2.4, 2.4].forEach(dz => box(g, glow(0xbfe6ff), 0.1, 1.2, 1.2, xf + f * 0.05, 2.4, s.z + dz));
+      const plain = makeSign({ w: 4.4, h: 1.0, title: def.sign, fg: '#fff3c4', bg: '#3a2412', border: '#c89a54' });
+      plain.position.set(xf + f * 0.08, 3.65, s.z); plain.rotation.y = f * Math.PI / 2; g.add(plain);
+    } else {
+      // painted front, a baseboard, corner posts and a cornice
+      box(g, lambert(look.wall), 0.14, 4.2, 7.02, xf + f * 0.07, 2.1, s.z);
+      box(g, lambert(look.trim), 0.2, 0.35, 7.1, xf + f * 0.1, 0.18, s.z);
+      box(g, lambert(look.trim), 0.22, 0.3, 7.1, xf + f * 0.11, 4.05, s.z);
+      [-1, 1].forEach(sd => box(g, lambert(look.trim), 0.24, 4.2, 0.3, xf + f * 0.12, 2.1, s.z + sd * 3.4));
+
+      // a framed door with a window, a knob, and an OPEN sign
+      box(g, lambert(look.trim), 0.2, 3.25, 2.25, xf + f * 0.1, 1.62, s.z);
+      box(g, lambert(look.door), 0.12, 3.0, 1.8, xf + f * 0.2, 1.5, s.z);
+      box(g, glow(0xbfe6ff), 0.05, 0.9, 0.9, xf + f * 0.27, 2.15, s.z);
+      box(g, lambert(0xe8c35a), 0.1, 0.12, 0.12, xf + f * 0.27, 1.3, s.z + 0.68);
+      const open = makeSign({ w: 0.8, h: 0.3, title: 'OPEN', fg: '#52f08f', bg: '#0c2a18', border: '#52f08f' });
+      open.position.set(xf + f * 0.29, 1.75, s.z - 0.42); open.rotation.y = f * Math.PI / 2; g.add(open);
+
+      // two display windows showing what is for sale
+      [-1, 1].forEach(sd => {
+        const wz = s.z + sd * 2.45;
+        box(g, lambert(look.trim), 0.16, 1.8, 1.9, xf + f * 0.15, 2.0, wz);
+        const art = textPlane(1.6, 1.5, (c, cv) => {
+          SHOP_WINDOWS[s.id](c, cv.width, cv.height);
+          c.fillStyle = 'rgba(255,255,255,.2)'; c.beginPath(); c.moveTo(cv.width * 0.55, 0); c.lineTo(cv.width * 0.8, 0); c.lineTo(cv.width * 0.3, cv.height); c.lineTo(cv.width * 0.05, cv.height); c.closePath(); c.fill();   // a glint on the glass
+        }, 80);
+        art.rotation.y = f * Math.PI / 2; art.position.set(xf + f * 0.24, 2.0, wz); g.add(art);
+        box(g, lambert(look.trim), 0.4, 0.12, 1.95, xf + f * 0.28, 1.06, wz);          // sill
+      });
+
+      awning(g, xf + f * 0.22, 2.9, s.z, 6.6, look.awning, f);
+
+      // the sign, with a line under the name saying what is sold
+      const sign = makeSign({ w: 4.6, h: 1.15, title: def.sign, sub: look.tag, fg: look.sign.fg, bg: look.sign.bg, border: look.sign.border, subColor: look.sign.subColor });
+      sign.position.set(xf + f * 0.2, 3.55, s.z); sign.rotation.y = f * Math.PI / 2; g.add(sign);   // top edge just under the roof
+
+      // the roof, with a bright trim along the front edge, and the big thing on top
+      box(g, lambert(look.roof), 6.8, 0.6, 7.8, s.x, 4.5, s.z);
+      box(g, lambert(look.roofTrim), 0.3, 0.3, 7.9, xf + f * 0.5, 4.55, s.z);    // along the roof's front edge, clear of the sign
+      SHOP_PROPS[s.id](zone, s, f, xf);
+    }
+
     solid(zone, s.x, s.z, 6.2, 7.2);
-    interact(zone, s.x + s.facing * 4.6, s.z, 2.4, `Browse the ${def.title}`, onUse);
+    interact(zone, s.x + f * 4.6, s.z, 2.4, `Browse the ${def.title}`, onUse);
   }
 
   /* ---------- village pieces ---------- */
@@ -728,8 +977,22 @@ const World = (() => {
   const plusCells = () => ({ cells: strokeCells([[1, 6], [11, 6], [6, 6], [6, 1], [6, 11]], 12, 12, 0.7), w: 12, h: 12 });
   const minusCells = () => ({ cells: strokeCells([[1, 6], [11, 6]], 12, 12, 0.7), w: 12, h: 12 });
   const timesCells = () => ({ cells: strokeCells([[1.5, 1.5], [10.5, 10.5], [6, 6], [1.5, 10.5], [10.5, 1.5]], 12, 12, 0.85), w: 12, h: 12 });
+  // the division sign: a bar with a 2 x 2 dot above and below it
+  const divideCells = () => ({
+    cells: [...strokeCells([[1, 6], [11, 6]], 12, 12, 0.7), ...strokeCells([[5.6, 9.6], [6.4, 9.6]], 12, 12, 0.95), ...strokeCells([[5.6, 2.4], [6.4, 2.4]], 12, 12, 0.95)],
+    w: 12, h: 12,
+  });
+
+  // a question mark, drawn pixel by pixel: a curve is too small to come out cleanly from strokes
+  const questionCells = () => {
+    const rows = ['..######..', '.########.', '###....###', '###....###', '.......###', '......###.', '.....###..', '....###...', '....##....', '....##....', '..........', '....##....', '....##....'];   // top row first
+    const cells = [];
+    rows.forEach((line, i) => [...line].forEach((ch, c) => { if (ch === '#') cells.push([c, rows.length - 1 - i]); }));
+    return { cells, w: 10, h: rows.length };
+  };
 
   const SYMBOLS = {
+    question: { shape: questionCells, u: 0.19, mirrorBack: false },
     sqrt:      { shape: radicalCells,   u: 0.1,   mirrorBack: false },
     quadratic: { shape: quadraticCells, u: 0.08,  mirrorBack: false },
     parabola:  { shape: parabolaCells,  u: 0.1,   mirrorBack: false },
@@ -737,6 +1000,7 @@ const World = (() => {
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },
+    divide: { shape: divideCells, u: 0.11, mirrorBack: false },
   };
 
   /** Two layers thick so it never vanishes edge-on. (mirrorBack flips the rear layer, but a flipped
@@ -1061,12 +1325,16 @@ const World = (() => {
     buildTable(zone, 9, -4, 'chalkTop', 'MULTIPLICATION TABLE', '60 seconds. 1 chip each.', '#a8d8f0', () => actions.openArithmetic('mul'),
       { ...chalk, prop: 'times', accent: 0xa8d8f0 });
 
-    // room for more games: the casino's other two table spots, kept clear on purpose
-    zone.tableSlots = [{ x: -5, z: 8, facing: -1 }, { x: 5, z: 8, facing: -1 }];
+    // the fourth operation takes the first of the casino's two south table spots; its sign faces the room
+    buildTable(zone, -5, 8, 'chalkTop', 'DIVISION TABLE', '60 seconds. 1 chip each.', '#cdb8f0', () => actions.openArithmetic('div'),
+      { ...chalk, prop: 'divide', accent: 0xcdb8f0, facing: -1 });
+
+    // room for more games: the casino's last table spot, kept clear on purpose
+    zone.tableSlots = [{ x: 5, z: 8, facing: -1 }];
 
     spawnNPCs(zone, 2);
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, SCHOOL_EXIT, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells } };
+  return { buildHub, buildCasino, buildSchool, SCHOOL_EXIT, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

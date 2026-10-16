@@ -84,7 +84,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; col
 .dialog-panel h2, .craft-panel h2 { font-family: var(--px); font-size: 20px; margin: 0 0 10px; }
 .dlg-body { font-size: 24px; line-height: 1.15; }
 .dlg-body p { margin: 0 0 10px; }
-.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+.dlg-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 14px; }   /* wraps, so many buttons never spill off the panel */
+.dlg-actions .btn { white-space: nowrap; }
+.dlg-break { flex-basis: 100%; height: 0; }
 .wares { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
 .ware { display: flex; align-items: center; gap: 12px; background: var(--slot); border: 4px solid; border-color: #373737 #fff #fff #373737; padding: 6px 10px; color: #111; }
 .ware-icon { width: 28px; height: 28px; background: var(--gold); border: 3px solid #a37a10; flex: none; }

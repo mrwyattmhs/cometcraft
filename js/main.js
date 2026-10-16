@@ -145,6 +145,7 @@
   }
 
   let hudKey = '', mapKey = '';
+  sandbox.onFontsLoaded(() => { mapKey = ''; });
   function updateSandboxHud() {
     const el = $('sandbox-hud');
     const here = started && !UI.isOpen() && inSandbox();

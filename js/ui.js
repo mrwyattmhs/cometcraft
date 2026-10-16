@@ -40,6 +40,7 @@ const UI = (() => {
     root.querySelector('#dlg-title').textContent = title;
     const actions = root.querySelector('.dlg-actions');
     buttons.forEach(b => {
+      if (b.newRow) { const br = document.createElement('div'); br.className = 'dlg-break'; actions.appendChild(br); }   // start a new row of buttons
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'btn' + (b.primary ? ' primary' : '');

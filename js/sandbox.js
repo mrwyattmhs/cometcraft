@@ -77,6 +77,7 @@ const Sandbox = (() => {
     const columns = new Map();            // "i,j" -> the heights (k) of the blocks standing there
     const rects = new Map();              // "i,j" -> the walking collider for that column
     const listeners = [];
+    const fontListeners = [];
 
     /* ----- the blocks ----- */
     const capacity = C.w * C.d * C.h;
@@ -384,7 +385,7 @@ const Sandbox = (() => {
                <p>Solved so far: <b>${Store.get().blueprintsSolved || 0}</b>. Each one earns ${Blueprint.REWARD} chips.</p>`,
         buttons: [
           ...[1, 2, 3, 4].map(n => ({ label: Blueprint.LEVELS[n].name, primary: n === state.level, onClick: () => setLevel(n) })),
-          { label: 'Clear the sandbox', onClick: () => { clear(); state.marks = null; say('The sandbox is clear.'); drawBoard(); } },
+          { label: 'Clear the sandbox', newRow: true, onClick: () => { clear(); state.marks = null; say('The sandbox is clear.'); drawBoard(); } },
           { label: 'Close' },
         ],
       });
@@ -433,12 +434,14 @@ const Sandbox = (() => {
 
     const api = {
       config: C, state, cells: cellList, has, contains, target, act, place, remove, clear,
-      showAim, stepLift, floorAt, ceilingAt, drawMap, newPuzzle, check, hint, setLevel, openMenu, hud, onChange: fn => listeners.push(fn),
+      showAim, stepLift, floorAt, ceilingAt, drawMap, onFontsLoaded: fn => fontListeners.push(fn), newPuzzle, check, hint, setLevel, openMenu, hud, onChange: fn => listeners.push(fn),
       board: { mesh: boardMesh, canvas, redraw: drawBoard },
       meshes: { blocks: blockMesh, ghosts: ghostMesh, aim: aimBox, place: placeBox },
       columns, rects,
     };
     newPuzzle(1);
+    // the board is drawn at startup, before the chalk font has loaded; draw it again once it has
+    if (typeof document !== 'undefined' && document.fonts && document.fonts.load) document.fonts.load('24px "Patrick Hand"').then(() => { drawBoard(); fontListeners.forEach(fn => fn()); }).catch(() => {});
     return api;
   }
 

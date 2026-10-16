@@ -11,7 +11,7 @@ const Store = (() => {
     practiceWins: 0, wagerWins: 0, wagerLosses: 0,
     trinomialWins: 0, trinomialLosses: 0, radicalWins: 0, radicalLosses: 0,
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0,
-    arithBest: { add: 0, sub: 0, mul: 0 },   // most problems solved in one 60-second round, per table
+    arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
     blueprintsSolved: 0,
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
@@ -30,7 +30,7 @@ const Store = (() => {
 
     const best = state.arithBest && typeof state.arithBest === 'object' ? state.arithBest : {};
     const whole = v => Math.max(0, Math.floor(Number(v)) || 0);
-    state.arithBest = { add: whole(best.add), sub: whole(best.sub), mul: whole(best.mul) };
+    state.arithBest = { add: whole(best.add), sub: whole(best.sub), mul: whole(best.mul), div: whole(best.div) };
 
     state.blueprintsSolved = whole(state.blueprintsSolved);
 

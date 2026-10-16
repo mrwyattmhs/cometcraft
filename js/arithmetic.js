@@ -1,7 +1,8 @@
 /* Pure logic for the timed arithmetic practice (no DOM, no THREE, unit tested in Node).
 
    A round lasts 60 seconds. Problems come one after another: two numbers from 1 to 10, added,
-   subtracted (the bigger one first, so no negative answers), or multiplied. Each correct answer
+   subtracted (the bigger one first, so no negative answers), multiplied, or divided (always a times-table
+   fact turned around, so every answer is a whole number from 1 to 10). Each correct answer
    earns 1 chip. A wrong answer earns nothing and you move on to the next problem, so there is
    no guessing your way through one problem.
 
@@ -28,9 +29,15 @@ const Arithmetic = (() => {
       rule: 'Each problem multiplies two numbers from 1 to 10.',
       make: (a, b) => ({ a, b, answer: a * b }),
     },
+    div: {
+      key: 'div', name: 'Division', symbol: '÷', table: 'DIVISION TABLE',
+      rule: 'Each problem divides evenly: it is a times-table fact turned around, like 56 ÷ 7. The answer is always a whole number from 1 to 10, and you never divide by 1.',
+      bLow: 2,   // the divisor starts at 2: dividing by 1 is not practice
+      make: (q, d) => ({ a: q * d, b: d, answer: q }),
+    },
   };
 
-  const pick = rng => LOW + Math.floor(rng() * (HIGH - LOW + 1));
+  const pick = (rng, low = LOW) => low + Math.floor(rng() * (HIGH - low + 1));
 
   /** One problem, never the same numbers twice in a row. */
   function problem(op, rng = Math.random, previous = null) {
@@ -38,7 +45,7 @@ const Arithmetic = (() => {
     if (!spec) throw new Error(`unknown operation: ${op}`);
     let p;
     for (let i = 0; i < 50; i++) {
-      p = { op, symbol: spec.symbol, ...spec.make(pick(rng), pick(rng)) };
+      p = { op, symbol: spec.symbol, ...spec.make(pick(rng), pick(rng, spec.bLow)) };
       if (!previous || p.a !== previous.a || p.b !== previous.b) break;
     }
     return p;

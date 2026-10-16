@@ -24,7 +24,8 @@ const CONTENT = {
       <p>Follow the road straight ahead to the <b>Casino</b>. The shops are on your left and the fountain is on your right. Five tables are inside.</p>
       <p><b>Practice table:</b> break each dice roll into prime factors. A miss costs nothing, and every number you solve earns you <b>20 chips</b>.</p>
       <p><b>The other four</b> (radicals, trinomials, and two graphing tables) are wagers. You bet chips first, then get one shot.</p>
-      <p>Across the road from the shops is the <b>Arithmetic Academy</b>, a classroom with more games on the way.</p>
+      <p>Across the road from the shops is the <b>Arithmetic Academy</b>: timed practice tables for adding, subtracting, multiplying, and dividing.</p>
+      <p>Follow the stone path round the south side of the school to the <b>Sandbox</b>. Build the shape that matches the blueprint board.</p>
       <p>Spend your chips on clothes, pencils, graphing calculators, and pets in the shops. Press <b>C</b> any time to open your closet.</p>`,
   },
 };

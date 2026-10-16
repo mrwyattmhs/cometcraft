@@ -1,4 +1,4 @@
-/* The chalkboard timed practice at the Addition, Subtraction and Multiplication tables.
+/* The chalkboard timed practice at the Addition, Subtraction, Multiplication and Division tables.
    Three pages, white chalk on green:
      rules   how it works, your best score, and a Start button
      play    a 60-second countdown, a problem, your typed answer, and a number pad
@@ -10,7 +10,7 @@ const ArithmeticGame = (() => {
   const $ = id => document.getElementById(id);
   const BUILD = 16; // must match Arithmetic.BUILD
   const MAX_DIGITS = 3;
-  const SAID = { add: 'plus', sub: 'minus', mul: 'times' };   // for screen readers
+  const SAID = { add: 'plus', sub: 'minus', mul: 'times', div: 'divided by' };   // for screen readers
   const TICK_MS = 100;
 
   /** The clock is swappable so tests can run a whole minute instantly. */
