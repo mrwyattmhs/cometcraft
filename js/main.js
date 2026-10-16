@@ -112,6 +112,53 @@
   const promptEl = $('prompt');
   let focused = null;
 
+  /* ---------- the sandbox: you can only build while you are standing in it ---------- */
+  const sandbox = hub.sandbox;
+  const inSandbox = () => zone === hub && sandbox.contains(Player.x, Player.z);
+
+  /** Place or break a block where you are aiming. announce: say why it did nothing, instead of staying quiet. */
+  function sandboxAct(kind, announce) {
+    if (zone !== hub) return;
+    if (!sandbox.contains(Player.x, Player.z)) { if (announce) UI.toast('You can only build inside the sandbox.'); return; }
+    if (Player.third || showcase) { if (announce) UI.toast('Press V for first person, then build.'); return; }
+    const r = sandbox.act(kind, Player);
+    if (!r.ok) { UI.toast(r.reason); return; }
+    // never leave a pet stuck inside a block you just placed
+    const pet = follower.group;
+    if (pet && World.Collide.blocked(hub, pet.position.x, pet.position.z, 0.2)) {
+      const b = behind();
+      follower.teleport(b.x, b.z);
+      if (World.Collide.blocked(hub, b.x, b.z, 0.2)) follower.teleport(Player.x, Player.z);
+    }
+  }
+
+  function sandboxKey(code) {
+    if (code === 'KeyF') sandboxAct('place', true);
+    else if (code === 'KeyX') sandboxAct('break', true);
+    else if (!inSandbox()) return;                      // the rest only mean something in the sandbox
+    else if (code === 'Enter') {
+      const r = sandbox.check();
+      UI.toast(r.solved && !r.again ? `Solved! +${Blueprint.REWARD} chips` : r.empty ? 'Build something first.' : r.again ? 'Already solved. Press N.' : 'Not yet. Look at the marks on the board.');
+    }
+    else if (code === 'KeyH') { if (sandbox.hint()) UI.toast('A hint is on the board.'); }
+    else if (code === 'KeyN') { sandbox.newPuzzle(); UI.toast('New blueprint.'); }
+  }
+
+  let hudKey = '';
+  function updateSandboxHud() {
+    const el = $('sandbox-hud');
+    const here = started && !UI.isOpen() && inSandbox();
+    if (!here) { if (hudKey) { el.classList.add('hidden'); hudKey = ''; } return; }
+    const h = sandbox.hud();
+    const k = h.title + '|' + h.lines.join('|');
+    if (k === hudKey) return;
+    hudKey = k;
+    el.innerHTML = '';
+    const t = document.createElement('b'); t.textContent = h.title; el.appendChild(t);
+    h.lines.forEach(line => { const d = document.createElement('div'); d.textContent = line; el.appendChild(d); });
+    el.classList.remove('hidden');
+  }
+
   /* ---------- input ---------- */
   let started = false;
   let locked = false;
@@ -141,14 +188,25 @@
     if (!locked && started && !UI.isOpen()) showStart('Paused. Click Resume to keep exploring.');
   });
 
-  canvas.addEventListener('mousedown', () => {
+  // left click breaks a block, right click places one (both only count inside the sandbox)
+  const sandboxClick = button => { if (button === 2) sandboxAct('place', false); else if (button === 0) sandboxAct('break', false); };
+  let click = null;
+  canvas.addEventListener('mousedown', e => {
     if (!started || UI.isOpen()) return;
     dragging = true;
+    click = { button: e.button, moved: 0 };
     if (!locked) requestLock();
+    else sandboxClick(e.button);                       // the mouse is captured: act right away
   });
-  window.addEventListener('mouseup', () => { dragging = false; });
+  window.addEventListener('mouseup', () => {
+    // without a captured mouse, a click that did not drag acts on release (a drag is looking around)
+    if (dragging && click && !locked && click.moved < 5) sandboxClick(click.button);
+    dragging = false; click = null;
+  });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('mousemove', e => {
     if (!started || UI.isOpen()) return;
+    if (click) click.moved += Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0);
     if (locked || dragging) Player.look(e.movementX || 0, e.movementY || 0);
   });
 
@@ -170,6 +228,7 @@
     if (e.code === 'KeyE' && !e.repeat && focused) focused.action();
     if (e.code === 'KeyV') Player.third = !Player.third;
     if (e.code === 'KeyC' && !e.repeat) Shop.openCloset();
+    if (!e.repeat && ['KeyF', 'KeyX', 'Enter', 'KeyH', 'KeyN'].includes(e.code)) sandboxKey(e.code);
   });
   window.addEventListener('keyup', e => { Player.keys[e.code] = false; });
   window.addEventListener('blur', () => { Player.keys = {}; });
@@ -211,6 +270,8 @@
     me.rotation.y = showcase ? showcase.face + Math.sin(t * 0.9) * 0.35 : Player.yaw + Math.PI;
     Avatar.animate(me, showcase ? 0 : Player.moveAmt, Player.bobT * 2.2);
     follower.update(dt, t, zone, Player, showcase ? showcase.petGoal : null);
+    sandbox.showAim(Player, started && !UI.isOpen() && zone === hub && !Player.third && !showcase);
+    updateSandboxHud();
 
     const bob = Math.sin(Player.bobT * 9) * 0.035 * Player.moveAmt;
     camera.rotation.set(Player.pitch, Player.yaw, 0);
@@ -247,5 +308,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

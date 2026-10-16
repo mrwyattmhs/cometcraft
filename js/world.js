@@ -506,10 +506,56 @@ const World = (() => {
     [14, 20.5, 27].forEach(bx => addBench(zone, bx, z1 + 2));
   }
 
+  /* ---------- the sandbox behind the school ---------- */
+  /** The sand, its wooden frame, the FRONT and SIDE mats you stand on to look in, and the blueprint board on its
+      posts. The building itself (blocks, aiming, the challenge) is Sandbox.create. */
+  function buildSandboxArea(zone) {
+    const g = zone.group, C = Sandbox.CONFIG, b = C.board;
+    const cx = C.x0 + C.w / 2, cz = C.z0 + C.d / 2;
+
+    flat(g, 'sand', C.w, C.d, cx, 0.03, cz);
+    const t = 0.5, fh = 0.45;
+    box(g, 'log', t, fh, C.d + 2 * t, C.x0 - t / 2, fh / 2, cz);
+    box(g, 'log', t, fh, C.d + 2 * t, C.x0 + C.w + t / 2, fh / 2, cz);
+    box(g, 'log', C.w, fh, t, cx, fh / 2, C.z0 - t / 2);
+    box(g, 'log', C.w, fh, t, cx, fh / 2, C.z0 + C.d + t / 2);
+    [[C.x0 - t / 2, C.z0 - t / 2], [C.x0 + C.w + t / 2, C.z0 - t / 2], [C.x0 - t / 2, C.z0 + C.d + t / 2], [C.x0 + C.w + t / 2, C.z0 + C.d + t / 2]]
+      .forEach(([x, z]) => box(g, 'planks', 0.6, 0.9, 0.6, x, 0.45, z));
+
+    // two mats outside the frame say where to stand to look at the build from the FRONT and from the SIDE
+    const mat = label => textPlane(2.4, 1.4, (c, cv) => {
+      c.fillStyle = '#8a6234'; c.fillRect(0, 0, cv.width, cv.height);
+      c.strokeStyle = '#d9b97e'; c.lineWidth = 6; c.strokeRect(5, 5, cv.width - 10, cv.height - 10);
+      c.fillStyle = '#f4f1e6';
+      c.beginPath(); c.moveTo(cv.width / 2, 14); c.lineTo(cv.width / 2 + 34, 58); c.lineTo(cv.width / 2 + 13, 58); c.lineTo(cv.width / 2 + 13, 74); c.lineTo(cv.width / 2 - 13, 74); c.lineTo(cv.width / 2 - 13, 58); c.lineTo(cv.width / 2 - 34, 58); c.closePath(); c.fill();   // arrow toward the sand
+      c.font = PX_FONT(30); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, cv.width / 2, cv.height - 30);
+    }, 64);
+    const front = mat('FRONT');
+    front.rotation.order = 'YXZ'; front.rotation.set(-Math.PI / 2, -Math.PI / 2, 0);   // reads left to right as you face east
+    front.position.set(C.x0 - 1.9, 0.045, cz);
+    const side = mat('SIDE');
+    side.rotation.x = -Math.PI / 2;                                                     // reads left to right as you face north
+    side.position.set(cx, 0.045, C.z0 + C.d + 1.9);
+    g.add(front, side);
+
+    // the board stands on two posts beyond the sand, facing the plot
+    box(g, 'wood', 0.2, b.h + 0.6, b.w + 0.6, b.x + 0.12, b.y, b.z);
+    [-1, 1].forEach(sd => {
+      const pz = b.z + sd * (b.w / 2 + 0.5), ph = b.y + b.h / 2 + 0.3;
+      box(g, 'log', 0.4, ph, 0.4, b.x + 0.12, ph / 2, pz);
+      solid(zone, b.x + 0.12, pz, 0.6, 0.6);
+    });
+    box(g, 'wood', 0.35, 0.12, b.w, b.x - 0.1, b.y - b.h / 2 - 0.05, b.z);              // chalk tray
+    [-3, 0.5, 2.5].forEach(dz => box(g, lambert(0xf4f1e6), 0.1, 0.06, 0.3, b.x - 0.1, b.y - b.h / 2 + 0.04, b.z + dz));
+
+    zone.sandbox = Sandbox.create(zone);
+    interact(zone, b.x - 1.6, b.z, 2.4, 'Choose a blueprint level', () => zone.sandbox.openMenu());
+  }
+
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
       spawn: { x: 0, z: 20, yaw: 0 },
-      bounds: { minX: -34, maxX: 34, minZ: -33, maxZ: 32 },
+      bounds: { minX: -34, maxX: 52, minZ: -33, maxZ: 32 },
       sky: 0x8fc8f0, fog: [0x8fc8f0, 45, 120],
       wander: { minX: -30, maxX: 30, minZ: -17, maxZ: 28 },
     });
@@ -535,6 +581,7 @@ const World = (() => {
     buildCasinoFront(zone, actions);   // straight ahead at the end of the road
     buildFountain(zone);               // off to the right
     buildSchoolFront(zone, actions);   // across the road from the shops
+    buildSandboxArea(zone);            // behind the school
 
     // notice board on the right-hand sidewalk near the spawn, facing the starting point
     box(g, 'log', 0.3, 2.2, 0.3, 6.2, 1.1, 17);
@@ -548,7 +595,7 @@ const World = (() => {
 
     // trees on either side, then the fence and the clouds
     [[-20, -14], [-25, -3], [-21, 10], [-27, 21], [-18, 27], [-30, -12],
-     [31, 2], [29, 21], [19, 26], [12, 27], [30, 12], [9, 23]]
+     [31, 2], [29, 21], [19, 26], [12, 27], [47, 20], [9, 23]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;

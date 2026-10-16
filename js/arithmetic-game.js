@@ -8,7 +8,7 @@
    right away. The rules of a round live in arithmetic.js; this file is the screen. */
 const ArithmeticGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 15; // must match Arithmetic.BUILD
+  const BUILD = 16; // must match Arithmetic.BUILD
   const MAX_DIGITS = 3;
   const SAID = { add: 'plus', sub: 'minus', mul: 'times' };   // for screen readers
   const TICK_MS = 100;

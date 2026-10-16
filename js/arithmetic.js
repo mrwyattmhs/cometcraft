@@ -7,7 +7,7 @@
 
    Time is passed in by the caller (now, in milliseconds), so a whole round can be tested instantly. */
 const Arithmetic = (() => {
-  const BUILD = 15; // bump together with arithmetic-game.js and the ?v= numbers in index.html
+  const BUILD = 16; // bump together with arithmetic-game.js and the ?v= numbers in index.html
   const DURATION_MS = 60000;
   const REWARD = 1;          // chips for every correct answer
   const LOW = 1, HIGH = 10;  // both numbers come from 1 to 10

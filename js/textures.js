@@ -97,6 +97,17 @@ const Tex = (() => {
       draw: g => px(g, 'rgba(150,138,110,.12)', [[4, 0, 1, 16], [12, 0, 1, 16]]),
     },
     schoolCeiling: { base: [238, 236, 228], v: 2 },
+    // the one building block: warm wood with a darker edge, so stacked blocks read as separate cubes
+    buildBlock: {
+      base: [232, 184, 104], v: 5,
+      draw: g => {
+        px(g, 'rgba(110,70,25,.7)', [[0, 0, 16, 1], [0, 15, 16, 1], [0, 0, 1, 16], [15, 0, 1, 16]]);
+        px(g, 'rgba(255,240,200,.35)', [[1, 1, 14, 1], [1, 1, 1, 14]]);
+        px(g, 'rgba(120,80,30,.25)', [[2, 14, 13, 1], [14, 2, 1, 13]]);
+      },
+    },
+    // sand with a faint line at every block edge, so you can see the grid you are building on
+    sand: { base: [232, 214, 160], v: 7, draw: g => px(g, 'rgba(150,125,70,.5)', [[0, 0, 16, 1], [0, 0, 1, 16]]) },
     chalkTop: {
       base: [40, 88, 62], v: 5,
       draw: g => px(g, 'rgba(255,255,255,.11)', [[2, 3, 6, 1], [9, 9, 5, 1], [4, 12, 7, 1], [11, 2, 3, 1]]),   // faint chalk scribbles
