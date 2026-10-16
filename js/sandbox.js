@@ -16,7 +16,9 @@ const Sandbox = (() => {
     margin: 0.6,                      // the frame around the sand counts as "in the sandbox"
     board: { x: 43, y: 3.2, z: 10, w: 10, h: 4.4 },
   };
-  const LOW = 2;                      // blocks in the bottom two layers stop you walking (you are 1.8 tall)
+  const BODY = 1.8;                   // how tall you are
+  const MAX_LIFT = 4;                 // the highest you can float (feet), enough to look down on the whole plot
+  const EPS = 0.01;
   const PX = 96;                      // chalkboard pixels per block
 
   /* ---------- aiming: which block, and which empty cell next to it, is under the crosshair ---------- */
@@ -72,7 +74,7 @@ const Sandbox = (() => {
     const C = CONFIG;
     const g = zone.group;
     const cells = new Map();              // "i,k,j" -> [i, k, j]
-    const columns = new Map();            // "i,j" -> how many low blocks stand there
+    const columns = new Map();            // "i,j" -> the heights (k) of the blocks standing there
     const rects = new Map();              // "i,j" -> the walking collider for that column
     const listeners = [];
 
@@ -124,8 +126,8 @@ const Sandbox = (() => {
     function drawBoard() {
       const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height;
       c.fillStyle = '#2c5b40'; c.fillRect(0, 0, W, H);
-      c.fillStyle = 'rgba(255,255,255,.05)';
-      [[40, 20, 300, 40], [610, 70, 280, 50], [180, 250, 420, 36]].forEach(([x, y, w, h]) => c.fillRect(x, y, w, h));   // chalk dust
+      c.fillStyle = 'rgba(255,255,255,.035)';                  // soft chalk dust
+      [[170, 60, 200], [700, 150, 240], [430, 300, 190]].forEach(([x, y, r]) => { c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.fill(); });
       const text = (str, x, y, size, color = CHALK, align = 'left') => { c.font = FONT(size); c.fillStyle = color; c.textAlign = align; c.textBaseline = 'middle'; c.fillText(str, x, y); };
       const level = Blueprint.LEVELS[state.level];
 
@@ -182,8 +184,8 @@ const Sandbox = (() => {
         }
       });
 
-      state.message.forEach((line, n) => text(line, W / 2, 358 + n * 32, 25, state.solved ? '#f7e98e' : CHALK, 'center'));
-      text(state.solved ? 'N: a new blueprint' : 'Enter: check     H: hint     N: new blueprint', W / 2, 408, 20, '#bfd3c4', 'center');
+      state.message.forEach((line, n) => text(line, W / 2, 344 + n * 29, 24, state.solved ? '#f7e98e' : CHALK, 'center'));
+      text(state.solved ? 'N: a new blueprint' : 'Enter: check     H: hint     N: new blueprint', W / 2, 406, 20, '#bfd3c4', 'center');
       boardTex.needsUpdate = true;
     }
 
@@ -202,25 +204,71 @@ const Sandbox = (() => {
     const inGrid = (i, k, j) => i >= 0 && j >= 0 && k >= 0 && i < C.w && j < C.d && k < C.h;
     const contains = (x, z) => x >= C.x0 - C.margin && x <= C.x0 + C.w + C.margin && z >= C.z0 - C.margin && z <= C.z0 + C.d + C.margin;
 
-    function setColumn(i, j, delta) {
+    /** A column stops you walking only if one of its blocks is at your body's height (so you can float over it, or
+        walk under a block that is above your head). */
+    function addToColumn(i, j, k) {
       const ck = `${i},${j}`;
-      const n = (columns.get(ck) || 0) + delta;
-      if (n > 0) {
-        columns.set(ck, n);
-        if (!rects.has(ck)) {
-          const r = { minX: C.x0 + i, maxX: C.x0 + i + 1, minZ: C.z0 + j, maxZ: C.z0 + j + 1 };
-          rects.set(ck, r); zone.colliders.push(r);
-        }
-      } else {
+      let set = columns.get(ck);
+      if (!set) {
+        set = new Set(); columns.set(ck, set);
+        const r = { minX: C.x0 + i, maxX: C.x0 + i + 1, minZ: C.z0 + j, maxZ: C.z0 + j + 1, hits: (y0, y1) => { for (const kk of set) if (kk + 1 > y0 + EPS && kk < y1 - EPS) return true; return false; } };
+        rects.set(ck, r); zone.colliders.push(r);
+      }
+      set.add(k);
+    }
+    function removeFromColumn(i, j, k) {
+      const ck = `${i},${j}`, set = columns.get(ck);
+      if (!set) return;
+      set.delete(k);
+      if (!set.size) {
         columns.delete(ck);
         const r = rects.get(ck);
         if (r) { zone.colliders.splice(zone.colliders.indexOf(r), 1); rects.delete(ck); }
       }
     }
 
-    /** You cannot put a block on top of yourself. */
+    /** The cells (as [i, j] columns) your feet-circle touches. */
+    function footprint(x, z, r) {
+      const out = [];
+      for (let i = Math.floor(x - r - C.x0); i <= Math.floor(x + r - C.x0); i++) for (let j = Math.floor(z - r - C.z0); j <= Math.floor(z + r - C.z0); j++) {
+        if (i < 0 || j < 0 || i >= C.w || j >= C.d) continue;
+        const dx = Math.max(C.x0 + i - x, 0, x - (C.x0 + i + 1)), dz = Math.max(C.z0 + j - z, 0, z - (C.z0 + j + 1));
+        if (Math.hypot(dx, dz) < r) out.push([i, j]);
+      }
+      return out;
+    }
+    /** The highest block top at or below your feet where you stand: that is the floor you can stand on. */
+    function floorAt(x, z, r, lift) {
+      let top = 0;
+      footprint(x, z, r).forEach(([i, j]) => { (columns.get(`${i},${j}`) || []).forEach(k => { if (k + 1 <= lift + 0.05) top = Math.max(top, k + 1); }); });
+      return top;
+    }
+    /** The lowest block bottom above your head where you stand (Infinity if the way up is clear). */
+    function ceilingAt(x, z, r, lift) {
+      let low = Infinity;
+      footprint(x, z, r).forEach(([i, j]) => { (columns.get(`${i},${j}`) || []).forEach(k => { if (k >= lift + BODY - 0.05) low = Math.min(low, k); }); });
+      return low;
+    }
+    /** Float: dir +1 rises, -1 sinks, 0 holds. You stop at a ceiling, land on top of blocks, and outside the sandbox you
+        always sink back to the ground. Returns your new height off the ground. */
+    function stepLift(p, dt, dir) {
+      let L = p.lift || 0;
+      const inside = contains(p.x, p.z);
+      if (!inside) dir = -1;
+      if (dir > 0) {
+        const cap = Math.min(MAX_LIFT, ceilingAt(p.x, p.z, p.radius || 0.35, L) - BODY);
+        L = Math.max(L, Math.min(L + 5 * dt, cap));
+      } else if (dir < 0) {
+        const floor = inside ? floorAt(p.x, p.z, p.radius || 0.35, L) : 0;
+        L = Math.max(Math.min(L, floor), L - 6 * dt);
+      }
+      return L;
+    }
+
+    /** You cannot put a block where you are standing or floating. */
     function overlapsPlayer(i, k, j, player) {
-      if (k >= LOW) return false;
+      const lift = player.lift || 0;
+      if (k + 1 <= lift + EPS || k >= lift + BODY - EPS) return false;      // wholly below your feet or above your head
       const x0 = C.x0 + i, z0 = C.z0 + j;
       const dx = Math.max(x0 - player.x, 0, player.x - (x0 + 1)), dz = Math.max(z0 - player.z, 0, player.z - (z0 + 1));
       return Math.hypot(dx, dz) < (player.radius || 0.35) + 0.05;
@@ -232,7 +280,7 @@ const Sandbox = (() => {
       if (cells.has(key(i, k, j))) return { ok: false, reason: 'There is already a block there.' };
       if (player && overlapsPlayer(i, k, j, player)) return { ok: false, reason: 'Step aside first: you are standing there.' };
       cells.set(key(i, k, j), [i, k, j]);
-      if (k < LOW) setColumn(i, j, 1);
+      addToColumn(i, j, k);
       rebuildBlocks(); syncGhosts(); emit();
       return { ok: true };
     }
@@ -240,7 +288,7 @@ const Sandbox = (() => {
     function remove(cell) {
       const [i, k, j] = cell;
       if (!cells.delete(key(i, k, j))) return { ok: false, reason: 'There is no block there.' };
-      if (k < LOW) setColumn(i, j, -1);
+      removeFromColumn(i, j, k);
       rebuildBlocks(); syncGhosts(); emit();
       return { ok: true };
     }
@@ -252,7 +300,7 @@ const Sandbox = (() => {
     }
 
     const has = (i, k, j) => cells.has(key(i, k, j));
-    const target = player => raycast(has, [player.x, player.eye, player.z], lookDir(player.yaw, player.pitch));
+    const target = player => raycast(has, [player.x, player.eye + (player.lift || 0), player.z], lookDir(player.yaw, player.pitch));
 
     /** kind: 'place' or 'break'. Only works while you stand in the sandbox. */
     function act(kind, player) {
@@ -300,7 +348,10 @@ const Sandbox = (() => {
         state.marks = result;
         const bad = ['top', 'front', 'side'].filter(v => !result.views[v].ok);
         const off = bad.map(v => `${v} (${result.views[v].missing.length + result.views[v].extra.length})`).join(', ');
-        say(`Not yet. These views don't match: ${off}. Yellow dashes mark squares you are missing; pink crosses mark extra ones.`);
+        // extra blocks outside the blueprint's size cannot be marked on its grid, so say so
+        const mine = Blueprint.silhouettes(cellList()).dims, want = state.puzzle.dims;
+        const over = [mine.y > want.y && 'tall', mine.z > want.z && 'wide', mine.x > want.x && 'deep'].filter(Boolean);
+        say(`Not yet. Views that don't match: ${off}. ${over.length ? `Your build is too ${over.join(' and too ')} for this blueprint.` : 'Yellow dashes: missing squares. Pink crosses: extra ones.'}`);
       }
       drawBoard(); emit();
       return result;
@@ -339,12 +390,42 @@ const Sandbox = (() => {
       });
     }
 
+    /** A top-down picture of what you have built, laid out exactly like the TOP view on the board: the front (west)
+        at the bottom, east at the top, north on the left. A stacked column shows how high it goes. You are the blue
+        dot, and the little line shows which way you are looking. */
+    const SHADES = ['#f0e0b0', '#e8c880', '#e0a860', '#d88a48', '#c86c3c', '#b85430'];
+    function drawMap(canvas, player) {
+      const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, cell = 22, gx = 22, gy = 36;
+      const gw = C.d * cell, gh = C.w * cell;
+      const font = px => `${px}px "Patrick Hand", "Chalkboard SE", "Comic Sans MS", sans-serif`;
+      const label = (str, x, y, px, color) => { c.font = font(px); c.fillStyle = color; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(str, x, y); };
+      c.fillStyle = '#1d3a2a'; c.fillRect(0, 0, W, H);
+      label('YOUR BUILD FROM ABOVE', W / 2, 11, 17, '#f4f1e6');
+      label('BACK', gx + gw / 2, gy - 9, 13, '#bfd3c4');
+      label('FRONT', gx + gw / 2, gy + gh + 10, 15, '#f7e98e');
+      label('SIDE', gx + gw + 22, gy + gh / 2, 15, '#f7e98e');
+      for (let r = 0; r < C.w; r++) for (let q = 0; q < C.d; q++) {
+        const set = columns.get(`${C.w - 1 - r},${q}`), x = gx + q * cell, y = gy + r * cell;
+        if (set && set.size) {
+          const top = Math.max(...set) + 1;
+          c.fillStyle = SHADES[Math.min(top, SHADES.length) - 1]; c.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+          label(String(top), x + cell / 2, y + cell / 2 + 1, 16, '#3a2412');
+        } else { c.strokeStyle = 'rgba(244,241,230,.25)'; c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, cell - 1, cell - 1); }
+      }
+      const px = Math.max(5, Math.min(W - 5, gx + (player.z - C.z0) * cell)), py = Math.max(gy - 10, Math.min(gy + gh + 4, gy + (C.x0 + C.w - player.x) * cell));
+      const dx = -Math.cos(player.yaw), dy = Math.sin(player.yaw);       // facing, in map directions: north is left, east is up
+      c.strokeStyle = '#7fd0ff'; c.lineWidth = 3; c.beginPath(); c.moveTo(px, py); c.lineTo(px + dx * 15, py + dy * 15); c.stroke();
+      c.fillStyle = '#7fd0ff'; c.beginPath(); c.arc(px, py, 6, 0, Math.PI * 2); c.fill();
+      if ((player.lift || 0) > 0.05) label(`floating ${player.lift.toFixed(1)} up`, W - 60, H - 9, 13, '#7fd0ff');
+    }
+
     /** What the on-screen panel says while you are in the sandbox. */
     const hud = () => ({
       title: 'SANDBOX',
       lines: [
         'Right-click or F: place a block',
         'Left-click or X: break a block',
+        'Space: float up   Shift: float down',
         'Enter: check   H: hint   N: new blueprint',
         `Level ${state.level} (${Blueprint.LEVELS[state.level].name})   Blocks: ${cells.size}   Hints: ${state.hints}${state.solved ? '   SOLVED' : ''}`,
       ],
@@ -352,7 +433,7 @@ const Sandbox = (() => {
 
     const api = {
       config: C, state, cells: cellList, has, contains, target, act, place, remove, clear,
-      showAim, newPuzzle, check, hint, setLevel, openMenu, hud, onChange: fn => listeners.push(fn),
+      showAim, stepLift, floorAt, ceilingAt, drawMap, newPuzzle, check, hint, setLevel, openMenu, hud, onChange: fn => listeners.push(fn),
       board: { mesh: boardMesh, canvas, redraw: drawBoard },
       meshes: { blocks: blockMesh, ghosts: ghostMesh, aim: aimBox, place: placeBox },
       columns, rects,
@@ -361,5 +442,5 @@ const Sandbox = (() => {
     return api;
   }
 
-  return { CONFIG, LOW, raycast, lookDir, create };
+  return { CONFIG, BODY, MAX_LIFT, raycast, lookDir, create };
 })();

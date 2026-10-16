@@ -362,3 +362,4 @@ div.pair-box { cursor: default; }
   padding: 8px 12px; background: rgba(0, 0, 0, .62); border: 3px solid #000; font-size: 21px; line-height: 1.15;
 }
 #sandbox-hud b { display: block; margin-bottom: 2px; font-family: var(--px); font-size: 13px; color: #f7e98e; }
+#sandbox-map { display: block; margin-top: 8px; border: 2px solid #000; image-rendering: auto; }

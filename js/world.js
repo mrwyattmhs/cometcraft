@@ -72,11 +72,16 @@ const World = (() => {
   const interact = (zone, x, z, r, label, action) => zone.interactables.push({ x, z, r, label, action });
 
   const Collide = {
-    blocked(zone, x, z, r) {
+    /** y is how high your feet are (0 on the ground). A collider with a hits(bottom, top) function, like a column of
+        sandbox blocks, only stops you if something in it is at your body's height; everything else is always solid. */
+    blocked(zone, x, z, r, y = 0) {
       const b = zone.bounds;
       if (x < b.minX || x > b.maxX || z < b.minZ || z > b.maxZ) return true;
       for (const c of zone.colliders) {
-        if (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) return true;
+        if (x > c.minX - r && x < c.maxX + r && z > c.minZ - r && z < c.maxZ + r) {
+          if (c.hits && !c.hits(y, y + 1.8)) continue;
+          return true;
+        }
       }
       return false;
     },
@@ -522,21 +527,27 @@ const World = (() => {
     [[C.x0 - t / 2, C.z0 - t / 2], [C.x0 + C.w + t / 2, C.z0 - t / 2], [C.x0 - t / 2, C.z0 + C.d + t / 2], [C.x0 + C.w + t / 2, C.z0 + C.d + t / 2]]
       .forEach(([x, z]) => box(g, 'planks', 0.6, 0.9, 0.6, x, 0.45, z));
 
-    // two mats outside the frame say where to stand to look at the build from the FRONT and from the SIDE
-    const mat = label => textPlane(2.4, 1.4, (c, cv) => {
+    // two mats outside the frame say where to stand to look at the build from the FRONT and from the SIDE.
+    // The arrow sits in the top half and the word in the bottom half, so they never overlap.
+    const MAT_W = 3.0, MAT_H = 2.0;
+    const mat = label => textPlane(MAT_W, MAT_H, (c, cv) => {
+      const mid = cv.width / 2;
       c.fillStyle = '#8a6234'; c.fillRect(0, 0, cv.width, cv.height);
       c.strokeStyle = '#d9b97e'; c.lineWidth = 6; c.strokeRect(5, 5, cv.width - 10, cv.height - 10);
       c.fillStyle = '#f4f1e6';
-      c.beginPath(); c.moveTo(cv.width / 2, 14); c.lineTo(cv.width / 2 + 34, 58); c.lineTo(cv.width / 2 + 13, 58); c.lineTo(cv.width / 2 + 13, 74); c.lineTo(cv.width / 2 - 13, 74); c.lineTo(cv.width / 2 - 13, 58); c.lineTo(cv.width / 2 - 34, 58); c.closePath(); c.fill();   // arrow toward the sand
-      c.font = PX_FONT(30); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, cv.width / 2, cv.height - 30);
+      c.beginPath();                                                   // an arrow pointing toward the sand
+      c.moveTo(mid, 16); c.lineTo(mid + 30, 50); c.lineTo(mid + 11, 50); c.lineTo(mid + 11, 66);
+      c.lineTo(mid - 11, 66); c.lineTo(mid - 11, 50); c.lineTo(mid - 30, 50); c.closePath(); c.fill();
+      c.font = PX_FONT(26); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, mid, cv.height - 32);
     }, 64);
     const front = mat('FRONT');
     front.rotation.order = 'YXZ'; front.rotation.set(-Math.PI / 2, -Math.PI / 2, 0);   // reads left to right as you face east
-    front.position.set(C.x0 - 1.9, 0.045, cz);
+    front.position.set(C.x0 - 0.5 - 0.5 - MAT_H / 2, 0.045, cz);
     const side = mat('SIDE');
     side.rotation.x = -Math.PI / 2;                                                     // reads left to right as you face north
-    side.position.set(cx, 0.045, C.z0 + C.d + 1.9);
+    side.position.set(cx, 0.045, C.z0 + C.d + 0.5 + 0.5 + MAT_H / 2);
     g.add(front, side);
+    zone.sandboxMats = { front, side, w: MAT_W, h: MAT_H };
 
     // the board stands on two posts beyond the sand, facing the plot
     box(g, 'wood', 0.2, b.h + 0.6, b.w + 0.6, b.x + 0.12, b.y, b.z);
@@ -550,6 +561,26 @@ const World = (() => {
 
     zone.sandbox = Sandbox.create(zone);
     interact(zone, b.x - 1.6, b.z, 2.4, 'Choose a blueprint level', () => zone.sandbox.openMenu());
+  }
+
+  /** The paved path around the school: from the road's sidewalk, along the school's south side, then up to the SIDE mat
+      by the sandbox. Lamps light it and a signpost at the start points the way. */
+  function buildSandboxPath(zone) {
+    const g = zone.group, C = Sandbox.CONFIG;
+    const cx = C.x0 + C.w / 2, W = 2.4;
+    const startX = 6.4, z = 22.5, mat = C.z0 + C.d + 0.5 + 0.5 + 2;           // where the path meets the SIDE mat
+    zone.sandboxPath = [
+      flat(g, 'flagstone', cx - startX, W, (startX + cx) / 2, 0.02, z),          // east along the school's south lawn
+      flat(g, 'flagstone', W, z - mat + W / 2, cx, 0.02, (z + W / 2 + mat) / 2),   // then north to the mat
+    ];
+    [[13, z + 1.9], [22, z + 1.9], [31, z + 1.9], [cx + 1.9, 19.5]].forEach(([lx, lz]) => addLamp(zone, lx, lz));
+    // a signpost where the path leaves the sidewalk, facing the road
+    const sx = 8.6, sz = z - 2.1;
+    box(g, 'log', 0.3, 2.6, 0.3, sx, 1.3, sz);
+    const sign = makeSign({ w: 3.4, h: 0.95, title: 'SANDBOX >>', sub: 'follow the path', fg: '#fff3c4', bg: '#3a2412', border: '#c89a54', subColor: '#c89a54' });
+    sign.position.set(sx - 0.17, 2.2, sz); sign.rotation.y = -Math.PI / 2;
+    g.add(sign);
+    solid(zone, sx, sz, 0.5, 0.5);
   }
 
   function buildHub(actions) {
@@ -582,6 +613,7 @@ const World = (() => {
     buildFountain(zone);               // off to the right
     buildSchoolFront(zone, actions);   // across the road from the shops
     buildSandboxArea(zone);            // behind the school
+    buildSandboxPath(zone);            // and a paved way round to it
 
     // notice board on the right-hand sidewalk near the spawn, facing the starting point
     box(g, 'log', 0.3, 2.2, 0.3, 6.2, 1.1, 17);
@@ -595,7 +627,7 @@ const World = (() => {
 
     // trees on either side, then the fence and the clouds
     [[-20, -14], [-25, -3], [-21, 10], [-27, 21], [-18, 27], [-30, -12],
-     [31, 2], [29, 21], [19, 26], [12, 27], [47, 20], [9, 23]]
+     [31, 2], [31, 28], [19, 26], [12, 27], [47, 20], [9.5, 28.5]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;

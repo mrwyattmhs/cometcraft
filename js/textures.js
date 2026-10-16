@@ -58,6 +58,11 @@ const Tex = (() => {
       },
     },
     asphalt: { base: [58, 60, 66], v: 7 },
+    // grey flagstones laid in a brick pattern, for the path around the school
+    flagstone: {
+      base: [164, 160, 152], v: 9,
+      draw: g => px(g, 'rgba(78,74,68,.6)', [[0, 0, 16, 1], [0, 8, 16, 1], [0, 0, 1, 8], [8, 8, 1, 8]]),
+    },
     paving: {
       base: [206, 196, 176], v: 6,
       draw: g => px(g, 'rgba(120,108,90,.35)', [[0, 0, 16, 1], [0, 8, 16, 1], [0, 0, 1, 16], [8, 0, 1, 16]]),

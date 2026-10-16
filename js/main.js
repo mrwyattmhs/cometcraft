@@ -144,19 +144,24 @@
     else if (code === 'KeyN') { sandbox.newPuzzle(); UI.toast('New blueprint.'); }
   }
 
-  let hudKey = '';
+  let hudKey = '', mapKey = '';
   function updateSandboxHud() {
     const el = $('sandbox-hud');
     const here = started && !UI.isOpen() && inSandbox();
-    if (!here) { if (hudKey) { el.classList.add('hidden'); hudKey = ''; } return; }
+    if (!here) { if (hudKey) { el.classList.add('hidden'); hudKey = ''; mapKey = ''; } return; }
     const h = sandbox.hud();
     const k = h.title + '|' + h.lines.join('|');
-    if (k === hudKey) return;
-    hudKey = k;
-    el.innerHTML = '';
-    const t = document.createElement('b'); t.textContent = h.title; el.appendChild(t);
-    h.lines.forEach(line => { const d = document.createElement('div'); d.textContent = line; el.appendChild(d); });
-    el.classList.remove('hidden');
+    if (k !== hudKey) {
+      hudKey = k;
+      const box = $('sandbox-text');
+      box.innerHTML = '';
+      const t = document.createElement('b'); t.textContent = h.title; box.appendChild(t);
+      h.lines.forEach(line => { const d = document.createElement('div'); d.textContent = line; box.appendChild(d); });
+      el.classList.remove('hidden');
+    }
+    // the top-down map: redraw only when something it shows has changed
+    const mk = [sandbox.cells().length, sandbox.cells().reduce((n, c) => n + c[0] * 7 + c[1] * 13 + c[2] * 31, 0), Math.round(Player.x * 5), Math.round(Player.z * 5), Math.round(Player.yaw * 12), Math.round(Player.lift * 5)].join(',');
+    if (mk !== mapKey) { mapKey = mk; sandbox.drawMap($('sandbox-map'), Player); }
   }
 
   /* ---------- input ---------- */
@@ -266,7 +271,7 @@
     me.visible = seen;
     viewPencil.visible = !seen && !hasCalc;
     viewCalc.visible = !seen && hasCalc;
-    me.position.set(Player.x, 0, Player.z);
+    me.position.set(Player.x, Player.lift, Player.z);
     me.rotation.y = showcase ? showcase.face + Math.sin(t * 0.9) * 0.35 : Player.yaw + Math.PI;
     Avatar.animate(me, showcase ? 0 : Player.moveAmt, Player.bobT * 2.2);
     follower.update(dt, t, zone, Player, showcase ? showcase.petGoal : null);
@@ -281,9 +286,9 @@
     } else if (Player.third) {
       const cp = Math.cos(Player.pitch);
       const fx = -Math.sin(Player.yaw) * cp, fy = Math.sin(Player.pitch), fz = -Math.cos(Player.yaw) * cp;
-      camera.position.set(Player.x - fx * 3.6, Math.max(0.5, Player.eye - fy * 3.6), Player.z - fz * 3.6);
+      camera.position.set(Player.x - fx * 3.6, Math.max(0.5, Player.eye + Player.lift - fy * 3.6), Player.z - fz * 3.6);
     } else {
-      camera.position.set(Player.x, Player.eye + bob, Player.z);
+      camera.position.set(Player.x, Player.eye + Player.lift + bob, Player.z);
       viewPencil.position.y = -0.28 + Math.sin(Player.bobT * 9) * 0.012 * Player.moveAmt;
       viewCalc.position.y = -0.32 + Math.sin(Player.bobT * 9 + 1) * 0.012 * Player.moveAmt;
     }
