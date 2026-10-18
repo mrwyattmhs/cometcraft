@@ -365,3 +365,25 @@ div.pair-box { cursor: default; }
 }
 #sandbox-hud b { display: block; margin-bottom: 2px; font-family: var(--px); font-size: 13px; color: #f7e98e; }
 #sandbox-map { display: block; margin-top: 8px; border: 2px solid #000; image-rendering: auto; }
+
+/* ---------- the click-the-state map ---------- */
+/* The map frame is sized from the window's HEIGHT as well as its width, so the whole board (and the feedback line under the map) fits on
+   screen, and it hugs the map so a zoomed-in map is never clipped inside a wider box. Its proportions never change, so a click lands
+   exactly where it looks. */
+.map-board { width: min(1100px, 100%); padding: 8px 22px 12px; border-width: 12px; }
+.map-board h2 { font-size: 36px; }
+.map-ask { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 24px; flex-wrap: wrap; margin-bottom: 10px; }
+.map-prompt { font-size: clamp(30px, 4.6vw, 46px); line-height: 1.1; }
+.map-prompt b { font-weight: 400; color: #f7e98e; text-decoration: underline wavy rgba(247, 233, 142, .55); text-underline-offset: 6px; }
+.map-stats { font-size: 22px; opacity: .92; }
+.map-stage { position: relative; box-sizing: content-box; width: min(100%, calc((100vh - 270px) * var(--map-ratio, 1.69))); min-width: min(100%, 320px); margin: 0 auto; border: 6px solid #6b4a26; border-radius: 4px; background: #cfe8f5; line-height: 0; overflow: hidden; }
+#usmap-canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-action: none; }
+#usmap-canvas.dragging { cursor: grabbing; }
+.map-zoom { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; line-height: 1.2; }
+.map-zoom .chalk-btn { background: rgba(44, 91, 64, .92); }
+.map-zoom .chalk-btn:hover { background: #3a7452; }
+.map-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 42px; margin-top: 8px; }
+.map-board .chalk-feedback { font-size: 28px; min-height: 0; }
+.map-board .chalk-feedback.good { color: #b9f0b0; }
+.map-board .chalk-feedback.bad { color: #f6b0c8; }
+.map-board .chalk-feedback.tip { font-size: 21px; opacity: .72; }

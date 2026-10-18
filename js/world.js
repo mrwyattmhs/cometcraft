@@ -1171,6 +1171,55 @@ const World = (() => {
     solid(zone, x, z + 0.4, 1.0, 1.7);
   }
 
+  /* ---------- the wall map and the flag, on the back wall left of the exit ---------- */
+  /** A pull-down classroom map of the United States (press E to play "find the state") and the flag beside it.
+      The flag is drawn to the official proportions and hung the way the US Flag Code says for a wall (4 U.S.C. 7(i)):
+      the blue union uppermost and to the observer's left. The picture is turned to face the room without mirroring it. */
+  function buildMapAndFlag(zone, actions) {
+    const g = zone.group, wallZ = 11.96;
+
+    // the map: a paper map between two wooden rods, with a pull cord
+    const mw = 6.2, mh = mw * USMap.HEIGHT / USMap.WIDTH, mx = -9.5, my = 3.55;     // clear of the wood paneling (1.3 high) and the ceiling
+    const map = textPlane(mw, mh + 0.5, (c, cv) => {
+      c.fillStyle = '#d9ecf5'; c.fillRect(0, 0, cv.width, cv.height);
+      c.fillStyle = '#7a2e2e'; c.fillRect(0, 0, cv.width, 58);                                          // the title band
+      c.fillStyle = '#fff3d8'; c.font = PX_FONT(30); c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillText('UNITED STATES', cv.width / 2, 31);
+      const pad = 12, k = Math.min((cv.width - 2 * pad) / USMap.WIDTH, (cv.height - 58 - 2 * pad) / USMap.HEIGHT);
+      USMap.draw(c, { scale: k, dx: (cv.width - USMap.WIDTH * k) / 2, dy: 58 + (cv.height - 58 - USMap.HEIGHT * k) / 2, lineWidth: 1.2 });
+      c.strokeStyle = '#5a4a3a'; c.lineWidth = 6; c.strokeRect(3, 3, cv.width - 6, cv.height - 6);
+    }, 160);
+    map.position.set(mx, my, wallZ); map.rotation.y = Math.PI;                                         // faces into the room
+    g.add(map);
+    const top = my + (mh + 0.5) / 2, bottom = my - (mh + 0.5) / 2;
+    box(g, 'wood', mw + 0.5, 0.16, 0.16, mx, top + 0.08, wallZ - 0.08);
+    box(g, 'wood', mw + 0.3, 0.12, 0.12, mx, bottom - 0.06, wallZ - 0.06);
+    [-1, 1].forEach(sd => box(g, lambert(0xe8c35a), 0.22, 0.22, 0.22, mx + sd * (mw / 2 + 0.28), top + 0.08, wallZ - 0.08));      // rod ends
+    box(g, lambert(0xf2eee4), 0.03, 0.8, 0.03, mx + 1.2, bottom - 0.5, wallZ - 0.06);                                         // the pull cord
+    box(g, lambert(0xe8c35a), 0.12, 0.12, 0.12, mx + 1.2, bottom - 0.95, wallZ - 0.06);
+    interact(zone, mx, 9.9, 2.6, 'Look at the map', actions.openMap);
+
+    // the flag: 1.9 as long as it is tall, flat against the wall, hanging from a rod
+    const fw = 3.8, fh = 2.0, fx = -3.7, fy = 3.4;
+    const flag = textPlane(fw, fh, (c, cv) => Flag.draw(c, cv.width, cv.height), 160);
+    flag.position.set(fx, fy, wallZ); flag.rotation.y = Math.PI;      // faces the room, not mirrored: its upper left is the observer's upper left
+    g.add(flag);
+    box(g, 'wood', fw + 0.3, 0.1, 0.1, fx, fy + fh / 2 + 0.07, wallZ - 0.06);
+    [-1, 1].forEach(sd => {
+      box(g, lambert(0xe8c35a), 0.16, 0.16, 0.16, fx + sd * (fw / 2 + 0.17), fy + fh / 2 + 0.07, wallZ - 0.06);
+      box(g, lambert(0xb8892f), 0.06, 0.06, 0.1, fx + sd * (fw / 2 - 0.25), fy + fh / 2 + 0.07, wallZ - 0.02);                  // brackets to the wall
+    });
+    zone.flag = { mesh: flag, x: fx, y: fy, z: wallZ, w: fw, h: fh };
+    zone.wallMap = { mesh: map, x: mx, y: my, z: wallZ, w: mw, h: mh + 0.5 };
+    interact(zone, fx, 10.4, 2.2, 'Read about the flag', () => UI.dialog({
+      title: 'The flag of the United States',
+      html: `<p>It has <b>13 stripes</b>, 7 red and 6 white, for the 13 original colonies, and <b>50 stars</b> for the 50 states, in 9 rows that alternate 6 and 5.</p>
+             <p>The Flag Code (4 U.S.C. 7) says that on a wall, the blue field (the <b>union</b>) goes <b>uppermost and to the observer's left</b>. Look at this one: the stars are at the top left. A flag hung sideways keeps the blue field in the upper left, too.</p>
+             <p>It should hang flat and free, never touching anything below it, and never with the blue field down except to signal real danger.</p>`,
+      buttons: [{ label: 'Close' }],
+    }));
+  }
+
   function buildSchool(actions) {
     const zone = createZone('Arithmetic Academy', {
       spawn: { x: 0, z: 3, yaw: 0 },
@@ -1314,6 +1363,7 @@ const World = (() => {
     exit.rotation.y = Math.PI;
     g.add(exit);
     interact(zone, 0, 10.6, 2.0, 'Leave the Academy', actions.leaveSchool);
+    buildMapAndFlag(zone, actions);                                                      // the map and the flag, beside the exit
 
     // three timed-practice tables on the north row, each with its chalk-colored sign floating above it
     // bright room: a dark chalkboard-green outline and a toned-down fill keep the floating signs from washing out
@@ -1325,12 +1375,13 @@ const World = (() => {
     buildTable(zone, 9, -4, 'chalkTop', 'MULTIPLICATION TABLE', '60 seconds. 1 chip each.', '#a8d8f0', () => actions.openArithmetic('mul'),
       { ...chalk, prop: 'times', accent: 0xa8d8f0 });
 
-    // the fourth operation takes the first of the casino's two south table spots; its sign faces the room
-    buildTable(zone, -5, 8, 'chalkTop', 'DIVISION TABLE', '60 seconds. 1 chip each.', '#cdb8f0', () => actions.openArithmetic('div'),
+    // the fourth operation takes the right-hand south table spot; its sign faces the room. (The left spot is kept clear on
+    // purpose: a table there would hang its sign in front of the wall map and the flag.)
+    buildTable(zone, 5, 8, 'chalkTop', 'DIVISION TABLE', '60 seconds. 1 chip each.', '#cdb8f0', () => actions.openArithmetic('div'),
       { ...chalk, prop: 'divide', accent: 0xcdb8f0, facing: -1 });
 
     // room for more games: the casino's last table spot, kept clear on purpose
-    zone.tableSlots = [{ x: 5, z: 8, facing: -1 }];
+    zone.tableSlots = [{ x: -5, z: 8, facing: -1 }];
 
     spawnNPCs(zone, 2);
     return zone;

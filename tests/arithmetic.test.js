@@ -182,6 +182,19 @@ assert.strictEqual(S.get().chips, 2);
 assert.deepStrictEqual({ ...S.get().arithBest }, { add: 0, sub: 0, mul: 0, div: 0 }); assert.strictEqual(S.get().chips, 321);
 ({ S } = freshStore({ arithBest: { add: 14, sub: 'lots', mul: -3, extra: 1 } }));
 assert.deepStrictEqual({ ...S.get().arithBest }, { add: 14, sub: 0, mul: 0, div: 0 });
+// map progress: a save from before the map existed gets an empty list and a zero streak, and a damaged one is cleaned up
+({ S } = freshStore({ chips: 55, arithBest: { add: 3, sub: 2, mul: 1, div: 4 } }));
+assert.deepStrictEqual([...S.get().mapFound], []); assert.strictEqual(S.get().mapBestStreak, 0); assert.strictEqual(S.get().chips, 55);
+({ S } = freshStore({ mapFound: ['OH', 'OH', 'tx', 'Texas', 7, null, 'CA', 'ZZ9', 'NY'], mapBestStreak: -3 }));
+assert.deepStrictEqual([...S.get().mapFound], ['OH', 'CA', 'NY'], 'duplicates and junk are dropped, real codes kept in order'); assert.strictEqual(S.get().mapBestStreak, 0);
+({ S } = freshStore({ mapFound: 'not a list', mapBestStreak: 'lots' })); assert.deepStrictEqual([...S.get().mapFound], []); assert.strictEqual(S.get().mapBestStreak, 0);
+({ S } = freshStore({ mapFound: Array.from({ length: 80 }, (_, i) => String.fromCharCode(65 + (i % 26)) + String.fromCharCode(65 + Math.floor(i / 26))), mapBestStreak: 7.9 }));
+assert.ok(S.get().mapFound.length <= 51, 'never more than 51 entries'); assert.strictEqual(S.get().mapBestStreak, 7, 'a streak is a whole number');
+({ S } = freshStore({}));
+assert.strictEqual(S.markMapFound('OH'), true); assert.strictEqual(S.markMapFound('OH'), false); assert.strictEqual(S.markMapFound('Ohio'), false); assert.strictEqual(S.markMapFound(null), false);
+assert.strictEqual(S.recordMapStreak(4), true); assert.strictEqual(S.recordMapStreak(4), false); assert.strictEqual(S.recordMapStreak(1), false); assert.strictEqual(S.recordMapStreak('9'), false);
+assert.deepStrictEqual([[...S.get().mapFound], S.get().mapBestStreak], [['OH'], 4]);
+S.reset(); assert.deepStrictEqual([[...S.get().mapFound], S.get().mapBestStreak], [[], 0], 'a reset forgets the map progress');
 // a save from before division existed keeps its scores and starts division at 0
 ({ S } = freshStore({ chips: 77, arithBest: { add: 31, sub: 22, mul: 18 } }));
 assert.deepStrictEqual({ ...S.get().arithBest }, { add: 31, sub: 22, mul: 18, div: 0 }, 'an old save gains a division score of 0 and loses nothing'); assert.strictEqual(S.get().chips, 77);

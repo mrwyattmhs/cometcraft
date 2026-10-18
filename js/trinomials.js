@@ -10,7 +10,7 @@
    Terms are {k, e}: coefficient k, power of x e (0, 1 or 2).
    Polynomials are coefficient arrays [c0, c1, c2, c3]. */
 const Trinomials = (() => {
-  const BUILD = 16; // bump together with trinomial-game.js and the ?v= numbers in index.html
+  const BUILD = 17; // bump together with trinomial-game.js and the ?v= numbers in index.html
   const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
   const term = (k, e) => ({ k, e });
 

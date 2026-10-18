@@ -13,6 +13,8 @@ const Store = (() => {
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0,
     arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
     blueprintsSolved: 0,
+    mapFound: [],            // two-letter codes of the states you have found on the map (first try)
+    mapBestStreak: 0,        // most states in a row on the first try
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
   });
@@ -33,6 +35,8 @@ const Store = (() => {
     state.arithBest = { add: whole(best.add), sub: whole(best.sub), mul: whole(best.mul), div: whole(best.div) };
 
     state.blueprintsSolved = whole(state.blueprintsSolved);
+    state.mapBestStreak = whole(state.mapBestStreak);
+    state.mapFound = Array.isArray(state.mapFound) ? [...new Set(state.mapFound.filter(c => typeof c === 'string' && /^[A-Z]{2}$/.test(c)))].slice(0, 51) : [];
 
     const raw = state.equipped && typeof state.equipped === 'object' ? { ...state.equipped } : {};
     if (!raw.accessory) {
@@ -110,10 +114,22 @@ const Store = (() => {
     return true;
   }
 
+  /** A state found on the first try. Returns true the first time. */
+  function markMapFound(code) {
+    if (typeof code !== 'string' || !/^[A-Z]{2}$/.test(code) || state.mapFound.includes(code)) return false;
+    set({ mapFound: [...state.mapFound, code] });
+    return true;
+  }
+  /** Remember a streak if it is the best so far. */
+  function recordMapStreak(n) {
+    if (!Number.isInteger(n) || n <= state.mapBestStreak) return false;
+    set({ mapBestStreak: n });
+    return true;
+  }
   return {
     MIN_CHIPS,
     get: () => state,
-    set, addChips, earn, recordBest, spend, owns, own, equip,
+    set, addChips, earn, recordBest, markMapFound, recordMapStreak, spend, owns, own, equip,
     onChange: fn => { listeners.push(fn); fn(state); },
     reset: () => set({ ...fresh() }),
   };

@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=17">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -27,7 +27,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 16</p>
+      <p class="fine build">Build 17</p>
     </div>
   </div>
 
@@ -325,6 +325,34 @@
     </div>
   </div>
 
+  <div id="usmap" class="overlay hidden">
+    <div class="chalk-board map-board" role="dialog" aria-modal="true" aria-labelledby="usmap-title">
+      <header class="chalk-head">
+        <h2 id="usmap-title">Find the state</h2>
+        <div class="chalk-meta">
+          <span id="usmap-wallet" class="chalk-chip">0 chips</span>
+          <button id="usmap-close" class="chalk-btn small" type="button">Leave map</button>
+        </div>
+      </header>
+      <div class="map-ask">
+        <div id="usmap-prompt" class="map-prompt" aria-live="polite">Click on...</div>
+        <div id="usmap-stats" class="map-stats"></div>
+      </div>
+      <div class="map-stage">
+        <canvas id="usmap-canvas" aria-label="Map of the United States. Click the state you are asked for."></canvas>
+        <div class="map-zoom" role="group" aria-label="Zoom the map">
+          <button id="usmap-zoom-in" class="chalk-btn small" type="button" aria-label="Zoom in">+</button>
+          <button id="usmap-zoom-out" class="chalk-btn small" type="button" aria-label="Zoom out">&minus;</button>
+          <button id="usmap-zoom-reset" class="chalk-btn small" type="button">Whole map</button>
+        </div>
+      </div>
+      <div class="map-foot">
+        <div id="usmap-feedback" class="chalk-feedback" role="status" aria-live="polite"></div>
+        <button id="usmap-next" class="chalk-btn small hidden" type="button">Next state</button>
+      </div>
+    </div>
+  </div>
+
   <div id="arith" class="overlay hidden" data-stage="rules">
     <div class="chalk-board" role="dialog" aria-modal="true" aria-labelledby="arith-title">
       <header class="chalk-head">
@@ -380,29 +408,33 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/factoring.js?v=16"></script>
-  <script src="js/catalog.js?v=16"></script>
-  <script src="js/store.js?v=16"></script>
-  <script src="js/content.js?v=16"></script>
-  <script src="js/textures.js?v=16"></script>
-  <script src="js/avatar.js?v=16"></script>
-  <script src="js/pets.js?v=16"></script>
-  <script src="js/blueprint.js?v=16"></script>
-  <script src="js/sandbox.js?v=16"></script>
-  <script src="js/world.js?v=16"></script>
-  <script src="js/showcase.js?v=16"></script>
-  <script src="js/player.js?v=16"></script>
-  <script src="js/ui.js?v=16"></script>
-  <script src="js/shop.js?v=16"></script>
-  <script src="js/crafting.js?v=16"></script>
-  <script src="js/trinomials.js?v=16"></script>
-  <script src="js/trinomial-game.js?v=16"></script>
-  <script src="js/radicals.js?v=16"></script>
-  <script src="js/radical-game.js?v=16"></script>
-  <script src="js/parabolas.js?v=16"></script>
-  <script src="js/parabola-game.js?v=16"></script>
-  <script src="js/arithmetic.js?v=16"></script>
-  <script src="js/arithmetic-game.js?v=16"></script>
-  <script src="js/main.js?v=16"></script>
+  <script src="js/factoring.js?v=17"></script>
+  <script src="js/catalog.js?v=17"></script>
+  <script src="js/store.js?v=17"></script>
+  <script src="js/content.js?v=17"></script>
+  <script src="js/textures.js?v=17"></script>
+  <script src="js/avatar.js?v=17"></script>
+  <script src="js/pets.js?v=17"></script>
+  <script src="js/usmap-data.js?v=17"></script>
+  <script src="js/usmap.js?v=17"></script>
+  <script src="js/flag.js?v=17"></script>
+  <script src="js/blueprint.js?v=17"></script>
+  <script src="js/sandbox.js?v=17"></script>
+  <script src="js/world.js?v=17"></script>
+  <script src="js/showcase.js?v=17"></script>
+  <script src="js/player.js?v=17"></script>
+  <script src="js/ui.js?v=17"></script>
+  <script src="js/shop.js?v=17"></script>
+  <script src="js/crafting.js?v=17"></script>
+  <script src="js/trinomials.js?v=17"></script>
+  <script src="js/trinomial-game.js?v=17"></script>
+  <script src="js/radicals.js?v=17"></script>
+  <script src="js/radical-game.js?v=17"></script>
+  <script src="js/parabolas.js?v=17"></script>
+  <script src="js/parabola-game.js?v=17"></script>
+  <script src="js/arithmetic.js?v=17"></script>
+  <script src="js/arithmetic-game.js?v=17"></script>
+  <script src="js/map-game.js?v=17"></script>
+  <script src="js/main.js?v=17"></script>
 </body>
 </html>

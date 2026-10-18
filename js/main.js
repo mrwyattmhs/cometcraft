@@ -41,6 +41,7 @@
     petRemy: () => UI.toast('Remy purrs.'),
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
     openArithmetic: op => ArithmeticGame.open(op),
+    openMap: () => MapGame.open(),
     openTable: m => {
       if (m === 'trinomial') TrinomialGame.open();
       else if (m === 'radical') RadicalGame.open();
@@ -225,6 +226,7 @@
       else if (VertexGame.isOpen()) VertexGame.close();
       else if (Shop.isOpen()) Shop.close();
       else if (ArithmeticGame.isOpen()) ArithmeticGame.close();
+      else if (MapGame.isOpen()) MapGame.close();
       else if (!$('dialog').classList.contains('hidden')) UI.closeDialog();
       return;
     }
