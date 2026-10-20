@@ -17,7 +17,7 @@
    Together these mean exactly one shape matches the blueprint, so a build that matches all three views IS the
    answer, however the student reached it. */
 const Blueprint = (() => {
-  const BUILD = 17; // bump together with sandbox.js and the ?v= numbers in index.html
+  const BUILD = 18; // bump together with sandbox.js and the ?v= numbers in index.html
   const REWARD = 30; // chips for solving a blueprint
 
   /** dims: the biggest box a shape can use (x front-to-back, z left-to-right, y tall).

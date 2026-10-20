@@ -15,6 +15,7 @@ const Store = (() => {
     blueprintsSolved: 0,
     mapFound: [],            // two-letter codes of the states you have found on the map (first try)
     mapBestStreak: 0,        // most states in a row on the first try
+    dorm: [],                // the furniture in your dorm room: { type, x, z, rot } (Dorm.sanitize makes sure it fits)
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
   });
@@ -36,6 +37,7 @@ const Store = (() => {
 
     state.blueprintsSolved = whole(state.blueprintsSolved);
     state.mapBestStreak = whole(state.mapBestStreak);
+    state.dorm = Array.isArray(state.dorm) ? state.dorm.filter(o => o && typeof o.type === 'string' && Number.isInteger(o.x) && Number.isInteger(o.z) && Number.isInteger(o.rot)).slice(0, 4).map(o => ({ type: o.type, x: o.x, z: o.z, rot: o.rot })) : [];
     state.mapFound = Array.isArray(state.mapFound) ? [...new Set(state.mapFound.filter(c => typeof c === 'string' && /^[A-Z]{2}$/.test(c)))].slice(0, 51) : [];
 
     const raw = state.equipped && typeof state.equipped === 'object' ? { ...state.equipped } : {};

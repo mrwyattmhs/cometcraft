@@ -20,7 +20,7 @@ python3 -m http.server 8000
 
 **Put the files at the top of the repo.** If you unzip the project you get a folder called `prime-time/`. The files inside it (`index.html`, `css/`, `js/`) must sit at the root of the repo, not inside a `prime-time/` folder: GitHub Pages keeps serving whatever `index.html` is at the root, so a copy one folder down changes nothing. Delete the old files first, so a removed file does not linger.
 
-**If the page looks like an old version after you push:** GitHub Pages caches files for a few minutes, and a browser can mix old and new files. Every file link in `index.html` ends in `?v=17`, so bump that number everywhere in `index.html` when you push a change, and bump the `BUILD` constant in each of these files to match: `js/arithmetic.js`, `js/arithmetic-game.js`, `js/blueprint.js`, `js/usmap.js`, `js/map-game.js`, `js/trinomials.js`, `js/trinomial-game.js`, `js/radicals.js`, `js/radical-game.js`, `js/parabolas.js`, and `js/parabola-game.js` (where it is called `BUILD_GRAPH_TABLES`). The start screen shows the build number under the Play button, and the games tell you to reload if they detect mismatched files.
+**If the page looks like an old version after you push:** GitHub Pages caches files for a few minutes, and a browser can mix old and new files. Every file link in `index.html` ends in `?v=18`, so bump that number everywhere in `index.html` when you push a change, and bump the `BUILD` constant in each of these files to match: `js/arithmetic.js`, `js/arithmetic-game.js`, `js/blueprint.js`, `js/usmap.js`, `js/map-game.js`, `js/dorm.js`, `js/dorm-planner.js`, `js/trinomials.js`, `js/trinomial-game.js`, `js/radicals.js`, `js/radical-game.js`, `js/parabolas.js`, and `js/parabola-game.js` (where it is called `BUILD_GRAPH_TABLES`). The start screen shows the build number under the Play button, and the games tell you to reload if they detect mismatched files.
 
 ## Controls
 
@@ -36,11 +36,13 @@ python3 -m http.server 8000
 | Left-click or X | Break a block (sandbox only) |
 | Space / Shift | Float up / down (sandbox only) |
 | Enter / H / N | Check, hint, and new blueprint (sandbox only) |
+| R | Turn a piece of furniture (in the room planner) |
 | Esc | Release the mouse, close a window |
 
 ## The game
 
-- **Village hub:** you start on a road that runs straight to the casino. **The four shops are all on your left** (west side), facing the road, with a crosswalk and street lamps along it. **The casino is straight ahead**, a mini grand hotel: a stepped crescent of sandstone with a window on every other block, a tall center tower and lower wings on each side, gold trim, and a columned porte-cochere over the entrance. **A big lake with dancing fountains is on your right**, in front of the right wing: 23 jets ripple in a wave, with a tall one rising in the middle, and there are benches along its edge. The lake is solid, so it is for looking at, not walking in. **Across the road from the shops, on the east side, is the Arithmetic Academy**: a red-brick school set back behind a front lawn, with two stories of windows, a flat roof, and a projecting entrance with a stepped gable, columns, steps, and a name sign. A little hedged walkway runs from the sidewalk to the front door (in line with the crosswalk), flowers dot the lawn, and a flagpole flies a rippling flag. The notice board stands by the road near the start. Five students wander the village, and so does **Remy**, a light brown and white calico cat with a floating name tag (walk up and press E to pet her; she is not for sale).
+- **Village hub:** you start on a road that runs straight to the casino. You start level with **Wilson Hall, the dorm, directly on your right** (east side). **Directly across the road from it is a little park** (west side): a huge old tree with a very thick trunk stands in the middle of a planting bed, a square paved walkway goes all the way round it, benches sit just outside the walkway facing the tree, a walk leads in from the sidewalk, two lamps stand at the far corners, and trimmed shrubs sit round the tree. On the south side (to the left as you face the park from the road) a short walk leads to a small paved plaza with a **fountain**, a gold-rimmed stone basin with drifting water, a tall center jet and four arching jets, and a bench on each side facing it (`buildPark` and `addMiniFountain` in `js/world.js`). **The four shops are on your left** (west side), set well back from the road behind a wide paved plaza and facing it, with a crosswalk and street lamps along the road. **The casino is straight ahead**, a mini grand hotel: a stepped crescent of sandstone with a window on every other block, a tall center tower and lower wings on each side, gold trim, and a columned porte-cochere over the entrance. **A big lake with dancing fountains is on your right**, in front of the right wing: 23 jets ripple in a wave, with a tall one rising in the middle, and there are benches along its edge. The lake is solid, so it is for looking at, not walking in. **Across the road from the shops, on the east side, is the Arithmetic Academy**: a red-brick school set back behind a front lawn, with two stories of windows, a flat roof, and a projecting entrance with a stepped gable, columns, steps, and a name sign. A little hedged walkway runs from the sidewalk to the front door (in line with the crosswalk), flowers dot the lawn, and a flagpole flies a rippling flag. The notice board stands by the road near the start. Five students wander the village, and so does **Remy**, a light brown and white calico cat with a floating name tag (walk up and press E to pet her; she is not for sale).
+- **Wilson Hall (the dorm):** a Georgian building after the documented look of Wilson Hall at Miami University in Oxford, Ohio (once called The Pines, built 1926, demolished 2019): blue limestone walls, a red tile roof, a white columned portico with a pediment and nameplate, shuttered windows on three floors, dormers and chimneys. Inside is one hallway with eight numbered doors and a staircase, **all locked except your room, the first door on the right**. Your room is a small grid. Press **E** at "Arrange your room" for the **room planner**, a top-down blueprint of the room: pick a **bed or a bunk bed**, a **TV stand with a TV**, a **desk with a computer**, and a **small dresser** (one of each), see a green or red preview follow your cursor, and click to place. Pieces turn to face the room by themselves (R turns one), clicking a placed piece picks it up to move it, and right-click takes it away. The two squares just inside the door always stay clear so you can walk in. Everything saves in this browser. A **trophy shelf** on the wall is empty for now, waiting for quest rewards. The rules are in `js/dorm.js` (tested by `tests/dorm.test.js`), the 3D furniture in `js/dormroom.js`, and the screen in `js/dorm-planner.js`.
 - **Shops:** spend chips on how your student looks. Basic items cost 400 chips, graphing calculators 600, and the Kelly Green M tee 1000. Each storefront shows what it sells: the Accessories shop has giant pencils and a giant graphing calculator on the roof, the Style shop a giant T-shirt and mannequins, the Pet Corner a giant paw print and a doghouse, and the Hint shop a spinning gold question mark. Each has a tagline under its name and pictures of its goods in the windows (`SHOP_LOOKS` in `js/world.js`).
   - **Accessories Shop:** pencil colors (400) and **graphing calculators** (600). You hold **one accessory at a time**, so equipping a calculator replaces your pencil (and equipping a pencil puts the calculator away). You keep everything you own and can swap freely in the shop or the closet. The calculators are TI-84-style, in eight colors, with a little parabola on the screen. It's held in the right hand where the pencil was, and shows in the lower right of your first-person view.
   - **Style Shop:** shirts, pants, hats (caps and beanies), and shoes. Includes a **Kelly Green tee with a white block M** on the front.
@@ -130,6 +132,9 @@ js/
   usmap.js       pure map logic: outlines, which state is at a point, the question deck (unit tested)
   map-game.js    the click-the-state screen on the wall map
   flag.js        the US flag, drawn to the official proportions (unit tested)
+  dorm.js        pure furniture rules for the dorm room: what fits, one of each kind, turning (unit tested)
+  dormroom.js    the dorm room's furniture models, solid and saved
+  dorm-planner.js  the top-down room planner screen
   blueprint.js   pure blueprint logic: fair random shapes, checking, hints (unit tested)
   sandbox.js     the build area, aiming, floating, the blueprint chalkboard
   main.js        renderer, input, zone switching
@@ -142,6 +147,7 @@ tests/arithmetic.test.js
 tests/blueprint.test.js
 tests/usmap.test.js
 tests/flag.test.js
+tests/dorm.test.js
 tools/build-usmap.js   rebuilds js/usmap-data.js (needs us-atlas, topojson-client, topojson-simplify)
 ```
 
@@ -166,6 +172,7 @@ node tests/arithmetic.test.js
 node tests/blueprint.test.js
 node tests/usmap.test.js
 node tests/flag.test.js
+node tests/dorm.test.js
 ```
 
 ## Assets and naming

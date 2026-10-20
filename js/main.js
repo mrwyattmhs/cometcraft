@@ -37,6 +37,9 @@
     leaveCasino: () => setZone(hub, { x: 0, z: -15.5, yaw: Math.PI }),
     enterSchool: () => setZone(school, school.spawn),
     leaveSchool: () => setZone(hub, World.SCHOOL_EXIT),
+    enterDorm: () => setZone(dorm, dorm.spawn),
+    leaveDorm: () => setZone(hub, World.DORM_EXIT),
+    openPlanner: () => DormPlanner.open(dorm.dormRoom),
     openShop: id => (id === 'hints' ? UI.shop(id) : Shop.open(id)),
     petRemy: () => UI.toast('Remy purrs.'),
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
@@ -53,7 +56,8 @@
   const hub = World.buildHub(actions);
   const casino = World.buildCasino(actions);
   const school = World.buildSchool(actions);
-  scene.add(hub.group, casino.group, school.group);
+  const dorm = World.buildDorm(actions);
+  scene.add(hub.group, casino.group, school.group, dorm.group);
 
   let zone = hub;
   function setZone(next, spawn) {
@@ -68,6 +72,7 @@
   }
   casino.group.visible = false;
   school.group.visible = false;
+  dorm.group.visible = false;
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
   Player.teleport(hub.spawn.x, hub.spawn.z, hub.spawn.yaw);
@@ -227,6 +232,7 @@
       else if (Shop.isOpen()) Shop.close();
       else if (ArithmeticGame.isOpen()) ArithmeticGame.close();
       else if (MapGame.isOpen()) MapGame.close();
+      else if (DormPlanner.isOpen()) DormPlanner.close();
       else if (!$('dialog').classList.contains('hidden')) UI.closeDialog();
       return;
     }
@@ -316,5 +322,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, dorm, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

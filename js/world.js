@@ -416,7 +416,7 @@ const World = (() => {
       box(g, glow(0xbfe6ff), 0.05, 0.9, 0.9, xf + f * 0.27, 2.15, s.z);
       box(g, lambert(0xe8c35a), 0.1, 0.12, 0.12, xf + f * 0.27, 1.3, s.z + 0.68);
       const open = makeSign({ w: 0.8, h: 0.3, title: 'OPEN', fg: '#52f08f', bg: '#0c2a18', border: '#52f08f' });
-      open.position.set(xf + f * 0.29, 1.75, s.z - 0.42); open.rotation.y = f * Math.PI / 2; g.add(open);
+      open.position.set(xf + f * 0.34, 1.75, s.z - 0.42); open.rotation.y = f * Math.PI / 2; g.add(open);
 
       // two display windows showing what is for sale
       [-1, 1].forEach(sd => {
@@ -426,7 +426,7 @@ const World = (() => {
           SHOP_WINDOWS[s.id](c, cv.width, cv.height);
           c.fillStyle = 'rgba(255,255,255,.2)'; c.beginPath(); c.moveTo(cv.width * 0.55, 0); c.lineTo(cv.width * 0.8, 0); c.lineTo(cv.width * 0.3, cv.height); c.lineTo(cv.width * 0.05, cv.height); c.closePath(); c.fill();   // a glint on the glass
         }, 80);
-        art.rotation.y = f * Math.PI / 2; art.position.set(xf + f * 0.24, 2.0, wz); g.add(art);
+        art.rotation.y = f * Math.PI / 2; art.position.set(xf + f * 0.285, 2.0, wz); g.add(art);
         box(g, lambert(look.trim), 0.4, 0.12, 1.95, xf + f * 0.28, 1.06, wz);          // sill
       });
 
@@ -434,7 +434,7 @@ const World = (() => {
 
       // the sign, with a line under the name saying what is sold
       const sign = makeSign({ w: 4.6, h: 1.15, title: def.sign, sub: look.tag, fg: look.sign.fg, bg: look.sign.bg, border: look.sign.border, subColor: look.sign.subColor });
-      sign.position.set(xf + f * 0.2, 3.55, s.z); sign.rotation.y = f * Math.PI / 2; g.add(sign);   // top edge just under the roof
+      sign.position.set(xf + f * 0.27, 3.55, s.z); sign.rotation.y = f * Math.PI / 2; g.add(sign);   // top edge just under the roof; clear of the door frame behind it
 
       // the roof, with a bright trim along the front edge, and the big thing on top
       box(g, lambert(look.roof), 6.8, 0.6, 7.8, s.x, 4.5, s.z);
@@ -455,6 +455,20 @@ const World = (() => {
     solid(zone, x, z, 0.5, 0.5);
   }
 
+  /** A park bench that faces any of the four ways ('N', 'E', 'S' or 'W'); the back is on the opposite side. Solid, like the others. */
+  function addBenchFacing(zone, x, z, way) {
+    const T_ = THREE, grp = new T_.Group();
+    box(grp, 'planks', 2.2, 0.18, 0.7, 0, 0.55, 0);
+    box(grp, 'planks', 2.2, 0.6, 0.12, 0, 0.95, 0.32);
+    [-0.9, 0.9].forEach(dx => box(grp, 'log', 0.15, 0.5, 0.6, dx, 0.25, 0));
+    const turn = { N: 0, E: -Math.PI / 2, S: Math.PI, W: Math.PI / 2 }[way];      // the bench is built facing north
+    grp.rotation.y = turn; grp.position.set(x, 0, z);
+    zone.group.add(grp);
+    const sideways = way === 'E' || way === 'W';
+    solid(zone, x, z, sideways ? 0.9 : 2.4, sideways ? 2.4 : 0.9);
+    return grp;
+  }
+
   /** A park bench facing north (toward the lake): the back is on the south side. */
   function addBench(zone, x, z) {
     const g = zone.group;
@@ -468,17 +482,18 @@ const World = (() => {
       and a paved forecourt where it ends at the casino. */
   function buildRoad(zone) {
     const g = zone.group;
-    const z0 = -14, z1 = 32, len = z1 - z0, mid = (z0 + z1) / 2;
+    const z0 = -14, z1 = 48, len = z1 - z0, mid = (z0 + z1) / 2;
     flat(g, 'asphalt', 8, len, 0, 0.03, mid);
     [-5.2, 5.2].forEach(x => flat(g, 'paving', 2.4, len, x, 0.02, mid));            // sidewalks
     [-4.15, 4.15].forEach(x => box(g, 'stone', 0.3, 0.18, len, x, 0.09, mid));      // curbs
     flat(g, 'paving', 16, 6, 0, 0.02, -17);                                         // forecourt
-    for (let z = 30; z >= -12; z -= 4) {
+    for (let z = 46; z >= -12; z -= 4) {
       if (Math.abs(z - 10) < 2.5) continue;                                         // not through the crosswalk
       box(g, glow(0xf2c230), 0.22, 0.02, 2, 0, 0.05, z);                            // dashed center line
     }
     for (let i = 0; i < 6; i++) box(g, glow(0xf4f4f4), 0.7, 0.02, 3, -3.25 + i * 1.3, 0.05, 10); // crosswalk
-    [22, 12, 2, -8].forEach(z => [-5.2, 5.2].forEach(x => addLamp(zone, x, z)));
+    // street lamps every 10 blocks, alternating sides of the road, so it is lit evenly without a pair at every spot
+    [42, 32, 22, 12, 2, -8].forEach((z, i) => addLamp(zone, i % 2 ? -5.2 : 5.2, z));
   }
 
   /** A wall block with a textured side (the hotel's windowed sandstone by default) and a plain stone roof. */
@@ -820,9 +835,9 @@ const World = (() => {
     const startX = 6.4, z = 22.5, mat = C.z0 + C.d + 0.5 + 0.5 + 2;           // where the path meets the SIDE mat
     zone.sandboxPath = [
       flat(g, 'flagstone', cx - startX, W, (startX + cx) / 2, 0.02, z),          // east along the school's south lawn
-      flat(g, 'flagstone', W, z - mat + W / 2, cx, 0.02, (z + W / 2 + mat) / 2),   // then north to the mat
+      flat(g, 'flagstone', W, z - mat + W / 2, cx, 0.04, (z + W / 2 + mat) / 2),   // then north to the mat (2 cm higher where the two slabs overlap)
     ];
-    [[13, z + 1.9], [22, z + 1.9], [31, z + 1.9], [cx + 1.9, 19.5]].forEach(([lx, lz]) => addLamp(zone, lx, lz));
+    [[22, z + 1.9], [cx + 1.9, 19.5]].forEach(([lx, lz]) => addLamp(zone, lx, lz));      // one halfway along the lawn, one at the corner
     // a signpost where the path leaves the sidewalk, facing the road
     const sx = 8.6, sz = z - 2.1;
     box(g, 'log', 0.3, 2.6, 0.3, sx, 1.3, sz);
@@ -832,12 +847,256 @@ const World = (() => {
     solid(zone, sx, sz, 0.5, 0.5);
   }
 
+  /* ---------- Wilson Hall, the dorm ---------- */
+  /** The dorm stands on the east side of the road, directly to the right of where you start. It is built to the documented look
+      of Wilson Hall at Miami University (Oxford, Ohio), which was Georgian in style, with native blue limestone walls and a red tile
+      roof: a long symmetrical front with a projecting center bay, a white columned portico with a pediment, shuttered windows in
+      three floors, dormers and chimneys. Its front faces west, toward the road. */
+  const DORM = { fx: 12, d: 9, w: 16, zc: 33.5, floors: 3, floorH: 3.3 };
+  const DORM_EXIT = { x: 8.2, z: DORM.zc, yaw: Math.PI / 2 };
+
+  function buildDormFront(zone, actions) {
+    const g = zone.group, { fx, d, w, zc, floors, floorH } = DORM;
+    const H = floors * floorH, cx = fx + d / 2;
+    const white = lambert(0xf1ede2), trimStone = lambert(0xd6d2c6), shutter = lambert(0x2d4a3a);
+
+    // the walls: blue limestone, on a stone foundation, with a projecting center bay
+    box(g, 'stone', d + 0.4, 0.6, w + 0.4, cx, 0.3, zc);
+    box(g, 'limestone', d, H, w, cx, H / 2, zc);
+    box(g, 'stone', 1.2, 0.6, 7.2, fx - 0.6, 0.3, zc);
+    box(g, 'limestone', 0.8, H, 6.8, fx - 0.4, H / 2, zc);
+    // white string courses between the floors, and a cornice under the roof
+    [floorH, 2 * floorH].forEach(y => { box(g, white, d + 0.3, 0.22, w + 0.3, cx, y, zc); box(g, white, 1.05, 0.22, 7.1, fx - 0.45, y, zc); });
+    box(g, white, d + 0.8, 0.45, w + 0.8, cx, H + 0.2, zc);
+    box(g, white, 1.4, 0.45, 7.4, fx - 0.55, H + 0.2, zc);
+
+    // windows: white frames with glass and mullions, a stone lintel and sill, and green shutters
+    const windowAt = (faceX, y, z, dir, wide = 1.15) => {
+      box(g, white, 0.2, 1.9, wide, faceX + dir * 0.1, y, z);
+      box(g, glow(0xbfdcf0), 0.05, 1.62, wide - 0.3, faceX + dir * 0.22, y, z);
+      box(g, white, 0.08, 1.62, 0.06, faceX + dir * 0.25, y, z); box(g, white, 0.08, 0.06, wide - 0.3, faceX + dir * 0.25, y, z);
+      box(g, trimStone, 0.26, 0.26, wide + 0.4, faceX + dir * 0.13, y + 1.08, z);
+      box(g, trimStone, 0.1, 0.1, 0.22, faceX + dir * 0.28, y + 1.12, z);                   // keystone
+      box(g, white, 0.32, 0.12, wide + 0.25, faceX + dir * 0.16, y - 1.0, z);
+      [-1, 1].forEach(sd => box(g, shutter, 0.1, 1.9, 0.42, faceX + dir * 0.06, y, z + sd * (wide / 2 + 0.3)));
+    };
+    for (let f = 0; f < floors; f++) {
+      const y = 1.95 + f * floorH;
+      [-6.7, -4.6, 4.6, 6.7].forEach(o => windowAt(fx, y, zc + o, -1));                      // the two wings
+      if (f > 0) [-2.0, 0, 2.0].forEach(o => windowAt(fx - 0.8, y, zc + o, -1, 1.05));     // the center bay, above the door
+    }
+
+    // the entrance: three steps, a framed double door, four white columns, an entablature and a pediment
+    [0, 1, 2].forEach(i => box(g, 'stone', 0.6, 0.2 * (i + 1), 4.2 - i * 0.2, fx - 0.8 - 0.4 - (2 - i) * 0.6 + 0.0, 0.1 * (i + 1), zc));
+    buildDoor(g, { x: fx - 0.78, z: zc, rotY: -Math.PI / 2, w: 2.4, h: 3.5, transom: true });
+    [-3.0, -1.9, 1.9, 3.0].forEach(o => {
+      box(g, white, 0.74, 0.3, 0.74, fx - 2.1, 0.75, zc + o);                                // base
+      box(g, white, 0.5, 3.3, 0.5, fx - 2.1, 2.5, zc + o);                                   // shaft
+      box(g, white, 0.8, 0.3, 0.8, fx - 2.1, 4.3, zc + o);                                   // capital
+      solid(zone, fx - 2.1, zc + o, 0.7, 0.7);
+    });
+    box(g, white, 2.0, 0.5, 7.4, fx - 1.4, 4.65, zc);                                        // entablature
+    [[7.6, 0.4], [6.0, 0.4], [4.4, 0.4], [2.8, 0.4], [1.2, 0.4]].forEach(([ww, hh], i) => box(g, white, 1.7, hh, ww, fx - 1.35, 5.1 + i * hh, zc));   // pediment, stepped
+    const name = makeSign({ w: 4.2, h: 0.5, title: 'WILSON HALL', fg: '#2c2c2c', bg: '#e9e5d8', border: '#8a8576' });
+    name.position.set(fx - 2.47, 4.65, zc); name.rotation.y = -Math.PI / 2; g.add(name);
+
+    // the roof: red tile in four stepped layers, with dormers on the front and a chimney at each end
+    const roofBase = H + 0.45;
+    for (let i = 0; i < 4; i++) box(g, 'redTile', d + 1.4 - 2.2 * i, 1.0, w + 1.4 - 2.2 * i, cx, roofBase + 0.5 + i * 1.0, zc);
+    box(g, lambert(0x8e3a2a), d - 6.6, 0.3, w - 6.6, cx, roofBase + 4.15, zc);                // the ridge cap
+    [-4.8, 0, 4.8].forEach(o => {
+      box(g, white, 1.2, 1.3, 1.5, fx + 0.9, roofBase + 1.15, zc + o);
+      box(g, glow(0xbfdcf0), 0.05, 0.85, 0.9, fx + 0.28, roofBase + 1.15, zc + o);
+      box(g, 'redTile', 1.7, 0.35, 2.0, fx + 1.0, roofBase + 1.95, zc + o);
+    });
+    [-1, 1].forEach(sd => { box(g, 'limestone', 1.0, 3.4, 1.0, fx + 5.0, roofBase + 1.7, zc + sd * 6.0); box(g, white, 1.3, 0.25, 1.3, fx + 5.0, roofBase + 3.5, zc + sd * 6.0); });
+
+    // the building is solid; the bay and the columns have their own colliders
+    solid(zone, cx, zc, d + 0.6, w + 0.6);
+    solid(zone, fx - 0.4, zc, 1.0, 7.2);
+
+    // a paved walk from the sidewalk to the steps, low hedges, and lamps
+    flat(g, 'paving', fx - 3.6 - 6.4, 2.6, (6.4 + fx - 3.6) / 2, 0.02, zc);
+    [-1, 1].forEach(sd => { for (let i = 0; i < 3; i++) box(g, 'leaves', 1.0, 0.9, 2.2, fx - 0.9, 0.45, zc + sd * (4.5 + i * 2.4)); });
+    [-1, 1].forEach(sd => addLamp(zone, fx - 4.2, zc + sd * 2.6));
+    interact(zone, fx - 4.4, zc, 2.4, 'Enter Wilson Hall', actions.enterDorm);
+  }
+
+  /** The great tree: a very thick flared base, a trunk that tapers, and a tall crown of leaf blocks. Solid at the base. */
+  function addGreatTree(zone, tx, tz) {
+    const g = zone.group;
+    box(g, 'log', 4.6, 0.8, 4.6, tx, 0.4, tz);                                               // the flared roots
+    [[-2.4, 0], [2.4, 0], [0, -2.4], [0, 2.4]].forEach(([ox, oz]) => box(g, 'log', ox ? 1.4 : 1.6, 0.7, oz ? 1.4 : 1.6, tx + ox, 0.35, tz + oz));      // roots reaching out
+    [[3.9, 3.0, 0.8], [3.3, 3.0, 3.8], [2.7, 3.0, 6.8], [2.1, 2.8, 9.8]].forEach(([wd, hh, y0]) => box(g, 'log', wd, hh, wd, tx, y0 + hh / 2, tz));
+    [[7.4, 4, 0, 0, 12.5 + 2], [5.6, 3, 0, 0, 16.0 + 1], [3.6, 2.4, 0, 0, 18.7 + 1]].forEach(([wd, hh, ox, oz, y]) => box(g, 'leaves', wd, hh, wd, tx + ox, y, tz + oz));
+    [[3.4, 0], [-3.4, 0], [0, 3.4], [0, -3.4]].forEach(([ox, oz]) => box(g, 'leaves', 4.4, 3.4, 4.4, tx + ox, 11.4, tz + oz));
+    solid(zone, tx, tz, 4.4, 4.4);
+  }
+
+  /** A trimmed round shrub on a ring of mulch: two stacked blocks of leaves. Solid. */
+  function addShrub(zone, x, z, size = 1.4) {
+    const g = zone.group;
+    box(g, lambert(0x5a3c24), size + 0.4, 0.06, size + 0.4, x, 0.03, z);
+    box(g, 'leaves', size, 0.6, size, x, 0.36, z);
+    box(g, 'leaves', size * 0.72, 0.5, size * 0.72, x, 0.86, z);
+    solid(zone, x, z, size, size);
+  }
+
+  /** A small fountain: a stone basin with a gold rim, drifting water, a tall jet in the middle and four arching in from the sides. */
+  function addMiniFountain(zone, x, z) {
+    const g = zone.group, outer = 4.4, rim = 0.5, inner = outer - 2 * rim, gold = lambert(0xc9a24a);
+    [[outer, rim, 0, -(outer - rim) / 2], [outer, rim, 0, (outer - rim) / 2], [rim, inner, -(outer - rim) / 2, 0], [rim, inner, (outer - rim) / 2, 0]].forEach(([w, d, ox, oz]) => {
+      box(g, 'stone', w, 0.6, d, x + ox, 0.3, z + oz);
+      box(g, gold, w, 0.07, d, x + ox, 0.635, z + oz);
+    });
+    box(g, lambert(0x1c5f8a), inner, 0.08, inner, x, 0.04, z);
+    const water = waterSurface(inner, inner);
+    water.mesh.position.set(x, 0.38, z);
+    g.add(water.mesh);
+    box(g, 'stone', 0.7, 0.5, 0.7, x, 0.25, z);                                              // a stone block for the middle jet to rise from
+    const colGeo = new T.BoxGeometry(1, 1, 1); colGeo.translate(0, 0.5, 0);
+    const colMat = new T.MeshBasicMaterial({ color: 0xe6f6ff, transparent: true, opacity: 0.78 });
+    const puffMat = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+    const jets = [];
+    const addJet = (jx, jz, y, o) => {
+      const pivot = new T.Group(); pivot.position.set(jx, y, jz); pivot.rotation.set(o.rx || 0, 0, o.rz || 0);
+      const col = new T.Mesh(colGeo, colMat); col.scale.set(o.width, 1, o.width);
+      const puff = new T.Mesh(new T.BoxGeometry(o.width * 2.4, o.width * 1.7, o.width * 2.4), puffMat);
+      pivot.add(col, puff); g.add(pivot);
+      jets.push({ col, puff, base: o.base, amp: o.amp, speed: o.speed, phase: o.phase });
+    };
+    addJet(x, z, 0.5, { width: 0.3, base: 1.0, amp: 1.8, speed: 1.5, phase: 0 });
+    const lean = 0.42, r = 1.1;                                                              // the four short jets lean in toward the middle
+    addJet(x + r, z, 0.42, { width: 0.2, base: 0.4, amp: 0.9, speed: 2.1, phase: 0.0, rz: lean });
+    addJet(x - r, z, 0.42, { width: 0.2, base: 0.4, amp: 0.9, speed: 2.1, phase: 1.6, rz: -lean });
+    addJet(x, z - r, 0.42, { width: 0.2, base: 0.4, amp: 0.9, speed: 2.1, phase: 3.2, rx: lean });
+    addJet(x, z + r, 0.42, { width: 0.2, base: 0.4, amp: 0.9, speed: 2.1, phase: 4.8, rx: -lean });
+    const place = t => jets.forEach(j => { const h = j.base + j.amp * (0.5 + 0.5 * Math.sin(t * j.speed + j.phase)); j.col.scale.y = h; j.puff.position.y = h; j.puff.rotation.y = t * 2 + j.phase; });
+    place(0);
+    zone.animated.push((dt, t) => { place(t); water.tex.offset.set(t * 0.03, t * 0.015); });
+    solid(zone, x, z, outer + 0.2, outer + 0.2);
+    return { x, z, outer, water, jets };
+  }
+
+  /* ---------- the little park across the road from the dorm ---------- */
+  /** The great tree stands in the middle of a small park on the west side of the road, level with the dorm. A square paved walkway
+      goes all the way round it, benches sit just outside the walkway facing the tree, and a walk leads in from the sidewalk. To the south
+      (to the left as you face the park from the road) a short walk leads to a small plaza with a fountain and two benches. */
+  const PARK = { cx: -15.5, cz: DORM.zc, inner: 4, outer: 6 };
+
+  function buildPark(zone) {
+    const g = zone.group, { cx, cz, inner, outer } = PARK, wide = outer - inner, mid = (outer + inner) / 2;
+    box(g, lambert(0x5a3c24), 7.4, 0.06, 7.4, cx, 0.03, cz);                                 // the planting bed under the tree
+    addGreatTree(zone, cx, cz);
+    const paths = [
+      flat(g, 'paving', 2 * outer, wide, cx, 0.02, cz - mid),                                // the walkway all the way round: north,
+      flat(g, 'paving', 2 * outer, wide, cx, 0.02, cz + mid),                                // south,
+      flat(g, 'paving', wide, 2 * inner, cx - mid, 0.02, cz),                                // west,
+      flat(g, 'paving', wide, 2 * inner, cx + mid, 0.02, cz),                                // and east sides
+      flat(g, 'paving', (-6.4) - (cx + outer), 2.4, (cx + outer - 6.4) / 2, 0.02, cz),       // and the walk in from the sidewalk
+    ];
+    // benches just outside the walkway, facing the tree: one on the north and west sides, and two on the east either side of the way in.
+    // (The south side is open: a short walk leads on to the fountain.)
+    const benchSpots = [[cx, cz - outer - 0.9, 'S'], [cx - outer - 0.9, cz, 'E'], [cx + outer + 0.9, cz - 3.8, 'W'], [cx + outer + 0.9, cz + 3.8, 'W']];
+    const benches = benchSpots.map(([x, z, way]) => { addBenchFacing(zone, x, z, way); return { x, z, way }; });
+    [-1, 1].forEach(sz => addLamp(zone, cx - (outer + 0.8), cz + sz * (outer + 0.8)));     // a lamp at each far corner (the road's lamps light the near side)
+    // trimmed shrubs in the four corners between the walkway and the tree
+    const shrubs = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz]) => { addShrub(zone, cx + sx * 3.0, cz + sz * 3.0, 1.5); return { x: cx + sx * 3.0, z: cz + sz * 3.0 }; });
+
+    // to the left of the tree (south, as you face the park from the road): a short walk to a small paved plaza with a fountain and two benches
+    const plazaZ = cz + outer + 1.5 + 4;                                                      // the plaza is 8 across, 1.5 beyond the walkway
+    paths.push(flat(g, 'paving', 2.4, 1.5, cx, 0.02, cz + outer + 0.75));
+    paths.push(flat(g, 'paving', 8, 8, cx, 0.02, plazaZ));
+    const fountain = addMiniFountain(zone, cx, plazaZ);
+    const fountainBenches = [[cx - 3.5, plazaZ, 'E'], [cx + 3.5, plazaZ, 'W']].map(([x, z, way]) => { addBenchFacing(zone, x, z, way); return { x, z, way }; });
+    [-1, 1].forEach(sx => { addShrub(zone, cx + sx * 3.1, plazaZ + 3.1, 1.3); shrubs.push({ x: cx + sx * 3.1, z: plazaZ + 3.1 }); });
+    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches } };
+  }
+
+  /* ---------- inside Wilson Hall: one hallway, one open room, everything else locked ---------- */
+  /** Coordinates here: x runs west to east, z north to south. The front door is at the south end of a long hallway. The first door on
+      the right (the east wall) after you walk in is your room; every other door is locked. The room is an 8 x 6 grid starting at
+      (3, 2); its furniture is built by DormRoom (dormroom.js) from the list saved in Store. */
+  function buildDorm(actions) {
+    const zone = createZone('Wilson Hall', {
+      spawn: { x: 0, z: 7.0, yaw: 0 },
+      bounds: { minX: -2.3, maxX: 10.8, minZ: -15.9, maxZ: 8.6 },
+      sky: 0x2a2622, fog: [0x2a2622, 40, 90], wander: { minX: 0, maxX: 0, minZ: 0, maxZ: 0 },
+    });
+    const g = zone.group, CH = 3.6;
+    g.add(new T.HemisphereLight(0xffffff, 0xb8aa88, 0.78));
+    g.add(new T.AmbientLight(0xfff0d8, 0.38));
+
+    // floors, ceilings and ceiling lights
+    flat(g, 'hallTile', 5, 25, 0, 0.01, -3.5);
+    flat(g, 'planks', 8, 6, 7, 0.01, 5);
+    box(g, 'schoolCeiling', 5.6, 0.2, 25.6, 0, CH + 0.1, -3.5);
+    box(g, 'schoolCeiling', 8.6, 0.2, 7.0, 7, CH + 0.1, 5);
+    [6, 0.5, -5, -10.5].forEach(z => box(g, glow(0xfffbe8), 1.6, 0.05, 0.8, 0, CH - 0.02, z));
+    box(g, glow(0xfffbe8), 2.4, 0.05, 1.2, 7, CH - 0.02, 5);
+    box(g, lambert(0x8a2f3a), 1.6, 0.03, 22, 0, 0.03, -4.0);                                   // a red runner down the hall
+
+    // walls (each is solid): the hall's two long walls, its two ends, and the room's three outer walls
+    const wall = (x, z, w, d, name = 'schoolWall') => { box(g, name, w, CH, d, x, CH / 2, z); solid(zone, x, z, w, d); };
+    wall(-2.75, -3.5, 0.5, 25.5);                      // west wall
+    wall(2.75, -6.375, 0.5, 19.75);                    // east wall, north of the room door
+    wall(2.75, 7.375, 0.5, 3.75);                      // east wall, south of the room door
+    wall(0, -16.0, 5.5, 0.5);                          // north end
+    wall(0, 9.0, 5.5, 0.5);                            // south end, with the front door
+    wall(7, 1.75, 8.6, 0.5);                           // the room's north wall
+    wall(7, 8.25, 8.6, 0.5);                           // its south wall
+    wall(11.25, 5, 0.5, 7.0);                          // its east wall
+    // wood paneling along the hall, and the room's walls in a soft color with a baseboard
+    box(g, 'wood', 0.06, 1.0, 25.0, -2.47, 0.5, -3.5);
+    box(g, 'wood', 0.06, 1.0, 19.5, 2.47, 0.5, -6.25); box(g, 'wood', 0.06, 1.0, 3.5, 2.47, 0.5, 7.25);
+    [[7, 2.02, 8, 0.04], [7, 7.98, 8, 0.04]].forEach(([x, z, w, d]) => { box(g, lambert(0xdde7ee), w, CH, d, x, CH / 2, z); box(g, 'wood', w, 0.2, d + 0.03, x, 0.1, z); });
+    box(g, lambert(0xdde7ee), 0.04, CH, 6, 10.98, CH / 2, 5); box(g, 'wood', 0.07, 0.2, 6, 10.97, 0.1, 5);
+    // the doorway into your room: a frame, a header, and a plate
+    [3.45, 5.55].forEach(z => box(g, 'wood', 0.6, 2.9, 0.12, 2.75, 1.45, z));
+    box(g, 'wood', 0.6, 0.7, 2.3, 2.75, 3.25, 4.5);
+    const mine = makeSign({ w: 1.5, h: 0.5, title: '101', sub: 'YOUR ROOM', fg: '#fff3c4', bg: '#27386b', border: '#f2c230', subColor: '#f2c230' });
+    mine.position.set(2.4, 3.2, 4.5); mine.rotation.y = -Math.PI / 2; g.add(mine);
+
+    // the locked doors, each with a room number; the front door; the stairs at the end
+    const locked = (x, z, rotY, num) => {
+      buildDoor(g, { x: x + (rotY > 0 ? 0.1 : -0.1), z, rotY, w: 1.7, h: 2.8 });
+      const plate = makeSign({ w: 0.7, h: 0.3, title: num, fg: '#fff3c4', bg: '#3a2412', border: '#c89a54' });
+      plate.position.set(x + (rotY > 0 ? 0.08 : -0.08), 2.3, z + 1.25); plate.rotation.y = rotY; g.add(plate);
+      interact(zone, rotY > 0 ? -1.3 : 1.3, z, 1.3, 'Locked door', () => UI.toast('This door is locked.'));
+    };
+    [[-2.5, 6, '103'], [-2.5, 1.5, '105'], [-2.5, -3, '107'], [-2.5, -7.5, '109'], [-2.5, -12, '111']].forEach(([x, z, n]) => locked(x, z, Math.PI / 2, n));
+    [[2.5, -2, '102'], [2.5, -6.5, '104'], [2.5, -11, '106']].forEach(([x, z, n]) => locked(x, z, -Math.PI / 2, n));
+    buildDoor(g, { x: 0, z: 8.65, rotY: Math.PI, w: 2.2, h: 3.0 });
+    buildDoor(g, { x: 0, z: -15.65, rotY: 0, w: 2.0, h: 2.9 });
+    const stairs = makeSign({ w: 1.4, h: 0.4, title: 'STAIRS', fg: '#fff3c4', bg: '#3a2412', border: '#c89a54' });
+    stairs.position.set(0, 3.25, -15.7); g.add(stairs);
+    interact(zone, 0, -14.4, 1.8, 'Stairs (locked)', () => UI.toast('The stairs are locked.'));
+    const exit = makeSign({ w: 1.8, h: 0.4, title: 'EXIT', fg: '#52f08f', bg: '#0c2a18', border: '#52f08f' });
+    exit.position.set(0, 3.3, 8.7); exit.rotation.y = Math.PI; g.add(exit);
+    interact(zone, 0, 7.5, 2.0, 'Leave Wilson Hall', actions.leaveDorm);
+
+    // your room: a window with curtains, an empty trophy shelf, and the prompt that opens the room planner
+    box(g, 'wood', 0.12, 1.8, 2.4, 10.93, 1.95, 5); box(g, glow(0xcfe8ff), 0.06, 1.5, 2.0, 10.88, 1.95, 5);
+    box(g, 'wood', 0.1, 1.5, 0.07, 10.84, 1.95, 5); box(g, 'wood', 0.1, 0.07, 2.0, 10.84, 1.95, 5);
+    box(g, 'wood', 0.4, 0.1, 2.7, 10.8, 1.0, 5);
+    [3.55, 6.45].forEach(z => box(g, lambert(0xc84a4a), 0.14, 2.0, 0.55, 10.82, 2.0, z));
+    [2.5, 3.0].forEach(y => box(g, 'wood', 3.0, 0.08, 0.32, 7, y, 2.2));
+    [5.7, 8.3].forEach(x => box(g, 'wood', 0.08, 0.5, 0.3, x, 2.75, 2.2));
+    const shelf = makeSign({ w: 1.6, h: 0.34, title: 'TROPHIES', fg: '#fff3c4', bg: '#6b4a26', border: '#c89a54' });
+    shelf.position.set(7, 3.36, 2.08); g.add(shelf);        // 4 cm in front of the painted wall layer (at exactly 2.04 it flickered)
+    interact(zone, 7, 3.2, 2.0, 'Look at the trophy shelf', () => UI.toast('Your trophy shelf is empty for now.'));
+    interact(zone, 7, 5.2, 3.3, 'Arrange your room', actions.openPlanner);
+
+    zone.dormRoom = DormRoom.attach(zone);
+    return zone;
+  }
+
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
-      spawn: { x: 0, z: 20, yaw: 0 },
-      bounds: { minX: -34, maxX: 52, minZ: -33, maxZ: 32 },
+      spawn: { x: 0, z: DORM.zc, yaw: 0 },                              // the dorm is directly on your right
+      bounds: { minX: -34, maxX: 52, minZ: -33, maxZ: 52 },
       sky: 0x8fc8f0, fog: [0x8fc8f0, 45, 120],
-      wander: { minX: -30, maxX: 30, minZ: -17, maxZ: 28 },
+      wander: { minX: -30, maxX: 30, minZ: -17, maxZ: 44 },
     });
     const g = zone.group;
 
@@ -849,12 +1108,13 @@ const World = (() => {
     flat(g, 'grass', 160, 160, 0, 0, 0);
     buildRoad(zone);
 
-    // all four shops are on the west side of the road, facing it
+    // all four shops are on the west side, set well back from the road behind a wide paved plaza, and face it
+    flat(g, 'paving', 9.6, 41, -11.2, 0.04, 3.5);                 // 2 cm above the casino apron it overlaps at the north end (the depth buffer cannot tell closer surfaces apart at a distance)
     const spots = [
-      { id: 'style', x: -11, z: 16, facing: 1 },
-      { id: 'accessories', x: -11, z: 7, facing: 1 },
-      { id: 'pets', x: -11, z: -2, facing: 1 },
-      { id: 'hints', x: -11, z: -11, facing: 1 },
+      { id: 'style', x: -19, z: 16, facing: 1 },
+      { id: 'accessories', x: -19, z: 7, facing: 1 },
+      { id: 'pets', x: -19, z: -2, facing: 1 },
+      { id: 'hints', x: -19, z: -11, facing: 1 },
     ];
     spots.forEach(s => buildShop(zone, s, CONTENT.shops[s.id], () => actions.openShop(s.id)));
 
@@ -863,20 +1123,23 @@ const World = (() => {
     buildSchoolFront(zone, actions);   // across the road from the shops
     buildSandboxArea(zone);            // behind the school
     buildSandboxPath(zone);            // and a paved way round to it
+    buildDormFront(zone, actions);     // Wilson Hall, directly on your right at the start
+    buildPark(zone);                   // and a little park with the great tree, across the road from it
 
-    // notice board on the right-hand sidewalk near the spawn, facing the starting point
-    box(g, 'log', 0.3, 2.2, 0.3, 6.2, 1.1, 17);
-    box(g, 'log', 0.3, 2.2, 0.3, 8.8, 1.1, 17);
-    box(g, 'planks', 2.9, 1.4, 0.2, 7.5, 1.7, 17);
+    // notice board on the left-hand sidewalk near the spawn, facing the starting point
+    const nz = DORM.zc - 7.5;
+    box(g, 'log', 0.3, 2.2, 0.3, -8.8, 1.1, nz);
+    box(g, 'log', 0.3, 2.2, 0.3, -6.2, 1.1, nz);
+    box(g, 'planks', 2.9, 1.4, 0.2, -7.5, 1.7, nz);
     const board = makeSign({ w: 2.5, h: 1.0, title: 'HOW TO PLAY', fg: '#3a2412', bg: '#e8d7a8', border: '#8a6a34' });
-    board.position.set(7.5, 1.7, 17.12);
+    board.position.set(-7.5, 1.7, nz + 0.12);
     g.add(board);
-    solid(zone, 7.5, 17, 3.2, 0.6);
-    interact(zone, 7.5, 18.6, 2.0, 'Read the notice board', actions.readBoard);
+    solid(zone, -7.5, nz, 3.2, 0.6);
+    interact(zone, -7.5, nz + 1.6, 2.0, 'Read the notice board', actions.readBoard);
 
     // trees on either side, then the fence and the clouds
-    [[-20, -14], [-25, -3], [-21, 10], [-27, 21], [-18, 27], [-30, -12],
-     [31, 2], [31, 28], [19, 26], [12, 27], [47, 20], [9.5, 28.5]]
+    [[-27, -14], [-27, -3], [-27, 10], [-27, 21], [-26, 25], [-30, -12],
+     [31, 2], [31, 28], [26, 27], [29, 44], [47, 20], [34, 38]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;
@@ -1257,7 +1520,7 @@ const World = (() => {
       });
       c.fillStyle = '#f4f1e6'; c.fillRect(cv.width * 0.08, cv.height * 0.4, cv.width * 0.84, 3);
     });
-    board.position.set(0, 3.2, -11.83);
+    board.position.set(0, 3.2, -11.8);
     g.add(board);
     box(g, 'wood', 16.4, 0.12, 0.35, 0, 1.4, -11.72);                       // chalk tray
     [-5, 2.5, 6].forEach(x => box(g, lambert(0xf4f1e6), 0.3, 0.06, 0.08, x, 1.49, -11.7));
@@ -1387,5 +1650,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, SCHOOL_EXIT, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

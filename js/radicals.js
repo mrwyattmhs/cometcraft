@@ -9,7 +9,7 @@
      { factors: [2,2,2,2,3], pairs: [[0,1],[2,3]], outside: 4, inside: 3 }
    `pairs` holds indexes into `factors`. */
 const Radicals = (() => {
-  const BUILD = 17; // bump together with radical-game.js and the ?v= numbers in index.html
+  const BUILD = 18; // bump together with radical-game.js and the ?v= numbers in index.html
   const F = typeof Factoring !== 'undefined' ? Factoring : require('./factoring.js');
 
   /* ---------- wager tiers: a bigger bet deals a bigger radicand ---------- */

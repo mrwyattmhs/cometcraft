@@ -58,6 +58,18 @@ const Tex = (() => {
       },
     },
     asphalt: { base: [58, 60, 66], v: 7 },
+    // native blue limestone laid in courses, with the joints staggered row to row (Wilson Hall's walls)
+    limestone: {
+      base: [116, 132, 150], v: 7,
+      draw: g => px(g, 'rgba(66,80,96,.7)', [[0, 0, 16, 1], [0, 4, 16, 1], [0, 8, 16, 1], [0, 12, 16, 1], [0, 1, 1, 3], [8, 1, 1, 3], [4, 5, 1, 3], [12, 5, 1, 3], [0, 9, 1, 3], [8, 9, 1, 3], [4, 13, 1, 3], [12, 13, 1, 3]]),
+    },
+    // red clay roof tile: rows of overlapping tiles
+    redTile: {
+      base: [170, 68, 50], v: 8,
+      draw: g => { px(g, 'rgba(255,170,140,.2)', [[0, 0, 16, 1], [0, 4, 16, 1], [0, 8, 16, 1], [0, 12, 16, 1]]); px(g, 'rgba(84,26,20,.6)', [[0, 3, 16, 1], [0, 7, 16, 1], [0, 11, 16, 1], [0, 15, 16, 1], [4, 0, 1, 3], [12, 0, 1, 3], [0, 4, 1, 3], [8, 4, 1, 3], [4, 8, 1, 3], [12, 8, 1, 3], [0, 12, 1, 3], [8, 12, 1, 3]]); },
+    },
+    // the checkered hallway floor
+    hallTile: { base: [228, 216, 190], v: 3, draw: g => px(g, 'rgba(140,108,76,.38)', [[0, 0, 8, 8], [8, 8, 8, 8]]) },
     // grey flagstones laid in a brick pattern, for the path around the school
     flagstone: {
       base: [164, 160, 152], v: 9,
