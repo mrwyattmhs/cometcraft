@@ -22,6 +22,20 @@ const UI = (() => {
     toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
   }
 
+  let trophyTimer = null;
+  /** A gold banner, above whatever screen is open, saying a trophy was just earned and where to find it. */
+  function trophy(def) {
+    const el = $('trophy-banner');
+    el.innerHTML = '';
+    const a = document.createElement('b'); a.textContent = 'TROPHY EARNED';
+    const b = document.createElement('span'); b.textContent = `${def.name}: ${def.goal} ${def.noun}!`;
+    const c = document.createElement('small'); c.textContent = 'It is on the shelf in your room in Wilson Hall.';
+    el.append(a, b, c);
+    el.classList.remove('hidden', 'show'); void el.offsetWidth; el.classList.add('show');
+    clearTimeout(trophyTimer);
+    trophyTimer = setTimeout(() => { el.classList.remove('show'); el.classList.add('hidden'); }, 6500);
+  }
+
   function closeDialog() {
     const root = $('dialog');
     root.classList.add('hidden');
@@ -67,5 +81,5 @@ const UI = (() => {
     dialog({ title: def.title, html: `<p>${def.blurb}</p><ul class="wares">${rows}</ul>` });
   }
 
-  return { setOpen, isOpen, has, toast, dialog, closeDialog, shop };
+  return { setOpen, isOpen, has, toast, trophy, dialog, closeDialog, shop };
 })();

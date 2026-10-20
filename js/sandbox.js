@@ -133,7 +133,7 @@ const Sandbox = (() => {
       const level = Blueprint.LEVELS[state.level];
 
       text('BLUEPRINT', 24, 40, 42);
-      text(`${level.name}: ${level.blocks[0]} to ${level.blocks[1]} blocks`, 270, 42, 28, '#f7e98e');
+      text(`${level.name}: ${level.blocks[0]} to ${level.blocks[1]} blocks, pays ${level.pay}`, 270, 42, 28, '#f7e98e');
       if (state.solved) {
         for (let s = 0; s < 3; s++) {
           const cx = W - 150 + s * 52, cy = 40;
@@ -342,9 +342,11 @@ const Sandbox = (() => {
       if (result.empty) { state.marks = null; say('Build something first, then press Enter to check it.'); drawBoard(); emit(); return result; }
       if (result.solved) {
         state.solved = true; state.marks = null; state.stars = Blueprint.stars(state.hints);
-        Store.earn(Blueprint.REWARD);
+        const pay = Blueprint.LEVELS[state.level].pay;
+        Store.earn(pay);
+        Trophies.award('blueprint');
         Store.set({ blueprintsSolved: (Store.get().blueprintsSolved || 0) + 1 });
-        say(`That's the shape! +${Blueprint.REWARD} chips.${state.hints ? ` (${state.hints} hint${state.hints > 1 ? 's' : ''} used)` : ' No hints!'}`);
+        say(`That's the shape! +${pay} chips.${state.hints ? ` (${state.hints} hint${state.hints > 1 ? 's' : ''} used)` : ' No hints!'}`);
       } else {
         state.marks = result;
         const bad = ['top', 'front', 'side'].filter(v => !result.views[v].ok);
@@ -377,12 +379,12 @@ const Sandbox = (() => {
     function setLevel(n) { if (Blueprint.LEVELS[n]) newPuzzle(n); }
 
     function openMenu() {
-      const desc = n => { const l = Blueprint.LEVELS[n]; return `${l.name}: ${l.blocks[0]} to ${l.blocks[1]} blocks${l.supported ? '' : ', with overhangs'}`; };
+      const desc = n => { const l = Blueprint.LEVELS[n]; return `${l.name}: ${l.blocks[0]} to ${l.blocks[1]} blocks${l.supported ? '' : ', with overhangs'}, pays ${l.pay}`; };
       UI.dialog({
         title: 'Blueprint board',
         html: `<p>Pick how hard the blueprint should be. Picking one clears the sandbox and gives you a new shape.</p>
                <p>${[1, 2, 3, 4].map(desc).join('<br>')}</p>
-               <p>Solved so far: <b>${Store.get().blueprintsSolved || 0}</b>. Each one earns ${Blueprint.REWARD} chips.</p>`,
+               <p>Solved so far: <b>${Store.get().blueprintsSolved || 0}</b>.</p>`,
         buttons: [
           ...[1, 2, 3, 4].map(n => ({ label: Blueprint.LEVELS[n].name, primary: n === state.level, onClick: () => setLevel(n) })),
           { label: 'Clear the sandbox', newRow: true, onClick: () => { clear(); state.marks = null; say('The sandbox is clear.'); drawBoard(); } },
@@ -428,7 +430,8 @@ const Sandbox = (() => {
         'Left-click or X: break a block',
         'Space: float up   Shift: float down',
         'Enter: check   H: hint   N: new blueprint',
-        `Level ${state.level} (${Blueprint.LEVELS[state.level].name})   Blocks: ${cells.size}   Hints: ${state.hints}${state.solved ? '   SOLVED' : ''}`,
+        `Level ${state.level} (${Blueprint.LEVELS[state.level].name}, pays ${Blueprint.LEVELS[state.level].pay})   Blocks: ${cells.size}   Hints: ${state.hints}${state.solved ? '   SOLVED' : ''}`,
+        Trophies.progressText(Store.get().solved || {}, Store.get().trophies || [], 'blueprint'),
       ],
     });
 

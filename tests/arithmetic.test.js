@@ -6,7 +6,8 @@ const seeded = seed => () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let x 
 
 // the rules in numbers
 assert.strictEqual(A.DURATION_MS, 60000, 'a round is 60 seconds');
-assert.strictEqual(A.REWARD, 1, 'one chip per correct answer');
+assert.deepStrictEqual(['add', 'sub', 'mul', 'div'].map(A.rewardFor), [2, 2, 4, 5], 'addition and subtraction pay 2 chips, multiplication 4, division 5');
+assert.strictEqual(A.REWARD, undefined);
 assert.deepStrictEqual([A.LOW, A.HIGH], [1, 10]);
 assert.deepStrictEqual(Object.keys(A.OPS), ['add', 'sub', 'mul', 'div']);
 assert.deepStrictEqual(Object.values(A.OPS).map(o => o.symbol), ['+', '-', '×', '÷']);
@@ -69,7 +70,7 @@ assert.strictEqual(seen.sub.size, 55, 'every bigger-first pair comes up in subtr
   assert.strictEqual(rd.current, first, 'and you stay on the same problem');
   assert.strictEqual(rd.submit(String(first.answer), 20).ok, true);
   const second = rd.current; assert.strictEqual(rd.submit(String(second.answer + 1), 30).ok, false);
-  const sum = rd.summary(); assert.deepStrictEqual([sum.correct, sum.attempts, sum.chips, sum.missed.length], [1, 2, 1, 1]);
+  const sum = rd.summary(); assert.deepStrictEqual([sum.correct, sum.attempts, sum.chips, sum.missed.length], [1, 2, A.rewardFor('div'), 1]);
   assert.strictEqual(sum.missed[0].symbol, '÷');
 }
 // a stuck random source still terminates
@@ -132,15 +133,15 @@ assert.strictEqual(correct, 59, 'answers at 1s..59s count; the one at exactly 60
 assert.strictEqual(sprint.phase, 'done');
 assert.deepStrictEqual(sprint.submit('1', 99999), { late: true }, 'nothing counts after time is up');
 const sum = sprint.summary();
-assert.deepStrictEqual([sum.correct, sum.attempts, sum.chips, sum.accuracy, sum.missed.length], [59, 59, 59, 1, 0]);
-assert.strictEqual(sum.chips, sum.correct * A.REWARD, 'one chip per correct answer');
+assert.deepStrictEqual([sum.correct, sum.attempts, sum.chips, sum.accuracy, sum.missed.length], [59, 59, 59 * A.rewardFor('mul'), 1, 0]);
+assert.strictEqual(sum.chips, sum.correct * A.rewardFor('mul'), 'four chips per correct answer at the multiplication table');
 
 // subtraction and multiplication rounds work the same way
 for (const op of ['sub', 'mul']) {
   const rr = A.createRound(op, { rng: seeded(3) }); rr.start(0);
   for (let i = 1; i <= 5; i++) assert.strictEqual(rr.submit(String(rr.current.answer), i * 100).ok, true);
   assert.strictEqual(rr.correct, 5);
-  assert.strictEqual(rr.summary().chips, 5);
+  assert.strictEqual(rr.summary().chips, 5 * A.rewardFor(op), `each ${op} answer pays ${A.rewardFor(op)} chips`);
 }
 // a short custom round ends on time
 const short = A.createRound('add', { durationMs: 5000, rng: seeded(1) }); short.start(0);
@@ -195,6 +196,23 @@ assert.strictEqual(S.markMapFound('OH'), true); assert.strictEqual(S.markMapFoun
 assert.strictEqual(S.recordMapStreak(4), true); assert.strictEqual(S.recordMapStreak(4), false); assert.strictEqual(S.recordMapStreak(1), false); assert.strictEqual(S.recordMapStreak('9'), false);
 assert.deepStrictEqual([[...S.get().mapFound], S.get().mapBestStreak], [['OH'], 4]);
 S.reset(); assert.deepStrictEqual([[...S.get().mapFound], S.get().mapBestStreak], [[], 0], 'a reset forgets the map progress');
+// trophies and Remy: a new save starts at zero, an old save starts at zero too (nothing played before trophies existed counts), junk is cleaned
+({ S } = freshStore({}));
+assert.deepStrictEqual([{ ...S.get().solved }, [...S.get().trophies], S.get().remyPets], [{}, [], 0], 'a new save has no progress, no trophies, and Remy has not been petted');
+({ S } = freshStore({ chips: 900, practiceWins: 500, radicalWins: 300, trinomialWins: 250, parabolaWins: 120, vertexWins: 400, blueprintsSolved: 80, arithBest: { add: 40, sub: 30, mul: 20, div: 10 }, mapFound: ['OH', 'TX'] }));
+assert.deepStrictEqual([{ ...S.get().solved }, [...S.get().trophies]], [{}, []], 'a player with hundreds of old wins starts every trophy from zero');
+assert.strictEqual(S.get().practiceWins, 500, 'their old statistics are untouched'); assert.strictEqual(S.get().chips, 900); assert.deepStrictEqual([...S.get().mapFound], ['OH', 'TX']);
+({ S } = freshStore({ solved: { add: 5, 'BAD KEY!': 3, sub: -2, mul: 'x', div: 7.9, radical: 40 }, trophies: ['add', 'add', 'Bad!', 7, null, 'sub'], remyPets: 'lots' }));
+assert.deepStrictEqual({ ...S.get().solved }, { add: 5, sub: 0, mul: 0, div: 7, radical: 40 }, 'counts are whole numbers and bad keys are dropped');
+assert.deepStrictEqual([...S.get().trophies], ['add', 'sub'], 'no duplicates and no junk'); assert.strictEqual(S.get().remyPets, 0);
+({ S } = freshStore({ solved: [1, 2], trophies: 'x', remyPets: -4 })); assert.deepStrictEqual([{ ...S.get().solved }, [...S.get().trophies], S.get().remyPets], [{}, [], 0]);
+({ S, storage } = freshStore({ remyPets: 41 })); assert.strictEqual(S.get().remyPets, 41, 'Remy\'s count is remembered');
+assert.strictEqual(S.countRemyPet(1000), true); assert.strictEqual(S.get().remyPets, 42);
+assert.strictEqual(S.countRemyPet(1500), false, 'a second pet half a second later does not count'); assert.strictEqual(S.countRemyPet(2999), false); assert.strictEqual(S.get().remyPets, 42);
+assert.strictEqual(S.countRemyPet(3000), true, 'two seconds later it counts again'); assert.strictEqual(S.get().remyPets, 43);
+for (let t = 3010; t < 3010 + 200; t += 10) S.countRemyPet(t); assert.strictEqual(S.get().remyPets, 43, 'tapping the key 20 times right after a counted pet adds nothing');
+assert.strictEqual(S.countRemyPet(5000), true); assert.strictEqual(S.get().remyPets, 44, 'and the first pet after the two seconds counts');
+assert.strictEqual(JSON.parse(storage['primetime.save.v1']).remyPets, 44, 'and the count is saved'); assert.ok(!('remyPets' in S) && Object.keys(S).every(k => !/remy/i.test(k) || k === 'countRemyPet'), 'the store offers no way to read it out for display');
 // a save from before division existed keeps its scores and starts division at 0
 ({ S } = freshStore({ chips: 77, arithBest: { add: 31, sub: 22, mul: 18 } }));
 assert.deepStrictEqual({ ...S.get().arithBest }, { add: 31, sub: 22, mul: 18, div: 0 }, 'an old save gains a division score of 0 and loses nothing'); assert.strictEqual(S.get().chips, 77);

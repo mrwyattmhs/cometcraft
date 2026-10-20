@@ -41,7 +41,7 @@
     leaveDorm: () => setZone(hub, World.DORM_EXIT),
     openPlanner: () => DormPlanner.open(dorm.dormRoom),
     openShop: id => (id === 'hints' ? UI.shop(id) : Shop.open(id)),
-    petRemy: () => UI.toast('Remy purrs.'),
+    petRemy: () => { UI.toast('Remy purrs.'); Store.countRemyPet(); },   // the count is saved but never shown
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
     openArithmetic: op => ArithmeticGame.open(op),
     openMap: () => MapGame.open(),
@@ -144,7 +144,7 @@
     else if (!inSandbox()) return;                      // the rest only mean something in the sandbox
     else if (code === 'Enter') {
       const r = sandbox.check();
-      UI.toast(r.solved && !r.again ? `Solved! +${Blueprint.REWARD} chips` : r.empty ? 'Build something first.' : r.again ? 'Already solved. Press N.' : 'Not yet. Look at the marks on the board.');
+      UI.toast(r.solved && !r.again ? `Solved! +${Blueprint.LEVELS[sandbox.state.level].pay} chips` : r.empty ? 'Build something first.' : r.again ? 'Already solved. Press N.' : 'Not yet. Look at the marks on the board.');
     }
     else if (code === 'KeyH') { if (sandbox.hint()) UI.toast('A hint is on the board.'); }
     else if (code === 'KeyN') { sandbox.newPuzzle(); UI.toast('New blueprint.'); }

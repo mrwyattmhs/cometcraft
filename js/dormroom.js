@@ -99,6 +99,71 @@ const DormRoom = (() => {
       return items;
     }
 
+    /* ----- the trophy shelves on the north wall ----- */
+    // One shelf at first. When it holds eight trophies, a second shelf appears below it for the rest. Trophies sit in the order you
+    // earned them. Each carries the symbol of its table (the same shape that floats above it).
+    const { buildSymbol, symbolSize } = H;
+    const shelfRoot = new T.Group(), trophyRoot = new T.Group();
+    zone.group.add(shelfRoot, trophyRoot);
+    const SHELF = { x0: 5.0, step: 0.65, boardY: [3.0, 2.4], z: 2.22, width: 5.6 };   // 8 slots; the brackets sit just outside the end slots
+    const hex = n => '#' + n.toString(16).padStart(6, '0');
+
+    function buildTrophy(def) {
+      const g = new T.Group();
+      box(g, lambert(0xe9e6dc), 0.5, 0.07, 0.34, 0, 0.035, 0);                 // a marble base
+      box(g, lambert(0xc9a24a), 0.36, 0.04, 0.24, 0, 0.09, 0);                 // with a gold step
+      const sym = def.symbol, y0 = 0.115;
+      if (typeof sym === 'string' && symbolSize && ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola'].includes(sym)) {
+        const top = buildSymbol(sym, def.color, { emissive: 0.4 }), sz = symbolSize(sym), k = Math.min(0.44 / sz.w, 0.36 / sz.h);
+        top.scale.setScalar(k); top.position.set(0, y0 + sz.h * k / 2, 0); g.add(top);
+      } else if (sym === 'd20') {
+        const die = new T.Mesh(new T.IcosahedronGeometry(0.17, 0), new T.MeshPhongMaterial({ color: 0xf4f1e8, flatShading: true, shininess: 40 }));
+        die.position.set(0, y0 + 0.17, 0); die.rotation.set(0.35, 0.6, 0); g.add(die);
+      } else if (sym && sym.words) {
+        const plate = textPlane(0.46, 0.34, (c, cv) => {
+          c.fillStyle = '#1f2a44'; c.fillRect(0, 0, cv.width, cv.height);
+          c.strokeStyle = '#c9a24a'; c.lineWidth = 6; c.strokeRect(4, 4, cv.width - 8, cv.height - 8);
+          c.fillStyle = hex(def.color); c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.font = PX_FONT(Math.round(cv.height * 0.2)); c.fillText(sym.words[0], cv.width / 2, cv.height * 0.36);
+          c.font = PX_FONT(Math.round(cv.height * 0.26)); c.fillText(sym.words[1], cv.width / 2, cv.height * 0.68);
+        }, 400);
+        plate.position.set(0, y0 + 0.17, 0); g.add(plate);
+      } else if (sym === 'map') {
+        const m = textPlane(0.44, 0.28, (c, cv) => {
+          c.fillStyle = '#cfe8f5'; c.fillRect(0, 0, cv.width, cv.height);
+          const k = Math.min((cv.width - 14) / USMap.WIDTH, (cv.height - 14) / USMap.HEIGHT);
+          USMap.draw(c, { scale: k, dx: (cv.width - USMap.WIDTH * k) / 2, dy: (cv.height - USMap.HEIGHT * k) / 2, lineWidth: 1 });
+          c.strokeStyle = '#c9a24a'; c.lineWidth = 6; c.strokeRect(3, 3, cv.width - 6, cv.height - 6);
+        }, 400);
+        m.position.set(0, y0 + 0.15, 0); g.add(m);
+      } else if (sym === 'blocks') {
+        [[-0.12, 0.06], [0, 0.06], [0.12, 0.06], [-0.06, 0.18], [0.06, 0.18], [0, 0.3]].forEach(([x, y]) => box(g, 'buildBlock', 0.12, 0.12, 0.12, x, y0 + y, 0));
+      }
+      return g;
+    }
+
+    let shelfKey = '';
+    function syncTrophies() {
+      const rows = Trophies.shelves(Store.get().trophies || []);
+      const key = JSON.stringify(rows);
+      if (key === shelfKey) return;
+      shelfKey = key;
+      while (shelfRoot.children.length) shelfRoot.remove(shelfRoot.children[0]);
+      while (trophyRoot.children.length) trophyRoot.remove(trophyRoot.children[0]);
+      rows.forEach((row, r) => {
+        const y = SHELF.boardY[r];
+        box(shelfRoot, 'wood', SHELF.width, 0.08, 0.34, SHELF.x0 + SHELF.width / 2, y, SHELF.z);
+        [SHELF.x0 + 0.12, SHELF.x0 + SHELF.width - 0.12].forEach(x => box(shelfRoot, 'wood', 0.08, 0.3, 0.3, x, y - 0.19, SHELF.z));
+        row.forEach((id, i) => {
+          const t = buildTrophy(Trophies.byId[id]);
+          t.position.set(SHELF.x0 + 0.45 + i * SHELF.step, y + 0.04, SHELF.z);
+          t.userData.trophy = id;
+          trophyRoot.add(t);
+        });
+      });
+    }
+    Store.onChange(syncTrophies);                  // shows the shelf now, and again whenever a trophy is earned
+
     // start from what was saved; if the save had something that does not fit, fix the save too
     const saved = Store.get().dorm, clean = Dorm.sanitize(saved);
     set(clean);
@@ -112,6 +177,7 @@ const DormRoom = (() => {
       /** Just inside the door, facing into the room: where you stand when the planner opens or closes. */
       entry: { x: origin.x0 + Dorm.DOOR.x + 0.5, z: origin.z0 + Dorm.DOOR.z + 0.5, yaw: -Math.PI / 2 },
       count: () => root.children.length,
+      shelf: { root: shelfRoot, trophies: trophyRoot, boards: () => shelfRoot.children.filter(o => o.geometry && o.geometry.parameters && o.geometry.parameters.width === SHELF.width).length, count: () => trophyRoot.children.length, ids: () => trophyRoot.children.map(c => c.userData.trophy) },
     };
   }
   return { attach };

@@ -171,7 +171,8 @@ for (let i = 0; i < 40; i++) {
 
 /* ---------- stars and hints ---------- */
 assert.deepStrictEqual([0, 1, 2, 3, 9].map(B.stars), [3, 2, 1, 1, 1]);
-assert.strictEqual(B.REWARD, 30);
+assert.deepStrictEqual([1, 2, 3, 4].map(l => B.LEVELS[l].pay), [50, 100, 150, 200], 'Easy 50, Medium 100, Hard 150, Expert 200 chips');
+assert.strictEqual(B.REWARD, undefined);
 const pz = B.generate(2, seeded(31));
 const anchor = { x: 2, z: 2 };
 const h1 = B.hint(pz, [], 1, anchor);

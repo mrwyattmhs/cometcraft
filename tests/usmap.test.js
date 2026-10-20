@@ -13,7 +13,7 @@ assert.strictEqual(M.states.length, 51);
 const dc = M.byCode.DC; assert.ok(dc && dc.name === 'District of Columbia' && dc.isState === false, 'D.C. is on the map but is not a state');
 assert.ok(!M.STATES.includes(dc), 'so the game never asks for it');
 assert.strictEqual(new Set(M.states.map(s => s.code)).size, 51, 'no duplicate codes');
-assert.strictEqual(M.REWARD, 20, 'finding a state pays 20 chips');
+assert.strictEqual(M.REWARD, 5, 'finding a state pays 5 chips');
 assert.ok(M.WIDTH > 1000 && M.WIDTH < 1060 && M.HEIGHT > 580 && M.HEIGHT < 640, `a frame of ${M.WIDTH} x ${M.HEIGHT}`);
 
 /* ---------- the outlines are sane ---------- */

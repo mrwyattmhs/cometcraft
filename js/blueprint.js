@@ -17,17 +17,18 @@
    Together these mean exactly one shape matches the blueprint, so a build that matches all three views IS the
    answer, however the student reached it. */
 const Blueprint = (() => {
-  const BUILD = 18; // bump together with sandbox.js and the ?v= numbers in index.html
-  const REWARD = 30; // chips for solving a blueprint
+  const BUILD = 19; // bump together with sandbox.js and the ?v= numbers in index.html
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
 
-  /** dims: the biggest box a shape can use (x front-to-back, z left-to-right, y tall).
+  /** pay: chips for solving a blueprint at this level (economy.js).
+      dims: the biggest box a shape can use (x front-to-back, z left-to-right, y tall).
       min: the smallest it may be in each direction, so every puzzle is a real 3D shape and not a flat one.
       blocks: how many blocks it has. supported: no overhangs (every block above the floor sits on another). */
   const LEVELS = {
-    1: { name: 'Easy',   dims: { x: 3, z: 3, y: 2 }, min: { x: 2, z: 2, y: 2 }, blocks: [4, 5],   supported: true },
-    2: { name: 'Medium', dims: { x: 3, z: 3, y: 3 }, min: { x: 3, z: 3, y: 2 }, blocks: [6, 8],   supported: true },
-    3: { name: 'Hard',   dims: { x: 4, z: 4, y: 3 }, min: { x: 3, z: 3, y: 3 }, blocks: [9, 12],  supported: true },
-    4: { name: 'Expert', dims: { x: 4, z: 4, y: 4 }, min: { x: 3, z: 3, y: 3 }, blocks: [10, 12], supported: false },
+    1: { name: 'Easy', pay: E.PAY.blueprint[0],   dims: { x: 3, z: 3, y: 2 }, min: { x: 2, z: 2, y: 2 }, blocks: [4, 5],   supported: true },
+    2: { name: 'Medium', pay: E.PAY.blueprint[1], dims: { x: 3, z: 3, y: 3 }, min: { x: 3, z: 3, y: 2 }, blocks: [6, 8],   supported: true },
+    3: { name: 'Hard', pay: E.PAY.blueprint[2],   dims: { x: 4, z: 4, y: 3 }, min: { x: 3, z: 3, y: 3 }, blocks: [9, 12],  supported: true },
+    4: { name: 'Expert', pay: E.PAY.blueprint[3], dims: { x: 4, z: 4, y: 4 }, min: { x: 3, z: 3, y: 3 }, blocks: [10, 12], supported: false },
   };
 
   const key = (x, y, z) => `${x},${y},${z}`;
@@ -198,7 +199,7 @@ const Blueprint = (() => {
     return { text: 'Here is one more block, shown as a blue outline.', ghosts: [todo[0]] };
   }
 
-  return { BUILD, REWARD, LEVELS, grow, key, normalize, silhouettes, hull, isConnected, isFair, isBuildable, generate, viewGrids, compare, stars, missingCells, hint };
+  return { BUILD, LEVELS, grow, key, normalize, silhouettes, hull, isConnected, isFair, isBuildable, generate, viewGrids, compare, stars, missingCells, hint };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Blueprint;

@@ -1,9 +1,9 @@
 /* Mini-game: simplify a square root by pairing prime factors.
-   Wager first: the chip bet decides how big the radicand is (see TIERS in radicals.js),
-   and the radical is dealt only after the bet is placed. One shot per radical.
+   Level first: the level you pick decides how big the radicand is (see TIERS in radicals.js), and the radical is dealt only after
+   you pick. One shot per radical. A correct answer pays the level's chips; a wrong one costs nothing.
 
    The screen reveals itself one step at a time:
-     bet   only the four wager cards
+     bet   only the four level cards
      1     break the number into primes (drop prime gems in)
      2     click two equal primes to pair them
      3     pick what comes outside and what stays inside the radical
@@ -12,14 +12,14 @@
    The math lives in radicals.js; this file is only the interface. */
 const RadicalGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 18; // must match Radicals.BUILD
+  const BUILD = 19; // must match Radicals.BUILD
   const MAX_FACTORS = 9;
   const PRIMES = Factoring.primesUpTo(100);
 
   let problem = null;
   let state = 'idle';       // idle | betting | playing | done
   let step = '1';           // 1 | 2 | 3 while playing
-  let bet = 0;
+  let level = 0;                // the level of the current radical (1 to 4)
   let factors = [];         // the student's primes, ascending
   let pairs = [];           // [[i, j], ...] indexes into factors
   let sel = null;           // index of the tile waiting for a partner
@@ -66,14 +66,15 @@ const RadicalGame = (() => {
     Radicals.TIERS.forEach(t => {
       const b = el('button', 'btn bet-card bet');
       b.type = 'button';
-      b.dataset.bet = t.bet;
+      b.dataset.level = t.level;
       b.innerHTML =
-        `<span class="bet-amt">${t.bet} chips</span>` +
+        `<span class="bet-amt">${t.name}</span>` +
         `<span class="bet-desc">${t.desc}</span>` +
-        `<span class="bet-win">Win ${Radicals.payout(t.bet)}</span>`;
-      b.addEventListener('click', () => chooseBet(t.bet));
+        `<span class="bet-win">Pays ${t.pay} chips</span>`;
+      b.addEventListener('click', () => chooseLevel(t.level));
       $('rad-bets').appendChild(b);
     });
+    $('rad-wallet').parentNode.insertBefore(Trophies.chip('radical'), $('rad-wallet'));
 
     $('rad-close').addEventListener('click', close);
     $('rad-done1').addEventListener('click', () => goStep('2'));
@@ -87,7 +88,7 @@ const RadicalGame = (() => {
 
   /** The palette changes with the step: primes for step 1, plain numbers for step 3. */
   function buildPalette(kind) {
-    const pal = Radicals.palette(bet);
+    const pal = Radicals.palette(level);
     const inv = $('rad-inventory');
     inv.innerHTML = '';
     $('rad-inv-title').textContent = kind === 'primes' ? 'Prime gems' : 'Numbers';
@@ -126,10 +127,10 @@ const RadicalGame = (() => {
 
   const isOpen = () => !$('rad').classList.contains('hidden');
 
-  /** Back to the wager screen. Nothing is dealt until a bet is placed. */
+  /** Back to the level screen. Nothing is dealt until a level is chosen. */
   function newRound() {
     problem = null;
-    bet = 0;
+    level = 0;
     factors = []; pairs = []; sel = null; outSlot = null; inSlot = null;
     step = '1';
     state = 'betting';
@@ -140,11 +141,11 @@ const RadicalGame = (() => {
     render();
   }
 
-  function chooseBet(amount) {
-    if (state !== 'betting' || amount > Store.get().chips) return;
-    bet = amount;
-    let p = Radicals.generate(bet);
-    for (let tries = 0; tries < 6 && p.n === lastN; tries++) p = Radicals.generate(bet); // avoid an immediate repeat
+  function chooseLevel(chosen) {
+    if (state !== 'betting') return;
+    level = chosen;
+    let p = Radicals.generate(level);
+    for (let tries = 0; tries < 6 && p.n === lastN; tries++) p = Radicals.generate(level); // avoid an immediate repeat
     problem = p;
     lastN = p.n;
     factors = []; pairs = []; sel = null; outSlot = null; inSlot = null;
@@ -258,15 +259,14 @@ const RadicalGame = (() => {
     const res = Radicals.check(problem, { factors, pairs, outside: outSlot, inside: inSlot });
     const s = Store.get();
     if (res.ok) {
-      const win = Radicals.payout(bet);
-      Store.addChips(win);
+      const win = Radicals.payout(level);
+      Store.earn(win);
       Store.set({ radicalWins: (s.radicalWins || 0) + 1 });
-      finish(res, `Correct! You bet ${bet} and won ${win} chips (${Radicals.multiplier(bet)}x).`, 'good');
+      Trophies.award('radical');
+      finish(res, `Correct! +${win} chips.`, 'good');
     } else {
-      const floored = Store.addChips(-bet);
       Store.set({ radicalLosses: (s.radicalLosses || 0) + 1 });
-      finish(res, `Not this time. You lose ${bet} chips.` +
-        (floored ? ` The house tops you up to ${Store.MIN_CHIPS} chips so you can keep playing.` : ''), 'bad');
+      finish(res, 'Not this time. Nothing lost. Here is how it works.', 'bad');
     }
   }
 
@@ -311,18 +311,6 @@ const RadicalGame = (() => {
     $('rad').dataset.state = state;
     $('rad').dataset.stage = stage;
 
-    // wager cards: say what a locked wager needs
-    const chips = Store.get().chips;
-    let anyLocked = false;
-    document.querySelectorAll('#rad-bets .bet').forEach(btn => {
-      const amount = parseInt(btn.dataset.bet, 10);
-      const locked = amount > chips;
-      anyLocked = anyLocked || locked;
-      btn.disabled = locked;
-      btn.querySelector('.bet-win').textContent = locked ? `Need ${amount} chips` : `Win ${Radicals.payout(amount)}`;
-    });
-    $('rad-lowhint').classList.toggle('hidden', !anyLocked);
-
     // one thing at a time
     show('rad-bet-row', stage === 'bet');
     show('rad-wager', stage === '1' || stage === '2' || stage === '3');
@@ -336,7 +324,7 @@ const RadicalGame = (() => {
     show('rad-result', stage === 'done');
     if (!problem) return;
 
-    $('rad-wager').textContent = `Wager: ${bet} chips. Win ${Radicals.payout(bet)} if you get it right.`;
+    $('rad-wager').textContent = `Level: ${Radicals.tierFor(level).name}. Pays ${Radicals.payout(level)} chips if you get it right.`;
     const radicand = $('rad-radicand');
     radicand.innerHTML = '';
     radicand.append(radicalEl([document.createTextNode(String(problem.n))], `square root of ${problem.n}`));

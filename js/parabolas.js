@@ -12,29 +12,36 @@
    The same problems are shown two ways: standard form (parabola table) and vertex form
    (vertex table). Only the display, the vertex check, and the worked steps differ. */
 const Parabolas = (() => {
-  const BUILD = 18; // bump together with parabola-game.js and the ?v= numbers in index.html
+  const BUILD = 19; // bump together with parabola-game.js and the ?v= numbers in index.html
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const T = typeof Trinomials !== 'undefined' ? Trinomials : require('./trinomials.js');
 
-  /* ---------- the one wager ---------- */
-  const WAGER = 50;
-  const MULT = 2;
-  const payout = () => WAGER * MULT;
+  /* ---------- difficulty levels ---------- */
+  /** Each level is a subset of the next: Easy keeps the parabola simple (a is 1 or -1) and close to the middle, Medium allows a
+      steeper one a bit farther out, and Hard is everything the table can deal. The two graph tables pay the same amounts. */
+  const TIERS = [
+    { level: 1, name: 'Easy',   desc: 'a is 1 or -1, close to the center',     a: [-1, 1],              hMax: 2, kMax: 5 },
+    { level: 2, name: 'Medium', desc: 'a up to 2, a little farther out',       a: [-2, -1, 1, 2],       hMax: 3, kMax: 7 },
+    { level: 3, name: 'Hard',   desc: 'a up to 3, anywhere on the graph',      a: [-3, -2, -1, 1, 2, 3], hMax: 4, kMax: 9 },
+  ];
+  const tierFor = level => TIERS.find(t => t.level === level) || TIERS[TIERS.length - 1];
+  /** Chips for a correct answer at this level (game is 'parabola' or 'vertex'). A wrong answer costs nothing. */
+  const payout = (level, game = 'parabola') => E.PAY[game][tierFor(level).level - 1];
 
   /* ---------- problems ---------- */
-  const A_VALUES = [-3, -2, -1, 1, 2, 3];
   const H_RANGE = 4;   // axis is -4..4, never 0 (so b is never 0)
   const K_RANGE = 9;   // vertex height is -9..9
   const C_MAX = 15;    // keeps the y-intercept inside the number palette
 
   const fOf = (p, x) => p.a * x * x + p.b * x + p.c;
 
-  /** Every (a, h, k) the table can deal. */
-  function candidates() {
-    const out = [];
-    A_VALUES.forEach(a => {
-      for (let h = -H_RANGE; h <= H_RANGE; h++) {
+  /** Every (a, h, k) a level can deal. With no level, everything the table can deal (Hard). */
+  function candidates(level = TIERS.length) {
+    const t = tierFor(level), out = [];
+    t.a.forEach(a => {
+      for (let h = -t.hMax; h <= t.hMax; h++) {
         if (h === 0) continue;
-        for (let k = -K_RANGE; k <= K_RANGE; k++) {
+        for (let k = -t.kMax; k <= t.kMax; k++) {
           const c = a * h * h + k;
           if (Math.abs(c) <= C_MAX) out.push({ a, h, k, b: -2 * a * h, c });
         }
@@ -44,8 +51,9 @@ const Parabolas = (() => {
   }
   const ALL = candidates();
 
-  function generate(rng = Math.random) {
-    return { ...ALL[Math.floor(rng() * ALL.length)] };
+  function generate(level = TIERS.length, rng = Math.random) {
+    const list = candidates(level);
+    return { level: tierFor(level).level, ...list[Math.floor(rng() * list.length)] };
   }
 
   /** Block palette for the number tiles: -15..15. */
@@ -130,7 +138,7 @@ const Parabolas = (() => {
   }
 
   return {
-    BUILD, WAGER, MULT, payout, PALETTE_MAX,
+    BUILD, TIERS, tierFor, payout, PALETTE_MAX,
     candidates, generate, fOf, fmtPoly, check, solution, view, curve,
     fmtVertexForm, checkVertexForm, solutionVertexForm,
   };

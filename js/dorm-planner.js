@@ -5,7 +5,7 @@
    dorm.js; the furniture models are in dormroom.js; this file is the screen. */
 const DormPlanner = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 18; // must match Dorm.BUILD
+  const BUILD = 19; // must match Dorm.BUILD
   const CELL = 84, M = 60;                                   // pixels per grid cell, and the margin for the walls
   const W = Dorm.ROOM.w * CELL + 2 * M, H = Dorm.ROOM.d * CELL + 2 * M;
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
@@ -92,9 +92,9 @@ const DormPlanner = (() => {
     seg(M + rw + 5, M - 5, M + rw + 5, M + rd + 5);
     seg(M - 5, M - 5, M - 5, px(Dorm.DOOR.z) - 4); seg(M - 5, px(Dorm.DOOR.z + 1) + 4, M - 5, M + rd + 5);
     ctx.strokeStyle = '#9fe0ff'; ctx.lineWidth = 6; seg(M + rw + 5, px(1.8), M + rw + 5, px(4.2));
-    ctx.strokeStyle = '#e8c35a'; ctx.lineWidth = 6; seg(px(2.5), M - 5, px(5.5), M - 5);
+    ctx.strokeStyle = '#e8c35a'; ctx.lineWidth = 6; seg(px(2.0), M - 5, px(7.6), M - 5);
     ctx.font = '600 14px system-ui, sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#dff1ff';
-    ctx.textAlign = 'center'; ctx.fillText('trophy shelf', px(4), M - 24); ctx.fillStyle = '#ffd0d0'; ctx.fillText('keep clear', px(1), px(Dorm.DOOR.z + 0.5)); ctx.fillStyle = '#dff1ff';
+    ctx.textAlign = 'center'; ctx.fillText('trophy shelf', px(4.8), M - 24); ctx.fillStyle = '#ffd0d0'; ctx.fillText('keep clear', px(1), px(Dorm.DOOR.z + 0.5)); ctx.fillStyle = '#dff1ff';
     ctx.save(); ctx.translate(M + rw + 28, px(3)); ctx.rotate(Math.PI / 2); ctx.fillText('window', 0, 0); ctx.restore();
     ctx.save(); ctx.translate(M - 28, px(Dorm.DOOR.z + 0.5)); ctx.rotate(-Math.PI / 2); ctx.fillText('door', 0, 0); ctx.restore();
     // the pieces already placed, then the preview

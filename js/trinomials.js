@@ -10,26 +10,27 @@
    Terms are {k, e}: coefficient k, power of x e (0, 1 or 2).
    Polynomials are coefficient arrays [c0, c1, c2, c3]. */
 const Trinomials = (() => {
-  const BUILD = 18; // bump together with trinomial-game.js and the ?v= numbers in index.html
+  const BUILD = 19; // bump together with trinomial-game.js and the ?v= numbers in index.html
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const gcd = (a, b) => (b ? gcd(b, a % b) : Math.abs(a));
   const term = (k, e) => ({ k, e });
 
-  /* ---------- wager tiers: a bigger bet deals a bigger a·c ---------- */
+  /* ---------- difficulty levels: a harder level deals a bigger a·c and pays more ---------- */
   // aMin..aMax: allowed leading coefficient.  pMax: largest p or r in (px + q)(rx + s).
   // qMax: largest |q| or |s|.  R: largest |m| or |n| (the split numbers), which is also
   // how far the number palette has to reach.  acMin..acMax: band for |a·c|.
   const TIERS = [
-    { bet: 10,  mult: 1,   desc: 'x² + bx + c',                   aMin: 1, aMax: 1,  pMax: 1, qMax: 6,  R: 6,  acMin: 4,   acMax: 36 },
-    { bet: 25,  mult: 1.5, desc: 'x² + bx + c, bigger numbers',   aMin: 1, aMax: 1,  pMax: 1, qMax: 12, R: 12, acMin: 40,  acMax: 120 },
-    { bet: 50,  mult: 2,   desc: 'ax² + bx + c',                  aMin: 2, aMax: 16, pMax: 4, qMax: 8,  R: 16, acMin: 60,  acMax: 200 },
-    { bet: 100, mult: 3,   desc: 'ax² + bx + c, bigger numbers',  aMin: 4, aMax: 16, pMax: 4, qMax: 9,  R: 24, acMin: 150, acMax: 400 },
+    { level: 1, name: 'Easy',   pay: E.PAY.trinomial[0], desc: 'x² + bx + c',                   aMin: 1, aMax: 1,  pMax: 1, qMax: 6,  R: 6,  acMin: 4,   acMax: 36 },
+    { level: 2, name: 'Medium', pay: E.PAY.trinomial[1], desc: 'x² + bx + c, bigger numbers',   aMin: 1, aMax: 1,  pMax: 1, qMax: 12, R: 12, acMin: 40,  acMax: 120 },
+    { level: 3, name: 'Hard',   pay: E.PAY.trinomial[2], desc: 'ax² + bx + c',                  aMin: 2, aMax: 16, pMax: 4, qMax: 8,  R: 16, acMin: 60,  acMax: 200 },
+    { level: 4, name: 'Expert', pay: E.PAY.trinomial[3], desc: 'ax² + bx + c, bigger numbers',  aMin: 4, aMax: 16, pMax: 4, qMax: 9,  R: 24, acMin: 150, acMax: 400 },
   ];
-  const tierFor = bet => TIERS.find(t => t.bet === bet) || TIERS[0];
+  const tierFor = level => TIERS.find(t => t.level === level) || TIERS[0];
 
   // Built from (px + q)(rx + s) with primitive binomials, so every problem has a clean
   // answer and the trinomial itself has no common factor.
-  function generate(bet, rng = Math.random) {
-    const t = tierFor(bet);
+  function generate(level, rng = Math.random) {
+    const t = tierFor(level);
     const pick = (lo, hi) => lo + Math.floor(rng() * (hi - lo + 1));
     const nonzero = lim => { let v = 0; while (v === 0) v = pick(-lim, lim); return v; };
     for (let attempt = 0; attempt < 50000; attempt++) {
@@ -43,17 +44,16 @@ const Trinomials = (() => {
       if (b === 0) continue;
       const ac = Math.abs(a * c);
       if (ac < t.acMin || ac > t.acMax) continue;
-      return { bet: t.bet, p, q, r, s, a, b, c };
+      return { level: t.level, p, q, r, s, a, b, c };
     }
-    throw new Error(`could not generate a trinomial for a ${bet} chip wager`);
+    throw new Error(`could not generate a trinomial for level ${level}`);
   }
 
-  /** Largest block magnitudes the palette must offer for a wager. */
-  const palette = bet => ({ xMax: 4, constMax: tierFor(bet).R });
+  /** Largest block magnitudes the palette must offer for a level. */
+  const palette = level => ({ xMax: 4, constMax: tierFor(level).R });
 
-  /** Harder wagers also pay a better multiplier. */
-  const multiplier = bet => tierFor(bet).mult;
-  const payout = bet => Math.round(bet * multiplier(bet));
+  /** Chips for a correct answer at this level. A wrong answer costs nothing. */
+  const payout = level => tierFor(level).pay;
 
   /* ---------- formatting ---------- */
   const SUP = { 0: '', 1: 'x', 2: 'x²' };
@@ -132,7 +132,7 @@ const Trinomials = (() => {
   }
 
   return {
-    BUILD, gcd, term, TIERS, tierFor, generate, palette, multiplier, payout,
+    BUILD, gcd, term, TIERS, tierFor, generate, palette, payout,
     termParts, fmtTerms, fmtBlock, fmtTrinomial, poly, mul, check, solution,
   };
 })();

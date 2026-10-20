@@ -416,3 +416,14 @@ div.pair-box { cursor: default; }
 .plan-hint { margin: 8px 0 0; min-height: 28px; font-size: 21px; }
 @media (max-width: 700px) { .plan-body { flex-direction: column; } .plan-side { flex-basis: auto; width: 100%; } .plan-palette { flex-direction: row; flex-wrap: wrap; } }
 
+/* ---------- trophies: the progress label on each game, and the banner when one is earned ---------- */
+.trophy-chip, .pay-chip { display: inline-block; padding: 1px 10px; border: 2px dashed currentColor; border-radius: 14px; font-size: 0.8em; opacity: .85; white-space: nowrap; }
+.trophy-chip.got { opacity: 1; border-style: solid; color: #f7e98e; }
+.pay-chip { border-style: solid; }
+#trophy-banner { position: fixed; z-index: 2000; top: 14px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 26px; max-width: 94vw; text-align: center; background: #2b2410; color: #fff3c4; border: 4px solid #f2c230; box-shadow: 0 6px 0 rgba(0, 0, 0, .45); font-size: 22px; line-height: 1.2; pointer-events: none; }
+#trophy-banner b { font-family: var(--px); font-weight: 400; font-size: 14px; color: #f2c230; letter-spacing: 1px; }
+#trophy-banner small { font-size: 17px; opacity: .85; }
+#trophy-banner.show { animation: trophy-in .5s ease-out; }
+@keyframes trophy-in { from { transform: translate(-50%, -140%); } to { transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { #trophy-banner.show { animation: none; } }
+

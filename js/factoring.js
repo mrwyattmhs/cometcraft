@@ -1,5 +1,6 @@
 /* Pure math helpers: no DOM, no THREE. Safe to unit-test in Node. */
 const Factoring = (() => {
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
   const sup = n => String(n).split('').map(d => SUP[+d]).join('');
 
@@ -46,18 +47,14 @@ const Factoring = (() => {
     return [...counts].map(([p, c]) => (c > 1 ? `${p}${sup(c)}` : `${p}`)).join(' · ');
   }
 
-  /* ---- Economy knobs (tune here) ---- */
-  const PRACTICE_REWARD = 20; // chips for every solved practice round, whatever the dice setting
-  const practiceReward = () => PRACTICE_REWARD;
-
-  /** More prime factors = harder number = bigger multiplier. A prime sum pays 1x. */
-  const wagerMultiplier = factors => 1 + 0.5 * (factors.length - 1);
-  const wagerPayout = (bet, factors) => Math.round(bet * wagerMultiplier(factors));
+  /* ---- Economy (the amounts live in economy.js) ---- */
+  /** Chips for a solved practice round: more dice make a harder number, so they pay more (2 dice 10, 3 dice 25, 4 dice 50). */
+  const practiceReward = dice => E.PAY.practice[dice] || E.PAY.practice[3];
 
   return {
     isPrime, primesUpTo, primeFactors, product, rollDice,
     isValidFactorization, toExponentForm,
-    PRACTICE_REWARD, practiceReward, wagerMultiplier, wagerPayout,
+    practiceReward,
   };
 })();
 

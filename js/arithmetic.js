@@ -8,9 +8,11 @@
 
    Time is passed in by the caller (now, in milliseconds), so a whole round can be tested instantly. */
 const Arithmetic = (() => {
-  const BUILD = 18; // bump together with arithmetic-game.js and the ?v= numbers in index.html
+  const BUILD = 19; // bump together with arithmetic-game.js and the ?v= numbers in index.html
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const DURATION_MS = 60000;
-  const REWARD = 1;          // chips for every correct answer
+  /** Chips for every correct answer at a table (the amounts live in economy.js). */
+  const rewardFor = op => E.PAY.arithmetic[op];
   const LOW = 1, HIGH = 10;  // both numbers come from 1 to 10
 
   const OPS = {
@@ -105,14 +107,14 @@ const Arithmetic = (() => {
         return {
           op, correct, attempts, missed: missed.map(m => ({ ...m })),
           accuracy: attempts ? correct / attempts : 0,
-          chips: correct * REWARD,
+          chips: correct * rewardFor(op),
         };
       },
     };
     return round;
   }
 
-  return { BUILD, DURATION_MS, REWARD, LOW, HIGH, OPS, problem, createRound };
+  return { BUILD, DURATION_MS, rewardFor, LOW, HIGH, OPS, problem, createRound };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Arithmetic;

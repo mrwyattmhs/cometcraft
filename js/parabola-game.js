@@ -1,5 +1,5 @@
 /* Mini-game engine for the two graphing tables.
-   One wager (50 chips), one shot. The questions come one at a time on the left:
+   Pick a level (Easy, Medium or Hard), then one shot. A correct sketch pays the level's chips; a wrong one costs nothing. The questions come one at a time on the left:
      1. the axis of symmetry   x = [ ]
      2. the vertex             ( x , [ ] )    x is filled in from step 1
      3. the y-intercept        ( 0 , [ ] )
@@ -12,7 +12,7 @@
      VertexGame    vertex form,    y = a(x - h)² + k  (overlay #vtx)
 
    The math lives in parabolas.js; this file is only the interface. */
-const BUILD_GRAPH_TABLES = 18; // must match Parabolas.BUILD
+const BUILD_GRAPH_TABLES = 19; // must match Parabolas.BUILD
 
 function createGraphTable(cfg) {
   const P = cfg.prefix;
@@ -22,6 +22,7 @@ function createGraphTable(cfg) {
 
   let problem = null;
   let state = 'idle';            // idle | betting | playing | done
+  let level = 0;                 // the level of the current parabola (1 to 3)
   let slots = [null, null, null]; // axis, vertex y, y-intercept y
   let wired = false;
   let lastKey = null;
@@ -51,15 +52,18 @@ function createGraphTable(cfg) {
     if (wired) return;
     wired = true;
 
-    const card = el('button', 'btn bet-card bet');
-    card.type = 'button';
-    card.dataset.bet = Parabolas.WAGER;
-    card.innerHTML =
-      `<span class="bet-amt">${Parabolas.WAGER} chips</span>` +
-      `<span class="bet-desc">${cfg.betDesc}</span>` +
-      `<span class="bet-win">Win ${Parabolas.payout()}</span>`;
-    card.addEventListener('click', chooseBet);
-    $('bets').appendChild(card);
+    Parabolas.TIERS.forEach(t => {
+      const card = el('button', 'btn bet-card bet');
+      card.type = 'button';
+      card.dataset.level = t.level;
+      card.innerHTML =
+        `<span class="bet-amt">${t.name}</span>` +
+        `<span class="bet-desc">${t.desc}</span>` +
+        `<span class="bet-win">Pays ${Parabolas.payout(t.level, cfg.game)} chips</span>`;
+      card.addEventListener('click', () => chooseLevel(t.level));
+      $('bets').appendChild(card);
+    });
+    $('wallet').parentNode.insertBefore(Trophies.chip(cfg.game), $('wallet'));
 
     const r1 = $('r1'), r2 = $('r2'), r3 = $('r3');
     const row1 = el('div', 'eq-row');
@@ -116,9 +120,10 @@ function createGraphTable(cfg) {
 
   const isOpen = () => !root().classList.contains('hidden');
 
-  /** Back to the wager screen. Nothing is dealt until the wager is placed. */
+  /** Back to the level screen. Nothing is dealt until a level is chosen. */
   function newRound() {
     problem = null;
+    level = 0;
     slots = [null, null, null];
     state = 'betting';
     $('result').innerHTML = '';
@@ -127,10 +132,11 @@ function createGraphTable(cfg) {
     render();
   }
 
-  function chooseBet() {
-    if (state !== 'betting' || Parabolas.WAGER > Store.get().chips) return;
-    let p = Parabolas.generate();
-    for (let tries = 0; tries < 6 && `${p.a},${p.h},${p.k}` === lastKey; tries++) p = Parabolas.generate();
+  function chooseLevel(chosen) {
+    if (state !== 'betting') return;
+    level = chosen;
+    let p = Parabolas.generate(level);
+    for (let tries = 0; tries < 6 && `${p.a},${p.h},${p.k}` === lastKey; tries++) p = Parabolas.generate(level);
     lastKey = `${p.a},${p.h},${p.k}`;
     problem = p;
     slots = [null, null, null];
@@ -160,15 +166,14 @@ function createGraphTable(cfg) {
     const res = cfg.check(problem, { axis: slots[0], vy: slots[1], yint: slots[2] });
     const s = Store.get();
     if (res.ok) {
-      const win = Parabolas.payout();
-      Store.addChips(win);
+      const win = Parabolas.payout(level, cfg.game);
+      Store.earn(win);
       Store.set({ [cfg.statWins]: (s[cfg.statWins] || 0) + 1 });
-      finish(res, `Correct! You bet ${Parabolas.WAGER} and won ${win} chips (${Parabolas.MULT}x).`, 'good');
+      Trophies.award(cfg.game);
+      finish(res, `Correct! +${win} chips.`, 'good');
     } else {
-      const floored = Store.addChips(-Parabolas.WAGER);
       Store.set({ [cfg.statLosses]: (s[cfg.statLosses] || 0) + 1 });
-      finish(res, `Not this time. You lose ${Parabolas.WAGER} chips.` +
-        (floored ? ` The house tops you up to ${Store.MIN_CHIPS} chips so you can keep playing.` : ''), 'bad');
+      finish(res, 'Not this time. Nothing lost. Here is how it works.', 'bad');
     }
   }
 
@@ -299,15 +304,6 @@ function createGraphTable(cfg) {
     root().dataset.state = state;
     root().dataset.stage = stage;
 
-    const chips = Store.get().chips;
-    const locked = Parabolas.WAGER > chips;
-    const card = document.querySelector(`#${P}-bets .bet`);
-    if (card) {
-      card.disabled = locked;
-      card.querySelector('.bet-win').textContent = locked ? `Need ${Parabolas.WAGER} chips` : `Win ${Parabolas.payout()}`;
-    }
-    $('lowhint').classList.toggle('hidden', !locked);
-
     // one thing at a time
     const [ax, vy, yi] = slots;
     show('bet-row', stage === 'bet');
@@ -323,7 +319,7 @@ function createGraphTable(cfg) {
     show('next', stage === 'done');
     if (!problem) { renderGraph(); return; }
 
-    $('wager').textContent = `Wager: ${Parabolas.WAGER} chips. Win ${Parabolas.payout()} if you get it right.`;
+    $('wager').textContent = `Level: ${Parabolas.tierFor(level).name}. Pays ${Parabolas.payout(level, cfg.game)} chips if you get it right.`;
     $('poly').textContent = cfg.fmt(problem);
 
     slotEls.forEach((b, i) => {
@@ -340,7 +336,7 @@ function createGraphTable(cfg) {
 
 const ParabolaGame = createGraphTable({
   prefix: 'par',
-  betDesc: 'Graph a parabola from standard form',
+  game: 'parabola',
   hints: {
     axis: 'What is the axis of symmetry?',
     vertex: 'The vertex sits on the axis. Plug that x into the polynomial to find y.',
@@ -357,7 +353,7 @@ const ParabolaGame = createGraphTable({
 
 const VertexGame = createGraphTable({
   prefix: 'vtx',
-  betDesc: 'Graph a parabola from vertex form',
+  game: 'vertex',
   hints: {
     axis: 'What is the axis of symmetry?',
     vertex: 'The vertex sits on the axis. What is its y-value?',

@@ -534,7 +534,7 @@ const World = (() => {
     box(g, goldGlow, 4.2, 5.0, 0.1, 0, 2.5, -19.95);
     box(g, glow(0x1b1208), 3.6, 4.6, 0.2, 0, 2.3, -19.85);
     const sign = makeSign({
-      w: 14, h: 2.4, title: 'PRIME TIME CASINO', sub: 'factor it. wager it. win it.',
+      w: 14, h: 2.4, title: 'PRIME TIME CASINO', sub: 'factor it. solve it. win it.',
       fg: '#ffd36b', bg: '#10162b', border: '#ffd36b', subColor: '#8fd8ff',
     });
     sign.position.set(0, 9.6, -19.95);
@@ -1080,11 +1080,13 @@ const World = (() => {
     box(g, 'wood', 0.1, 1.5, 0.07, 10.84, 1.95, 5); box(g, 'wood', 0.1, 0.07, 2.0, 10.84, 1.95, 5);
     box(g, 'wood', 0.4, 0.1, 2.7, 10.8, 1.0, 5);
     [3.55, 6.45].forEach(z => box(g, lambert(0xc84a4a), 0.14, 2.0, 0.55, 10.82, 2.0, z));
-    [2.5, 3.0].forEach(y => box(g, 'wood', 3.0, 0.08, 0.32, 7, y, 2.2));
-    [5.7, 8.3].forEach(x => box(g, 'wood', 0.08, 0.5, 0.3, x, 2.75, 2.2));
-    const shelf = makeSign({ w: 1.6, h: 0.34, title: 'TROPHIES', fg: '#fff3c4', bg: '#6b4a26', border: '#c89a54' });
-    shelf.position.set(7, 3.36, 2.08); g.add(shelf);        // 4 cm in front of the painted wall layer (at exactly 2.04 it flickered)
-    interact(zone, 7, 3.2, 2.0, 'Look at the trophy shelf', () => UI.toast('Your trophy shelf is empty for now.'));
+    // the trophy shelves themselves (one shelf, and a second below it once the first is full) are built by DormRoom
+    const shelf = makeSign({ w: 1.3, h: 0.34, title: 'TROPHIES', fg: '#fff3c4', bg: '#6b4a26', border: '#c89a54' });
+    shelf.position.set(3.95, 3.2, 2.08); g.add(shelf);      // 4 cm in front of the painted wall layer (at exactly 2.04 it flickered)
+    interact(zone, 7.6, 3.2, 2.2, 'Look at the trophy shelf', () => {
+      const n = (Store.get().trophies || []).filter(Trophies.valid).length;
+      UI.toast(n ? `Trophies: ${n} of ${Trophies.GAMES.length}.` : 'No trophies yet. Get 100 right at any table to win one.');
+    });
     interact(zone, 7, 5.2, 3.3, 'Arrange your room', actions.openPlanner);
 
     zone.dormRoom = DormRoom.attach(zone);
@@ -1266,6 +1268,9 @@ const World = (() => {
     divide: { shape: divideCells, u: 0.11, mirrorBack: false },
   };
 
+  /** The size of a symbol in world units, so something else (a trophy) can scale it to fit. */
+  const symbolSize = kind => { const d = SYMBOLS[kind], s = d.shape(); return { w: s.w * d.u, h: s.h * d.u }; };
+
   /** Two layers thick so it never vanishes edge-on. (mirrorBack flips the rear layer, but a flipped
       copy shows through the gaps between letters, so the text uses a plain solid slab instead.) */
   /** opts: outline (a color for a dark edge around the whole shape, so it stands out against light walls),
@@ -1384,10 +1389,10 @@ const World = (() => {
     });
 
     // three tables on the north wall, in front of you as you walk in...
-    buildTable(zone, -9, -4, 'felt', 'PRACTICE TABLE', 'live product. no risk.', '#52f08f', () => actions.openTable('practice'));
+    buildTable(zone, -9, -4, 'felt', 'PRACTICE TABLE', 'live product. 10 to 50 chips.', '#52f08f', () => actions.openTable('practice'));
     buildTable(zone, 0, -4, 'feltBlue', 'RADICAL TABLE', 'factor, pair up, simplify', '#38e8ff', () => actions.openTable('radical'),
       { prop: 'sqrt', accent: 0x38e8ff });
-    buildTable(zone, 9, -4, 'feltRed', 'TRINOMIAL TABLE', 'split the middle. bet chips.', '#ff6a6a', () => actions.openTable('trinomial'),
+    buildTable(zone, 9, -4, 'feltRed', 'TRINOMIAL TABLE', 'split the middle. pick a level.', '#ff6a6a', () => actions.openTable('trinomial'),
       { prop: 'quadratic', accent: 0xff6a6a });
     // ...and one behind you on the south side, off to one side of the exit door
     buildTable(zone, 5, 8, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'),
@@ -1631,16 +1636,16 @@ const World = (() => {
     // three timed-practice tables on the north row, each with its chalk-colored sign floating above it
     // bright room: a dark chalkboard-green outline and a toned-down fill keep the floating signs from washing out
     const chalk = { signBg: '#244a35', signSub: '#f2efe0', symbolOutline: 0x1d4a30, symbolEmissive: 0, symbolTone: 0.68 };
-    buildTable(zone, -9, -4, 'chalkTop', 'ADDITION TABLE', '60 seconds. 1 chip each.', '#f7e98e', () => actions.openArithmetic('add'),
+    buildTable(zone, -9, -4, 'chalkTop', 'ADDITION TABLE', '60 seconds. 2 chips each.', '#f7e98e', () => actions.openArithmetic('add'),
       { ...chalk, prop: 'plus', accent: 0xf7e98e });
-    buildTable(zone, 0, -4, 'chalkTop', 'SUBTRACTION TABLE', '60 seconds. 1 chip each.', '#f6b0c8', () => actions.openArithmetic('sub'),
+    buildTable(zone, 0, -4, 'chalkTop', 'SUBTRACTION TABLE', '60 seconds. 2 chips each.', '#f6b0c8', () => actions.openArithmetic('sub'),
       { ...chalk, prop: 'minus', accent: 0xf6b0c8 });
-    buildTable(zone, 9, -4, 'chalkTop', 'MULTIPLICATION TABLE', '60 seconds. 1 chip each.', '#a8d8f0', () => actions.openArithmetic('mul'),
+    buildTable(zone, 9, -4, 'chalkTop', 'MULTIPLICATION TABLE', '60 seconds. 4 chips each.', '#a8d8f0', () => actions.openArithmetic('mul'),
       { ...chalk, prop: 'times', accent: 0xa8d8f0 });
 
     // the fourth operation takes the right-hand south table spot; its sign faces the room. (The left spot is kept clear on
     // purpose: a table there would hang its sign in front of the wall map and the flag.)
-    buildTable(zone, 5, 8, 'chalkTop', 'DIVISION TABLE', '60 seconds. 1 chip each.', '#cdb8f0', () => actions.openArithmetic('div'),
+    buildTable(zone, 5, 8, 'chalkTop', 'DIVISION TABLE', '60 seconds. 5 chips each.', '#cdb8f0', () => actions.openArithmetic('div'),
       { ...chalk, prop: 'divide', accent: 0xcdb8f0, facing: -1 });
 
     // room for more games: the casino's last table spot, kept clear on purpose
@@ -1650,5 +1655,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

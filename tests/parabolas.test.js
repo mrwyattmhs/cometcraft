@@ -65,7 +65,7 @@ for (let i = 0; i < 500; i++) {
   assert.ok(all.some(q => q.a === p.a && q.h === p.h && q.k === p.k));
 }
 const seeded = seed => () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let x = Math.imul(seed ^ (seed >>> 15), 1 | seed); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
-assert.deepStrictEqual(P.generate(seeded(9)), P.generate(seeded(9)));
+assert.deepStrictEqual(P.generate(3, seeded(9)), P.generate(3, seeded(9)));
 
 // the curve passes through the vertex and the mirror points
 const pts = P.curve(2, -2, -3, -9, 9, 1);
@@ -109,8 +109,23 @@ all.forEach(p => {
   assert.strictEqual(p.a * (0 - p.h) ** 2 + p.k, p.c, 'plugging in x = 0 gives c');
 });
 
-// the one wager
-assert.strictEqual(P.WAGER, 50);
-assert.strictEqual(P.payout(), 100);
+// three difficulty levels, each inside the next; Hard is everything the table can deal
+assert.deepStrictEqual(P.TIERS.map(t => t.name), ['Easy', 'Medium', 'Hard']);
+const lv = [1, 2, 3].map(l => P.candidates(l)), key = q => `${q.a},${q.h},${q.k}`;
+assert.deepStrictEqual(lv.map(l => l.length), [88, 316, 552], 'how many problems at each level');
+assert.deepStrictEqual(P.candidates().map(key), lv[2].map(key), 'with no level, everything (Hard)');
+[0, 1].forEach(i => { const bigger = new Set(lv[i + 1].map(key)); assert.ok(lv[i].every(q => bigger.has(key(q))), `every ${P.TIERS[i].name} problem is also a ${P.TIERS[i + 1].name} one`); });
+P.TIERS.forEach((t, i) => lv[i].forEach(q => {
+  assert.ok(t.a.includes(q.a) && Math.abs(q.h) >= 1 && Math.abs(q.h) <= t.hMax && Math.abs(q.k) <= t.kMax, `${key(q)} belongs to ${t.name}`);
+  assert.ok(Math.abs(q.c) <= 15 && q.b === -2 * q.a * q.h && q.c === q.a * q.h * q.h + q.k, `${key(q)} is a valid, whole-number problem`);
+}));
+assert.deepStrictEqual([...new Set(lv[0].map(q => q.a))].sort(), [-1, 1], 'Easy keeps a to 1 or -1');
+assert.ok(Math.max(...lv[0].map(q => Math.abs(q.h))) <= 2 && Math.max(...lv[1].map(q => Math.abs(q.a))) === 2);
+for (let level = 1; level <= 3; level++) for (let i = 0; i < 300; i++) { const p = P.generate(level); assert.strictEqual(p.level, level); assert.ok(lv[level - 1].some(q => key(q) === key(p)), `a level ${level} problem comes from level ${level}`); }
+assert.deepStrictEqual(P.generate(1, seeded(4)), P.generate(1, seeded(4)));
+// economy: a correct sketch pays by level at both graph tables, and a wrong one costs nothing
+assert.deepStrictEqual([1, 2, 3].map(l => P.payout(l)), [25, 50, 100]);
+assert.deepStrictEqual([1, 2, 3].map(l => P.payout(l, 'vertex')), [25, 50, 100]);
+assert.strictEqual(P.WAGER, undefined); assert.strictEqual(P.MULT, undefined);
 
 console.log(`parabola tests passed (${all.length} problems)`);

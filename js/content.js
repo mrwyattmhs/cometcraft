@@ -22,8 +22,9 @@ const CONTENT = {
     title: 'How to play',
     html: `
       <p>Follow the road straight ahead to the <b>Casino</b>. The shops are on your left and the fountain is on your right. Five tables are inside.</p>
-      <p><b>Practice table:</b> break each dice roll into prime factors. A miss costs nothing, and every number you solve earns you <b>20 chips</b>.</p>
-      <p><b>The other four</b> (radicals, trinomials, and two graphing tables) are wagers. You bet chips first, then get one shot.</p>
+      <p><b>Practice table:</b> break each dice roll into prime factors. A miss costs nothing. Easier rolls (2 dice) earn <b>10 chips</b>, and harder ones earn more, up to <b>50</b>.</p>
+      <p><b>The other four</b> (radicals, trinomials, and two graphing tables) let you pick a level, Easy up to Expert. Harder levels pay more, and a wrong answer never costs you chips.</p>
+      <p><b>Trophies:</b> get 100 right at any table and you win a trophy for the shelf in your room in Wilson Hall.</p>
       <p>Across the road from the shops is the <b>Arithmetic Academy</b>: timed practice tables for adding, subtracting, multiplying, and dividing.</p>
       <p>Follow the stone path round the south side of the school to the <b>Sandbox</b>. Build the shape that matches the blueprint board.</p>
       <p>Spend your chips on clothes, pencils, graphing calculators, and pets in the shops. Press <b>C</b> any time to open your closet.</p>`,

@@ -3,7 +3,7 @@
 const Store = (() => {
   const C = typeof Catalog !== 'undefined' ? Catalog : require('./catalog.js');
   const KEY = 'primetime.save.v1';
-  const MIN_CHIPS = 10; // wagers never take the wallet below this, so there's always a way back in
+  const MIN_CHIPS = 10; // addChips never takes the wallet below this (nothing is wagered any more, but the floor is kept)
   const FREE_IDS = Object.values(C.FREE);
 
   const fresh = () => ({
@@ -15,6 +15,9 @@ const Store = (() => {
     blueprintsSolved: 0,
     mapFound: [],            // two-letter codes of the states you have found on the map (first try)
     mapBestStreak: 0,        // most states in a row on the first try
+    solved: {},              // how many you have got right in each game, toward its trophy (see trophies.js). Starts at zero for everyone.
+    trophies: [],            // the trophies earned, in the order earned
+    remyPets: 0,             // how many times Remy has been petted, over the whole life of the save. The player is never shown this.
     dorm: [],                // the furniture in your dorm room: { type, x, z, rot } (Dorm.sanitize makes sure it fits)
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
@@ -37,6 +40,10 @@ const Store = (() => {
 
     state.blueprintsSolved = whole(state.blueprintsSolved);
     state.mapBestStreak = whole(state.mapBestStreak);
+    state.remyPets = whole(state.remyPets);
+    state.solved = state.solved && typeof state.solved === 'object' && !Array.isArray(state.solved)
+      ? Object.fromEntries(Object.entries(state.solved).filter(([k]) => /^[a-z]{2,12}$/.test(k)).map(([k, v]) => [k, whole(v)])) : {};
+    state.trophies = Array.isArray(state.trophies) ? [...new Set(state.trophies.filter(t => typeof t === 'string' && /^[a-z]{2,12}$/.test(t)))].slice(0, 30) : [];
     state.dorm = Array.isArray(state.dorm) ? state.dorm.filter(o => o && typeof o.type === 'string' && Number.isInteger(o.x) && Number.isInteger(o.z) && Number.isInteger(o.rot)).slice(0, 4).map(o => ({ type: o.type, x: o.x, z: o.z, rot: o.rot })) : [];
     state.mapFound = Array.isArray(state.mapFound) ? [...new Set(state.mapFound.filter(c => typeof c === 'string' && /^[A-Z]{2}$/.test(c)))].slice(0, 51) : [];
 
@@ -116,6 +123,17 @@ const Store = (() => {
     return true;
   }
 
+  /** Remy was petted. Counted at most once every two seconds, so tapping the key cannot run the number up. This count is for the
+      story to come: nothing on screen ever shows it. */
+  const REMY_COOLDOWN_MS = 2000;
+  let lastRemyPet = -Infinity;
+  function countRemyPet(nowMs = Date.now()) {
+    if (nowMs - lastRemyPet < REMY_COOLDOWN_MS) return false;
+    lastRemyPet = nowMs;
+    set({ remyPets: state.remyPets + 1 });
+    return true;
+  }
+
   /** A state found on the first try. Returns true the first time. */
   function markMapFound(code) {
     if (typeof code !== 'string' || !/^[A-Z]{2}$/.test(code) || state.mapFound.includes(code)) return false;
@@ -131,7 +149,7 @@ const Store = (() => {
   return {
     MIN_CHIPS,
     get: () => state,
-    set, addChips, earn, recordBest, markMapFound, recordMapStreak, spend, owns, own, equip,
+    set, addChips, earn, recordBest, countRemyPet, markMapFound, recordMapStreak, spend, owns, own, equip,
     onChange: fn => { listeners.push(fn); fn(state); },
     reset: () => set({ ...fresh() }),
   };

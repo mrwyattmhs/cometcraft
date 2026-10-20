@@ -1,9 +1,9 @@
 /* Mini-game: factor ax² + bx + c by "splitting the middle".
-   Wager first: the chip bet decides how hard the trinomial is (see TIERS in trinomials.js),
-   and it is dealt only after the bet is placed. One shot per trinomial.
+   Level first: the level you pick decides how hard the trinomial is (see TIERS in trinomials.js), and it is dealt only after you
+   pick. One shot per trinomial. A correct answer pays the level's chips; a wrong one costs nothing.
 
    The screen reveals itself in stages so there is never much on it:
-     bet     only the four wager cards
+     bet     only the four level cards
      1       only the two number slots (m·n = a·c, m + n = b)
      2       the big rewrite line appears, then step 2 opens:
              GCF of each pair + what is left inside each set of parentheses
@@ -13,7 +13,7 @@
    The math lives in trinomials.js; this file is only the interface. */
 const TrinomialGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 18; // must match Trinomials.BUILD
+  const BUILD = 19; // must match Trinomials.BUILD
   const SLOTS = 8;
   const SLOT_NAMES = [
     'Split, first number', 'Split, second number',
@@ -24,7 +24,7 @@ const TrinomialGame = (() => {
   let problem = null;
   let slots = Array(SLOTS).fill(null);
   let state = 'idle'; // idle | betting | playing | done
-  let bet = 0; // the locked-in wager for the current trinomial
+  let level = 0; // the level of the current trinomial (1 to 4)
   let wired = false;
   let invStage = null; // which palette is currently built
   const slotEls = [];
@@ -106,20 +106,21 @@ const TrinomialGame = (() => {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'btn bet-card bet';
-      b.dataset.bet = t.bet;
+      b.dataset.level = t.level;
       b.innerHTML =
-        `<span class="bet-amt">${t.bet} chips</span>` +
+        `<span class="bet-amt">${t.name}</span>` +
         `<span class="bet-desc">${t.desc}</span>` +
-        `<span class="bet-win">Win ${Trinomials.payout(t.bet)}</span>`;
-      b.addEventListener('click', () => chooseBet(t.bet));
+        `<span class="bet-win">Pays ${t.pay} chips</span>`;
+      b.addEventListener('click', () => chooseLevel(t.level));
       $('tri-bets').appendChild(b);
     });
+    $('tri-wallet').parentNode.insertBefore(Trophies.chip('trinomial'), $('tri-wallet'));
     Store.onChange(() => { $('tri-wallet').textContent = `${Store.get().chips} chips`; if (state !== 'idle') render(); });
   }
 
   /** Stage 1 offers only plain numbers; once step 2 opens the x-terms join them. */
   function buildInventory(numbersOnly) {
-    const pal = Trinomials.palette(bet);
+    const pal = Trinomials.palette(level);
     const blocks = [];
     if (!numbersOnly) for (let k = -pal.xMax; k <= pal.xMax; k++) if (k) blocks.push(Trinomials.term(k, 1));
     for (let k = -pal.constMax; k <= pal.constMax; k++) if (k) blocks.push(Trinomials.term(k, 0));
@@ -162,10 +163,10 @@ const TrinomialGame = (() => {
 
   const isOpen = () => !$('tri').classList.contains('hidden');
 
-  /** Back to the wager screen. The trinomial is not dealt until a bet is placed. */
+  /** Back to the level screen. The trinomial is not dealt until a level is chosen. */
   function newProblem() {
     problem = null;
-    bet = 0;
+    level = 0;
     slots = Array(SLOTS).fill(null);
     state = 'betting';
     invStage = null;
@@ -178,10 +179,10 @@ const TrinomialGame = (() => {
     render();
   }
 
-  function chooseBet(amount) {
-    if (state !== 'betting' || amount > Store.get().chips) return;
-    bet = amount;
-    problem = Trinomials.generate(bet);
+  function chooseLevel(chosen) {
+    if (state !== 'betting') return;
+    level = chosen;
+    problem = Trinomials.generate(level);
     slots = Array(SLOTS).fill(null);
     state = 'playing';
     invStage = null; // force the palette to rebuild
@@ -213,15 +214,14 @@ const TrinomialGame = (() => {
     const res = Trinomials.check(problem, slots);
     const s = Store.get();
     if (res.ok) {
-      const win = Trinomials.payout(bet);
-      Store.addChips(win);
+      const win = Trinomials.payout(level);
+      Store.earn(win);
       Store.set({ trinomialWins: s.trinomialWins + 1 });
-      finish(res, `Correct! You bet ${bet} and won ${win} chips (${Trinomials.multiplier(bet)}x).`, 'good');
+      Trophies.award('trinomial');
+      finish(res, `Correct! +${win} chips.`, 'good');
     } else {
-      const floored = Store.addChips(-bet);
       Store.set({ trinomialLosses: s.trinomialLosses + 1 });
-      finish(res, `Not this time. You lose ${bet} chips.` +
-        (floored ? ` The house tops you up to ${Store.MIN_CHIPS} chips so you can keep playing.` : ''), 'bad');
+      finish(res, 'Not this time. Nothing lost. Here is how it works.', 'bad');
     }
   }
 
@@ -268,16 +268,6 @@ const TrinomialGame = (() => {
     $('tri').dataset.state = state;
     $('tri').dataset.stage = stage;
 
-    const chips = Store.get().chips;
-    let anyLocked = false;
-    document.querySelectorAll('#tri-bets .bet').forEach(btn => {
-      const amount = parseInt(btn.dataset.bet, 10);
-      const locked = amount > chips;
-      anyLocked = anyLocked || locked;
-      btn.disabled = locked;
-      btn.querySelector('.bet-win').textContent = locked ? `Need ${amount} chips` : `Win ${Trinomials.payout(amount)}`;
-    });
-    $('tri-lowhint').classList.toggle('hidden', !anyLocked);
     for (let i = 0; i < SLOTS; i++) {
       slotEls[i].innerHTML = slots[i] === null ? '' : blockHTML(slots[i]);
       slotEls[i].setAttribute('aria-label', slots[i] === null
@@ -285,12 +275,12 @@ const TrinomialGame = (() => {
         : `${SLOT_NAMES[i]}: ${Trinomials.fmtBlock(slots[i])}. Click to remove.`);
     }
 
-    if (!problem) return; // still on the wager screen
+    if (!problem) return; // still on the level screen
 
     if (stage !== 'done' && stage !== invStage) { invStage = stage; buildInventory(stage === '1'); }
 
     const { a, b, c } = problem;
-    $('tri-wager').textContent = `Wager: ${bet} chips. Win ${Trinomials.payout(bet)} if you get it right.`;
+    $('tri-wager').textContent = `Level: ${Trinomials.tierFor(level).name}. Pays ${Trinomials.payout(level)} chips if you get it right.`;
     $('tri-poly').textContent = Trinomials.fmtTrinomial(problem);
     $('tri-hint1').textContent = `Pick two numbers that multiply to ${a * c} and add to ${b}.`;
 

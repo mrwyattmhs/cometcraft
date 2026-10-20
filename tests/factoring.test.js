@@ -47,12 +47,10 @@ for (let i = 0; i < 500; i++) {
   assert.strictEqual(r.dice.reduce((a, b) => a + b, 0), r.sum);
 }
 
-// economy
-assert.strictEqual(F.wagerMultiplier([37]), 1);
-assert.strictEqual(F.wagerPayout(10, F.primeFactors(37)), 10);
-assert.strictEqual(F.wagerPayout(10, F.primeFactors(48)), 30);
-// practice pays a flat 20 chips for every solved round, whatever the dice setting
-[2, 3, 4].forEach(n => assert.strictEqual(F.practiceReward(n), 20));
-assert.strictEqual(F.PRACTICE_REWARD, 20);
+// economy: practice pays by the number of dice (a harder number pays more), and there is no wagering
+assert.deepStrictEqual([2, 3, 4].map(F.practiceReward), [10, 25, 50], '2 dice 10 chips, 3 dice 25, 4 dice 50');
+assert.strictEqual(F.practiceReward(9), 25, 'an unknown setting falls back to the middle one');
+assert.ok(F.practiceReward(4) > F.practiceReward(3) && F.practiceReward(3) > F.practiceReward(2), 'more dice, more chips');
+assert.strictEqual(F.wagerMultiplier, undefined); assert.strictEqual(F.wagerPayout, undefined); assert.strictEqual(F.PRACTICE_REWARD, undefined);
 
 console.log('factoring tests passed');

@@ -9,20 +9,21 @@
      { factors: [2,2,2,2,3], pairs: [[0,1],[2,3]], outside: 4, inside: 3 }
    `pairs` holds indexes into `factors`. */
 const Radicals = (() => {
-  const BUILD = 18; // bump together with radical-game.js and the ?v= numbers in index.html
+  const BUILD = 19; // bump together with radical-game.js and the ?v= numbers in index.html
+  const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const F = typeof Factoring !== 'undefined' ? Factoring : require('./factoring.js');
 
-  /* ---------- wager tiers: a bigger bet deals a bigger radicand ---------- */
+  /* ---------- difficulty levels: a harder level deals a bigger radicand and pays more ---------- */
   // N = k² · m with m squarefree (so k is the number that comes out, m stays in).
   // kMin..kMax / mMax shape the problem, nMin..nMax bound N. primeMax is the largest
   // prime gem offered; numMax is how far the answer palette (1..numMax) reaches.
   const TIERS = [
-    { bet: 10,  mult: 1,   desc: 'Roots up to 63',  kMin: 2, kMax: 3,  mMax: 7,  nMin: 8,   nMax: 63,  primeMax: 7,  numMax: 12 },
-    { bet: 25,  mult: 1.5, desc: 'Roots up to 150', kMin: 2, kMax: 5,  mMax: 15, nMin: 40,  nMax: 150, primeMax: 13, numMax: 16 },
-    { bet: 50,  mult: 2,   desc: 'Roots up to 300', kMin: 2, kMax: 8,  mMax: 15, nMin: 100, nMax: 300, primeMax: 13, numMax: 20 },
-    { bet: 100, mult: 3,   desc: 'Roots up to 600', kMin: 2, kMax: 10, mMax: 15, nMin: 200, nMax: 600, primeMax: 17, numMax: 24 },
+    { level: 1, name: 'Easy',   pay: E.PAY.radical[0], desc: 'Roots up to 63',  kMin: 2, kMax: 3,  mMax: 7,  nMin: 8,   nMax: 63,  primeMax: 7,  numMax: 12 },
+    { level: 2, name: 'Medium', pay: E.PAY.radical[1], desc: 'Roots up to 150', kMin: 2, kMax: 5,  mMax: 15, nMin: 40,  nMax: 150, primeMax: 13, numMax: 16 },
+    { level: 3, name: 'Hard',   pay: E.PAY.radical[2], desc: 'Roots up to 300', kMin: 2, kMax: 8,  mMax: 15, nMin: 100, nMax: 300, primeMax: 13, numMax: 20 },
+    { level: 4, name: 'Expert', pay: E.PAY.radical[3], desc: 'Roots up to 600', kMin: 2, kMax: 10, mMax: 15, nMin: 200, nMax: 600, primeMax: 17, numMax: 24 },
   ];
-  const tierFor = bet => TIERS.find(t => t.bet === bet) || TIERS[0];
+  const tierFor = level => TIERS.find(t => t.level === level) || TIERS[0];
 
   const isSquarefree = m => {
     const f = F.primeFactors(m);
@@ -30,8 +31,8 @@ const Radicals = (() => {
   };
 
   /** Every (k, m) the tier can deal. Exposed so tests and the UI can see the variety. */
-  function candidates(bet) {
-    const t = tierFor(bet);
+  function candidates(level) {
+    const t = tierFor(level);
     const out = [];
     for (let k = t.kMin; k <= t.kMax; k++) {
       for (let m = 2; m <= t.mMax; m++) {
@@ -42,19 +43,19 @@ const Radicals = (() => {
     return out;
   }
 
-  function generate(bet, rng = Math.random) {
-    const t = tierFor(bet);
-    const list = candidates(bet);
+  function generate(level, rng = Math.random) {
+    const t = tierFor(level);
+    const list = candidates(level);
     const c = list[Math.floor(rng() * list.length)];
-    return { bet: t.bet, k: c.k, m: c.m, n: c.n, factors: F.primeFactors(c.n) };
+    return { level: t.level, k: c.k, m: c.m, n: c.n, factors: F.primeFactors(c.n) };
   }
 
-  const palette = bet => {
-    const t = tierFor(bet);
+  const palette = level => {
+    const t = tierFor(level);
     return { primes: F.primesUpTo(t.primeMax), numMax: t.numMax };
   };
-  const multiplier = bet => tierFor(bet).mult;
-  const payout = bet => Math.round(bet * multiplier(bet));
+  /** Chips for a correct answer at this level. A wrong answer costs nothing. */
+  const payout = level => tierFor(level).pay;
 
   /* ---------- formatting ---------- */
   const fmtRoot = list => (list.length === 1 ? `√${list[0]}` : `√(${list.join(' · ')})`);
@@ -116,7 +117,7 @@ const Radicals = (() => {
     };
   }
 
-  return { BUILD, TIERS, tierFor, candidates, generate, palette, multiplier, payout, fmtRoot, fmtAnswer, check, solution };
+  return { BUILD, TIERS, tierFor, candidates, generate, palette, payout, fmtRoot, fmtAnswer, check, solution };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Radicals;

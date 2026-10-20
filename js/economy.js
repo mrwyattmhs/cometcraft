@@ -1,0 +1,27 @@
+/* Every payout in the game, in one place, so they are easy to tune. No wagering anywhere: a correct answer pays, a wrong one
+   costs nothing. Harder levels pay more.
+
+   Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
+const Economy = (() => {
+  const BUILD = 19; // bump together with the ?v= numbers in index.html
+  const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
+  const PAY = {
+    // casino tables (chips for each correct answer, by level)
+    practice: { 2: 10, 3: 25, 4: 50 },     // by the number of dice you throw: 2 is Easy, 3 Medium, 4 Hard
+    radical: [10, 25, 50, 100],
+    trinomial: [10, 25, 50, 100],
+    parabola: [25, 50, 100],
+    vertex: [25, 50, 100],
+    // Arithmetic Academy: chips for each correct answer
+    arithmetic: { add: 2, sub: 2, mul: 4, div: 5 },
+    // the wall map: chips for each state found on the first try
+    map: 5,
+    // the sandbox: chips for each blueprint solved, by level
+    blueprint: [50, 100, 150, 200],
+  };
+  /** The name of a level: levelName(2, 4) is "Medium". */
+  const levelName = level => LEVELS[Math.max(0, Math.min(LEVELS.length - 1, level - 1))];
+  return { BUILD, LEVELS, PAY, levelName };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = Economy;

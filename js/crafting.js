@@ -1,20 +1,15 @@
-/* Mini-game: throw d20s, then craft their sum out of prime gems.
-   Both modes share this one grid; the mode only changes the rules:
-     practice: live product, free retries, small flat reward
-     wager:    hidden product, bet chips, one shot, bigger payout */
+/* Mini-game: throw d20s, then craft their sum out of prime gems. The live product is shown, retries are free, and a solved round
+   pays by the number of dice you threw (2 dice 10 chips, 3 dice 25, 4 dice 50). */
 const CraftingGame = (() => {
   const $ = id => document.getElementById(id);
   const GRID = 9;
-  const BETS = [10, 25, 50, 100];
   const PRIMES = Factoring.primesUpTo(100);
   const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  let mode = 'practice';
   let diceCount = 3;
   let state = 'idle'; // idle | rolling | playing | done
   let round = null;
   let slots = Array(GRID).fill(null);
-  let bet = 10;
   let timer = null;
   let wired = false;
 
@@ -47,20 +42,13 @@ const CraftingGame = (() => {
     $('btn-craft').addEventListener('click', craft);
     $('btn-next').addEventListener('click', newRound);
     $('dice-count').addEventListener('change', e => { diceCount = parseInt(e.target.value, 10); newRound(); });
-    document.querySelectorAll('#bet-row .bet').forEach(b => {
-      b.addEventListener('click', () => {
-        if (state === 'playing' || state === 'rolling') { bet = parseInt(b.dataset.bet, 10); render(); }
-      });
-    });
+    $('craft-wallet').parentNode.insertBefore(Trophies.chip('practice'), $('craft-wallet'));
     Store.onChange(() => { $('craft-wallet').textContent = `${Store.get().chips} chips`; if (round) render(); });
   }
 
   /* ---------- open / close ---------- */
-  function open(m) {
+  function open() {
     wire();
-    mode = m;
-    $('craft-title').textContent = m === 'practice' ? 'Practice Table' : 'Wager Table';
-    $('bet-row').classList.toggle('hidden', m !== 'wager');
     $('dice-count').value = String(diceCount);
     $('craft').classList.remove('hidden');
     UI.setOpen('craft', true);
@@ -80,9 +68,6 @@ const CraftingGame = (() => {
   /* ---------- rounds ---------- */
   function newRound() {
     clearInterval(timer);
-    const chips = Store.get().chips;
-    if (bet > chips) bet = Math.max(...BETS.filter(b => b <= chips), BETS[0]);
-
     round = { ...Factoring.rollDice(diceCount), placements: 0 };
     round.factors = Factoring.primeFactors(round.sum);
     slots = Array(GRID).fill(null);
@@ -124,9 +109,7 @@ const CraftingGame = (() => {
     state = 'playing';
     $('dice-sum').textContent = `${round.dice.join(' + ')} = ${round.sum}`;
     $('target').textContent = round.sum;
-    setMsg(mode === 'practice'
-      ? 'Break the number into primes. Click a gem, or drag it into the grid.'
-      : 'Pick your bet, then craft. You only get one shot.');
+    setMsg('Break the number into primes. Click a gem, or drag it into the grid.');
     render();
   }
 
@@ -171,27 +154,16 @@ const CraftingGame = (() => {
     const ok = Factoring.isValidFactorization(placed, round.sum);
     const s = Store.get();
 
-    if (mode === 'practice') {
-      if (!ok) {
-        setMsg(`Not yet. Your primes multiply to ${prod}, and the target is ${round.sum}.`, 'bad');
-        shake();
-        return;
-      }
-      const reward = Factoring.practiceReward(diceCount);
-      Store.addChips(reward);
-      Store.set({ practiceWins: s.practiceWins + 1 });
-      finish(`Crafted! +${reward} chips. Solved in ${round.placements} placement${round.placements === 1 ? '' : 's'}.`, 'good');
-    } else if (ok) {
-      const win = Factoring.wagerPayout(bet, round.factors);
-      Store.addChips(win);
-      Store.set({ wagerWins: s.wagerWins + 1 });
-      finish(`Correct! You bet ${bet} and won ${win} chips (${Factoring.wagerMultiplier(round.factors)}x).`, 'good');
-    } else {
-      const floored = Store.addChips(-bet);
-      Store.set({ wagerLosses: s.wagerLosses + 1 });
-      finish(`Not this time. You lose ${bet} chips. Your primes multiply to ${prod}.` +
-        (floored ? ` The house tops you up to ${Store.MIN_CHIPS} chips so you can keep playing.` : ''), 'bad');
+    if (!ok) {
+      setMsg(`Not yet. Your primes multiply to ${prod}, and the target is ${round.sum}.`, 'bad');
+      shake();
+      return;
     }
+    const reward = Factoring.practiceReward(diceCount);
+    Store.earn(reward);
+    Store.set({ practiceWins: s.practiceWins + 1 });
+    Trophies.award('practice');
+    finish(`Crafted! +${reward} chips. Solved in ${round.placements} placement${round.placements === 1 ? '' : 's'}.`, 'good');
   }
 
   function finish(msg, kind) {
@@ -225,7 +197,7 @@ const CraftingGame = (() => {
 
   function render() {
     $('craft').dataset.state = state;
-    $('craft').dataset.mode = mode;
+    $('craft-pay').textContent = `Pays ${Factoring.practiceReward(diceCount)} chips`;
 
     document.querySelectorAll('#grid .slot').forEach((el, i) => {
       el.innerHTML = slots[i] === null ? '' : gemHTML(slots[i]);
@@ -236,27 +208,13 @@ const CraftingGame = (() => {
     const prod = placed.length ? Factoring.product(placed) : null;
     const out = $('output');
     let shown, match;
-    if (mode === 'practice') {
-      shown = prod === null ? '' : prod;
-      match = round && prod === round.sum;
-    } else {
-      shown = state === 'done' ? (prod === null ? '' : prod) : '?';
-      match = state === 'done' && round && prod === round.sum;
-    }
+    shown = prod === null ? '' : prod;
+    match = round && prod === round.sum;
     $('output-val').textContent = shown;
     out.classList.toggle('match', !!match);
-    out.classList.toggle('miss', mode === 'wager' && state === 'done' && !match);
 
     $('btn-craft').disabled = state !== 'playing' || !placed.length;
     $('btn-clear').disabled = state !== 'playing' || !placed.length;
-
-    const chips = Store.get().chips;
-    document.querySelectorAll('#bet-row .bet').forEach(b => {
-      const v = parseInt(b.dataset.bet, 10);
-      b.disabled = v > chips || state === 'done';
-      b.classList.toggle('selected', v === bet);
-      b.setAttribute('aria-pressed', v === bet ? 'true' : 'false');
-    });
   }
 
   /* ---------- factor tree (shown after every round) ---------- */

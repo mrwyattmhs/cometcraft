@@ -4,7 +4,7 @@ const R = require('../js/radicals.js');
 const F = require('../js/factoring.js');
 
 // a hand-checked example: √48 = 4√3
-const p48 = { bet: 25, k: 4, m: 3, n: 48, factors: F.primeFactors(48) };
+const p48 = { level: 2, k: 4, m: 3, n: 48, factors: F.primeFactors(48) };
 const s48 = R.solution(p48);
 assert.deepStrictEqual(s48.lines, [
   '√48',
@@ -68,9 +68,9 @@ assert.strictEqual(R.check(p48, { factors: [], pairs: [], outside: 1, inside: 1 
 // tiers: every candidate is valid, squarefree inside, in band, and inside the palette
 let prevMean = 0;
 for (const t of R.TIERS) {
-  const list = R.candidates(t.bet);
-  assert.ok(list.length >= 10, `tier ${t.bet} has variety (${list.length})`);
-  const pal = R.palette(t.bet);
+  const list = R.candidates(t.level);
+  assert.ok(list.length >= 10, `level ${t.level} has variety (${list.length})`);
+  const pal = R.palette(t.level);
   list.forEach(({ k, m, n }) => {
     assert.strictEqual(n, k * k * m);
     assert.ok(n >= t.nMin && n <= t.nMax);
@@ -87,20 +87,22 @@ for (const t of R.TIERS) {
   });
   // generation matches the candidate list and is reproducible
   for (let i = 0; i < 300; i++) {
-    const pr = R.generate(t.bet);
+    const pr = R.generate(t.level);
     assert.ok(list.some(c => c.n === pr.n && c.k === pr.k && c.m === pr.m));
     assert.strictEqual(F.product(pr.factors), pr.n);
-    assert.strictEqual(pr.bet, t.bet);
+    assert.strictEqual(pr.level, t.level);
   }
   const mean = list.reduce((a, c) => a + c.n, 0) / list.length;
-  assert.ok(mean > prevMean, 'bigger wager means bigger radicands on average');
+  assert.ok(mean > prevMean, 'a harder level means bigger radicands on average');
   prevMean = mean;
-  console.log(`tier ${t.bet}: ${list.length} radicals, mean N = ${mean.toFixed(0)}`);
+  console.log(`level ${t.level} (${t.name}): ${list.length} radicals, mean N = ${mean.toFixed(0)}`);
 }
 const seeded = seed => () => { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; let x = Math.imul(seed ^ (seed >>> 15), 1 | seed); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
-assert.deepStrictEqual(R.generate(50, seeded(3)), R.generate(50, seeded(3)));
+assert.deepStrictEqual(R.generate(3, seeded(3)), R.generate(3, seeded(3)));
 
 // economy
-assert.deepStrictEqual([10, 25, 50, 100].map(R.payout), [10, 38, 100, 300]);
+assert.deepStrictEqual([1, 2, 3, 4].map(R.payout), [10, 25, 50, 100], 'Easy, Medium, Hard, Expert pay 10, 25, 50, 100');
+assert.deepStrictEqual(R.TIERS.map(t => t.name), ['Easy', 'Medium', 'Hard', 'Expert']);
+assert.strictEqual(R.multiplier, undefined, 'no multipliers: a level pays what it pays');
 
 console.log('radical tests passed');

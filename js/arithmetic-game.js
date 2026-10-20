@@ -8,7 +8,14 @@
    right away. The rules of a round live in arithmetic.js; this file is the screen. */
 const ArithmeticGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 18; // must match Arithmetic.BUILD
+  let chipEl = null;
+  /** The "Trophy: 37 of 100" label for whichever table is open. */
+  function mountTrophyChip() {
+    if (chipEl) chipEl.remove();
+    chipEl = Trophies.chip(op);
+    $('arith-wallet').parentNode.insertBefore(chipEl, $('arith-wallet'));
+  }
+  const BUILD = 19; // must match Arithmetic.BUILD
   const MAX_DIGITS = 3;
   const SAID = { add: 'plus', sub: 'minus', mul: 'times', div: 'divided by' };   // for screen readers
   const TICK_MS = 100;
@@ -103,12 +110,13 @@ const ArithmeticGame = (() => {
     $('arith-title').textContent = s.name;
 
     const list = $('arith-rule-list');
+    mountTrophyChip();
     list.innerHTML = '';
     [
       `You have ${Arithmetic.DURATION_MS / 1000} seconds. Solve as many problems as you can.`,
       s.rule,
       'Type your answer and press Enter, or tap the number pad.',
-      `Every correct answer earns ${Arithmetic.REWARD} chip, right away.`,
+      `Every correct answer earns ${Arithmetic.rewardFor(op)} chips, right away.`,
       'A wrong answer earns nothing, and you move on to the next one.',
     ].forEach(t => list.appendChild(el('li', '', t)));
 
@@ -155,8 +163,10 @@ const ArithmeticGame = (() => {
     if (r.ignored) { setFeedback('Type your answer first.', 'hint'); return; }
     typed = '';
     if (r.ok) {
-      Store.earn(Arithmetic.REWARD);
-      setFeedback(`Yes! +${Arithmetic.REWARD} chip`, 'good');
+      const pay = Arithmetic.rewardFor(op);
+      Store.earn(pay);
+      Trophies.award(op);
+      setFeedback(`Yes! +${pay} chips`, 'good');
     } else {
       setFeedback(`Not quite: ${eq(r.problem)}`, 'bad');
     }

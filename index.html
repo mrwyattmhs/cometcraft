@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=18">
+  <link rel="stylesheet" href="css/style.css?v=19">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -19,6 +19,7 @@
     <div id="sandbox-hud" class="hidden"><div id="sandbox-text"></div><canvas id="sandbox-map" width="242" height="236"></canvas></div>
     <div id="prompt" class="hidden"></div>
     <div id="toast" role="status"></div>
+  <div id="trophy-banner" class="hidden" role="status" aria-live="polite"></div>
   </div>
 
   <div id="start-screen">
@@ -27,7 +28,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 18</p>
+      <p class="fine build">Build 19</p>
     </div>
   </div>
 
@@ -45,6 +46,7 @@
               <option value="4">4</option>
             </select>
           </label>
+          <span id="craft-pay" class="pay-chip"></span>
           <span id="craft-wallet" class="wallet-chip">0 chips</span>
           <button id="craft-close" class="btn small" type="button">Leave table</button>
         </div>
@@ -69,14 +71,6 @@
           <h3>Prime gems</h3>
           <div id="inventory" class="inventory"></div>
         </div>
-      </div>
-
-      <div id="bet-row" class="bet-row hidden">
-        <span>Bet</span>
-        <button class="btn small bet" type="button" data-bet="10">10</button>
-        <button class="btn small bet" type="button" data-bet="25">25</button>
-        <button class="btn small bet" type="button" data-bet="50">50</button>
-        <button class="btn small bet" type="button" data-bet="100">100</button>
       </div>
 
       <div id="craft-msg" class="msg" role="status" aria-live="polite"></div>
@@ -116,9 +110,8 @@
       </div>
 
       <div id="tri-bet-row" class="tri-bets">
-        <p class="bet-prompt">Place your wager first. A bigger wager deals a harder trinomial and pays more.</p>
+        <p class="bet-prompt">Pick a level first. A harder level deals a harder trinomial and pays more.</p>
         <div id="tri-bets" class="bet-grid"></div>
-        <p id="tri-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock the bigger wagers.</p>
       </div>
 
       <div id="tri-msg" class="msg" role="status" aria-live="polite"></div>
@@ -128,7 +121,7 @@
       <div class="craft-actions">
         <button id="tri-clear" class="btn" type="button">Clear blocks</button>
         <button id="tri-craft" class="btn primary" type="button">Craft</button>
-        <button id="tri-next" class="btn primary hidden" type="button">Place next wager</button>
+        <button id="tri-next" class="btn primary hidden" type="button">Next problem</button>
       </div>
 
     </div>
@@ -167,9 +160,8 @@
       <div id="rad-wager" class="wager-line"></div>
 
       <div id="rad-bet-row" class="tri-bets">
-        <p class="bet-prompt">Place your wager first. A bigger wager deals a bigger square root and pays more.</p>
+        <p class="bet-prompt">Pick a level first. A harder level deals a bigger square root and pays more.</p>
         <div id="rad-bets" class="bet-grid"></div>
-        <p id="rad-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock the bigger wagers.</p>
       </div>
 
       <section id="rad-felt" class="felt" aria-label="Square root to simplify">
@@ -216,7 +208,7 @@
 
       <div class="craft-actions">
         <button id="rad-craft" class="btn primary" type="button">Craft</button>
-        <button id="rad-next" class="btn primary hidden" type="button">Place next wager</button>
+        <button id="rad-next" class="btn primary hidden" type="button">Next problem</button>
       </div>
     </div>
   </div>
@@ -234,9 +226,8 @@
       <div id="par-wager" class="wager-line"></div>
 
       <div id="par-bet-row" class="tri-bets">
-        <p class="bet-prompt">Place your wager first. It costs 50 chips to graph a parabola, and a correct sketch pays double.</p>
+        <p class="bet-prompt">Pick a level first. A harder level deals a steeper parabola, farther from the center, and pays more.</p>
         <div id="par-bets" class="bet-grid"></div>
-        <p id="par-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock this one.</p>
       </div>
 
       <div id="par-main" class="par-main">
@@ -268,7 +259,7 @@
 
       <div class="craft-actions">
         <button id="par-craft" class="btn primary" type="button">Craft</button>
-        <button id="par-next" class="btn primary hidden" type="button">Place next wager</button>
+        <button id="par-next" class="btn primary hidden" type="button">Next problem</button>
       </div>
     </div>
   </div>
@@ -286,9 +277,8 @@
       <div id="vtx-wager" class="wager-line"></div>
 
       <div id="vtx-bet-row" class="tri-bets">
-        <p class="bet-prompt">Place your wager first. It costs 50 chips to graph a parabola from vertex form, and a correct sketch pays double.</p>
+        <p class="bet-prompt">Pick a level first. A harder level deals a steeper parabola, farther from the center, and pays more.</p>
         <div id="vtx-bets" class="bet-grid"></div>
-        <p id="vtx-lowhint" class="bet-low hidden">Low on chips? Win some at the Practice table to unlock this one.</p>
       </div>
 
       <div id="vtx-main" class="par-main">
@@ -320,7 +310,7 @@
 
       <div class="craft-actions">
         <button id="vtx-craft" class="btn primary" type="button">Craft</button>
-        <button id="vtx-next" class="btn primary hidden" type="button">Place next wager</button>
+        <button id="vtx-next" class="btn primary hidden" type="button">Next problem</button>
       </div>
     </div>
   </div>
@@ -428,36 +418,38 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/factoring.js?v=18"></script>
-  <script src="js/catalog.js?v=18"></script>
-  <script src="js/store.js?v=18"></script>
-  <script src="js/content.js?v=18"></script>
-  <script src="js/textures.js?v=18"></script>
-  <script src="js/avatar.js?v=18"></script>
-  <script src="js/pets.js?v=18"></script>
-  <script src="js/dorm.js?v=18"></script>
-  <script src="js/dormroom.js?v=18"></script>
-  <script src="js/usmap-data.js?v=18"></script>
-  <script src="js/usmap.js?v=18"></script>
-  <script src="js/flag.js?v=18"></script>
-  <script src="js/blueprint.js?v=18"></script>
-  <script src="js/sandbox.js?v=18"></script>
-  <script src="js/world.js?v=18"></script>
-  <script src="js/showcase.js?v=18"></script>
-  <script src="js/player.js?v=18"></script>
-  <script src="js/ui.js?v=18"></script>
-  <script src="js/shop.js?v=18"></script>
-  <script src="js/crafting.js?v=18"></script>
-  <script src="js/trinomials.js?v=18"></script>
-  <script src="js/trinomial-game.js?v=18"></script>
-  <script src="js/radicals.js?v=18"></script>
-  <script src="js/radical-game.js?v=18"></script>
-  <script src="js/parabolas.js?v=18"></script>
-  <script src="js/parabola-game.js?v=18"></script>
-  <script src="js/arithmetic.js?v=18"></script>
-  <script src="js/arithmetic-game.js?v=18"></script>
-  <script src="js/map-game.js?v=18"></script>
-  <script src="js/dorm-planner.js?v=18"></script>
-  <script src="js/main.js?v=18"></script>
+  <script src="js/economy.js?v=19"></script>
+  <script src="js/factoring.js?v=19"></script>
+  <script src="js/catalog.js?v=19"></script>
+  <script src="js/store.js?v=19"></script>
+  <script src="js/trophies.js?v=19"></script>
+  <script src="js/content.js?v=19"></script>
+  <script src="js/textures.js?v=19"></script>
+  <script src="js/avatar.js?v=19"></script>
+  <script src="js/pets.js?v=19"></script>
+  <script src="js/dorm.js?v=19"></script>
+  <script src="js/dormroom.js?v=19"></script>
+  <script src="js/usmap-data.js?v=19"></script>
+  <script src="js/usmap.js?v=19"></script>
+  <script src="js/flag.js?v=19"></script>
+  <script src="js/blueprint.js?v=19"></script>
+  <script src="js/sandbox.js?v=19"></script>
+  <script src="js/world.js?v=19"></script>
+  <script src="js/showcase.js?v=19"></script>
+  <script src="js/player.js?v=19"></script>
+  <script src="js/ui.js?v=19"></script>
+  <script src="js/shop.js?v=19"></script>
+  <script src="js/crafting.js?v=19"></script>
+  <script src="js/trinomials.js?v=19"></script>
+  <script src="js/trinomial-game.js?v=19"></script>
+  <script src="js/radicals.js?v=19"></script>
+  <script src="js/radical-game.js?v=19"></script>
+  <script src="js/parabolas.js?v=19"></script>
+  <script src="js/parabola-game.js?v=19"></script>
+  <script src="js/arithmetic.js?v=19"></script>
+  <script src="js/arithmetic-game.js?v=19"></script>
+  <script src="js/map-game.js?v=19"></script>
+  <script src="js/dorm-planner.js?v=19"></script>
+  <script src="js/main.js?v=19"></script>
 </body>
 </html>
