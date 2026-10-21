@@ -17,6 +17,8 @@ const Store = (() => {
     mapBestStreak: 0,        // most states in a row on the first try
     solved: {},              // how many you have got right in each game, toward its trophy (see trophies.js). Starts at zero for everyone.
     trophies: [],            // the trophies earned, in the order earned
+    reading: {},             // your place in each Little Library book: { bookId: pageNumber }, saved every time you turn a page
+    readerFont: 2,           // the reader's text size, 0 (smallest) to 4
     remyPets: 0,             // how many times Remy has been petted, over the whole life of the save. The player is never shown this.
     dorm: [],                // the furniture in your dorm room: { type, x, z, rot } (Dorm.sanitize makes sure it fits)
     owned: [...FREE_IDS],
@@ -41,6 +43,9 @@ const Store = (() => {
     state.blueprintsSolved = whole(state.blueprintsSolved);
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
+    state.reading = state.reading && typeof state.reading === 'object' && !Array.isArray(state.reading)
+      ? Object.fromEntries(Object.entries(state.reading).filter(([k, v]) => /^[a-z]{2,12}$/.test(k) && whole(v) >= 1).map(([k, v]) => [k, Math.min(9999, whole(v))])) : {};
+    state.readerFont = Math.min(4, Math.max(0, Number.isInteger(state.readerFont) ? state.readerFont : 2));
     state.solved = state.solved && typeof state.solved === 'object' && !Array.isArray(state.solved)
       ? Object.fromEntries(Object.entries(state.solved).filter(([k]) => /^[a-z]{2,12}$/.test(k)).map(([k, v]) => [k, whole(v)])) : {};
     state.trophies = Array.isArray(state.trophies) ? [...new Set(state.trophies.filter(t => typeof t === 'string' && /^[a-z]{2,12}$/.test(t)))].slice(0, 30) : [];

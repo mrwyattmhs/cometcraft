@@ -12,7 +12,7 @@
    The same problems are shown two ways: standard form (parabola table) and vertex form
    (vertex table). Only the display, the vertex check, and the worked steps differ. */
 const Parabolas = (() => {
-  const BUILD = 19; // bump together with parabola-game.js and the ?v= numbers in index.html
+  const BUILD = 20; // bump together with parabola-game.js and the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const T = typeof Trinomials !== 'undefined' ? Trinomials : require('./trinomials.js');
 

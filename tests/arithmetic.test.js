@@ -213,6 +213,16 @@ assert.strictEqual(S.countRemyPet(3000), true, 'two seconds later it counts agai
 for (let t = 3010; t < 3010 + 200; t += 10) S.countRemyPet(t); assert.strictEqual(S.get().remyPets, 43, 'tapping the key 20 times right after a counted pet adds nothing');
 assert.strictEqual(S.countRemyPet(5000), true); assert.strictEqual(S.get().remyPets, 44, 'and the first pet after the two seconds counts');
 assert.strictEqual(JSON.parse(storage['primetime.save.v1']).remyPets, 44, 'and the count is saved'); assert.ok(!('remyPets' in S) && Object.keys(S).every(k => !/remy/i.test(k) || k === 'countRemyPet'), 'the store offers no way to read it out for display');
+// the Little Library's save fields: a new save has no bookmarks and the middle text size; junk is cleaned when a save is loaded
+({ S } = freshStore({}));
+assert.deepStrictEqual([{ ...S.get().reading }, S.get().readerFont], [{}, 2], 'a new save has no bookmarks and the middle text size');
+({ S } = freshStore({ reading: { flatland: 50, alice: 3.9, tangled: 0, 'BAD KEY': 4, x: 2, big: 99999999, neg: -5, str: 'abc' }, readerFont: 4 }));
+assert.deepStrictEqual({ ...S.get().reading }, { flatland: 50, alice: 3, big: 9999 }, 'bookmarks are whole pages from 1 up, capped, with bad keys and values dropped');
+assert.strictEqual(S.get().readerFont, 4);
+({ S } = freshStore({ reading: [1, 2], readerFont: 99 })); assert.deepStrictEqual([{ ...S.get().reading }, S.get().readerFont], [{}, 4], 'a list is not a set of bookmarks, and a huge text size is capped');
+({ S } = freshStore({ readerFont: -3 })); assert.strictEqual(S.get().readerFont, 0); ({ S } = freshStore({ readerFont: 1.5 })); assert.strictEqual(S.get().readerFont, 2, 'a text size that is not a whole number falls back to the middle');
+({ S, storage } = freshStore({ reading: { flatland: 12 } })); S.set({ reading: { ...S.get().reading, alice: 7 }, readerFont: 1 });
+assert.deepStrictEqual(JSON.parse(storage['primetime.save.v1']).reading, { flatland: 12, alice: 7 }, 'bookmarks are saved'); assert.strictEqual(JSON.parse(storage['primetime.save.v1']).readerFont, 1);
 // a save from before division existed keeps its scores and starts division at 0
 ({ S } = freshStore({ chips: 77, arithBest: { add: 31, sub: 22, mul: 18 } }));
 assert.deepStrictEqual({ ...S.get().arithBest }, { add: 31, sub: 22, mul: 18, div: 0 }, 'an old save gains a division score of 0 and loses nothing'); assert.strictEqual(S.get().chips, 77);

@@ -984,7 +984,42 @@ const World = (() => {
       (to the left as you face the park from the road) a short walk leads to a small plaza with a fountain and two benches. */
   const PARK = { cx: -15.5, cz: DORM.zc, inner: 4, outer: 6 };
 
-  function buildPark(zone) {
+  /** A little free library like the ones in parks: a big blue mailbox on a post with a glass door and books inside. It stands by the
+      fountain, facing it. Press E to open it. The three real books (Flatland, Alice, A Tangled Tale) are among the spines you can see. */
+  function addLittleLibrary(zone, actions, bx, bz) {
+    const g = zone.group, T_ = T, wood = lambert(0x6b4a2b), blue = lambert(0x3a6ea5), cream = lambert(0xf3e8c9), gold = lambert(0xc9a24a);
+    box(g, wood, 0.18, 1.25, 0.18, bx, 0.625, bz);                                           // the post
+    // the body is hollow and open on the east side (the side you face), so the shelves show through the glass door
+    box(g, blue, 0.06, 0.8, 1.1, bx - 0.32, 1.6, bz);                                        // back
+    box(g, blue, 0.7, 0.8, 0.06, bx, 1.6, bz - 0.52); box(g, blue, 0.7, 0.8, 0.06, bx, 1.6, bz + 0.52);   // the two ends
+    box(g, blue, 0.7, 0.06, 1.1, bx, 1.23, bz); box(g, blue, 0.7, 0.06, 1.1, bx, 1.97, bz);               // floor and ceiling
+    box(g, blue, 0.62, 0.1, 1.0, bx, 2.05, bz); box(g, blue, 0.48, 0.1, 0.86, bx, 2.15, bz); box(g, blue, 0.32, 0.08, 0.7, bx, 2.24, bz);   // a rounded roof, in steps
+    box(g, lambert(0x2f5885), 0.62, 0.04, 1.0, bx - 0.01, 1.6, bz);                           // the middle shelf
+    // a frame round the opening, and the glass
+    const fx = bx + 0.35;
+    box(g, cream, 0.05, 0.06, 1.12, fx, 1.94, bz); box(g, cream, 0.05, 0.06, 1.12, fx, 1.27, bz);
+    box(g, cream, 0.05, 0.68, 0.06, fx, 1.6, bz - 0.52); box(g, cream, 0.05, 0.68, 0.06, fx, 1.6, bz + 0.52);
+    const glass = new T_.Mesh(new T_.PlaneGeometry(0.96, 0.64), new T_.MeshBasicMaterial({ color: 0xdff1ff, transparent: true, opacity: 0.2, side: T_.DoubleSide, depthWrite: false }));
+    glass.rotation.y = Math.PI / 2; glass.position.set(bx + 0.352, 1.6, bz); g.add(glass);
+    box(g, gold, 0.04, 0.12, 0.05, bx + 0.40, 1.6, bz + 0.4);                                // a knob
+    // the books: spines face you. Two rows; the three real ones are the wide, tall ones in the top row.
+    const real = typeof Library !== 'undefined' ? Library.BOOKS.map(b => parseInt(b.color.slice(1), 16)) : [0x2f6f8f, 0x3f93c9, 0x8e3b46];
+    const filler = [0xc0392b, 0xe0a030, 0x3fae5a, 0x8a4fd0, 0xe8742a, 0x2b2b30, 0xf06fb0, 0x2fb5b0];
+    const row = (y0, specs) => { let z = bz - 0.46; specs.forEach(([t, h, color]) => { box(g, lambert(color), 0.46, h, t, bx - 0.05, y0 + h / 2, z + t / 2); z += t + 0.012; }); };
+    row(1.26, [[0.09, 0.3, filler[0]], [0.11, 0.26, filler[1]], [0.08, 0.32, filler[2]], [0.1, 0.28, filler[3]], [0.12, 0.3, filler[4]], [0.09, 0.25, filler[5]], [0.1, 0.31, filler[6]], [0.08, 0.27, filler[7]], [0.1, 0.3, filler[0]]]);
+    row(1.62, [[0.1, 0.27, filler[3]], [0.13, 0.31, real[0]], [0.13, 0.3, real[1]], [0.13, 0.31, real[2]], [0.09, 0.26, filler[1]], [0.11, 0.29, filler[6]], [0.08, 0.3, filler[2]], [0.1, 0.25, filler[7]], [0.09, 0.28, filler[4]]]);
+    // the flag, up
+    box(g, lambert(0x888c92), 0.04, 0.5, 0.04, bx - 0.1, 1.75, bz - 0.6); box(g, lambert(0xd94a4a), 0.04, 0.18, 0.3, bx - 0.1, 1.96, bz - 0.77);
+    // a board on the post with the name
+    box(g, wood, 0.05, 0.5, 1.1, bx + 0.12, 0.8, bz);
+    const sign = makeSign({ w: 1.04, h: 0.44, title: 'LITTLE LIBRARY', sub: 'take one, read one', fg: '#fff3c4', bg: '#2f5885', border: '#f3e8c9' });
+    sign.rotation.y = Math.PI / 2; sign.position.set(bx + 0.175, 0.8, bz); g.add(sign);       // 3 cm in front of the board
+    solid(zone, bx + 0.03, bz, 0.85, 1.2);
+    interact(zone, bx + 1.1, bz, 1.7, 'Open the Little Library', () => actions.openLibrary());
+    return { x: bx, z: bz };
+  }
+
+  function buildPark(zone, actions) {
     const g = zone.group, { cx, cz, inner, outer } = PARK, wide = outer - inner, mid = (outer + inner) / 2;
     box(g, lambert(0x5a3c24), 7.4, 0.06, 7.4, cx, 0.03, cz);                                 // the planting bed under the tree
     addGreatTree(zone, cx, cz);
@@ -1010,7 +1045,9 @@ const World = (() => {
     const fountain = addMiniFountain(zone, cx, plazaZ);
     const fountainBenches = [[cx - 3.5, plazaZ, 'E'], [cx + 3.5, plazaZ, 'W']].map(([x, z, way]) => { addBenchFacing(zone, x, z, way); return { x, z, way }; });
     [-1, 1].forEach(sx => { addShrub(zone, cx + sx * 3.1, plazaZ + 3.1, 1.3); shrubs.push({ x: cx + sx * 3.1, z: plazaZ + 3.1 }); });
-    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches } };
+    // a little free library on the lawn just west of the plaza's north-west corner, its glass door facing the fountain
+    const library = addLittleLibrary(zone, actions, cx - 5.2, plazaZ - 2.7);
+    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches }, library };
   }
 
   /* ---------- inside Wilson Hall: one hallway, one open room, everything else locked ---------- */
@@ -1126,7 +1163,7 @@ const World = (() => {
     buildSandboxArea(zone);            // behind the school
     buildSandboxPath(zone);            // and a paved way round to it
     buildDormFront(zone, actions);     // Wilson Hall, directly on your right at the start
-    buildPark(zone);                   // and a little park with the great tree, across the road from it
+    buildPark(zone, actions);          // and a little park with the great tree, across the road from it
 
     // notice board on the left-hand sidewalk near the spawn, facing the starting point
     const nz = DORM.zc - 7.5;

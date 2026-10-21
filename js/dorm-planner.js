@@ -5,7 +5,7 @@
    dorm.js; the furniture models are in dormroom.js; this file is the screen. */
 const DormPlanner = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 19; // must match Dorm.BUILD
+  const BUILD = 20; // must match Dorm.BUILD
   const CELL = 84, M = 60;                                   // pixels per grid cell, and the margin for the walls
   const W = Dorm.ROOM.w * CELL + 2 * M, H = Dorm.ROOM.d * CELL + 2 * M;
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
