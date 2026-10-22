@@ -1389,67 +1389,9 @@ const World = (() => {
     interact(zone, x, z + 2.8 * facing, 2.2, `Sit at the ${title.toLowerCase()}`, onUse);
   }
 
+  /** The casino inside is built by casino-interior.js (a grand hall and two wings). The outside, buildCasinoFront, is above. */
   function buildCasino(actions) {
-    const zone = createZone('Prime Time Casino', {
-      spawn: { x: 0, z: 3, yaw: 0 },
-      bounds: { minX: -14.4, maxX: 14.4, minZ: -11.4, maxZ: 11.4 },
-      sky: 0x0b0614, fog: [0x0b0614, 14, 40],
-      wander: { minX: -12, maxX: 12, minZ: 2, maxZ: 9 },
-    });
-    const g = zone.group;
-
-    g.add(new T.AmbientLight(0x6a5a88, 0.9));
-    [[-10, 6.5, -7, 0xff4fd8], [10, 6.5, -7, 0x38e8ff], [-10, 6.5, 6, 0x38e8ff], [10, 6.5, 6, 0xff4fd8]].forEach(([x, y, z, c]) => {
-      const p = new T.PointLight(c, 0.9, 22);
-      p.position.set(x, y, z);
-      g.add(p);
-    });
-
-    flat(g, 'carpet', 30, 24, 0, 0, 0);
-    box(g, 'ceiling', 30, 0.3, 24, 0, 8.15, 0);
-    box(g, 'wallDark', 30, 8, 0.5, 0, 4, -12.25);
-    box(g, 'wallDark', 30, 8, 0.5, 0, 4, 12.25);
-    box(g, 'wallDark', 0.5, 8, 24, -15.25, 4, 0);
-    box(g, 'wallDark', 0.5, 8, 24, 15.25, 4, 0);
-
-    // neon trim
-    box(g, glow(0xff4fd8), 29.6, 0.15, 0.1, 0, 6.5, -11.95);
-    box(g, glow(0x38e8ff), 0.1, 0.15, 23.6, -14.95, 6.5, 0);
-    box(g, glow(0x38e8ff), 0.1, 0.15, 23.6, 14.95, 6.5, 0);
-    box(g, glow(0xff4fd8), 29.6, 0.15, 0.1, 0, 6.5, 11.95);
-
-    // pillars
-    [[-10, -7], [10, -7], [-10, 6], [10, 6]].forEach(([x, z]) => {
-      box(g, 'stone', 1, 7.6, 1, x, 3.8, z);
-      box(g, glow(0xffd36b), 1.2, 0.3, 1.2, x, 7.7, z);
-      solid(zone, x, z, 1, 1);
-    });
-
-    // three tables on the north wall, in front of you as you walk in...
-    buildTable(zone, -9, -4, 'felt', 'PRACTICE TABLE', 'live product. 10 to 50 chips.', '#52f08f', () => actions.openTable('practice'));
-    buildTable(zone, 0, -4, 'feltBlue', 'RADICAL TABLE', 'factor, pair up, simplify', '#38e8ff', () => actions.openTable('radical'),
-      { prop: 'sqrt', accent: 0x38e8ff });
-    buildTable(zone, 9, -4, 'feltRed', 'TRINOMIAL TABLE', 'split the middle. pick a level.', '#ff6a6a', () => actions.openTable('trinomial'),
-      { prop: 'quadratic', accent: 0xff6a6a });
-    // ...and one behind you on the south side, off to one side of the exit door
-    buildTable(zone, 5, 8, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'),
-      { prop: 'parabola', accent: 0xd58bff, facing: -1 });
-
-    // ...and a matching one behind you on the other side of the exit door, a mirror image of the parabola table
-    buildTable(zone, -5, 8, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'),
-      { prop: 'vertexform', accent: 0xffb347, facing: -1 });
-
-    // exit door on the south wall
-    box(g, glow(0x52f08f), 3.8, 4.8, 0.1, 0, 2.4, 11.9);
-    box(g, glow(0x0c2a18), 3.4, 4.4, 0.2, 0, 2.2, 11.8);
-    const exit = makeSign({ w: 2.4, h: 0.7, title: 'EXIT', fg: '#52f08f', bg: '#0c2a18', border: '#52f08f' });
-    exit.position.set(0, 5.4, 11.9);
-    exit.rotation.y = Math.PI;
-    g.add(exit);
-    interact(zone, 0, 10.6, 2.0, 'Leave the Casino', actions.leaveCasino);
-
-    spawnNPCs(zone, 2);
-    return zone;
+    return CasinoInterior.build(actions, { box, flat, lambert, glow, textPlane, makeSign, solid, interact, createZone, buildTable, spawnNPCs, waterSurface, PX_FONT });
   }
 
   /* ---------- the arithmetic academy: inside ---------- */
@@ -1692,5 +1634,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

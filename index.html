@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20">
+  <link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -28,7 +28,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 20</p>
+      <p class="fine build">Build 22</p>
     </div>
   </div>
 
@@ -52,6 +52,8 @@
         </div>
       </header>
 
+      <div class="craft-layout">
+      <div class="craft-main">
       <section class="felt" aria-label="Dice">
         <div id="dice-row" class="dice-row"></div>
         <div id="dice-sum" class="dice-sum"></div>
@@ -82,6 +84,15 @@
       </div>
 
       <div id="result" class="result hidden"></div>
+      </div>
+
+      <aside class="tree-side" aria-labelledby="tree-title">
+        <h3 id="tree-title">Factor tree</h3>
+        <div id="tree-live" class="tree-live"></div>
+        <div id="tree-note" class="tree-note" role="status" aria-live="polite"></div>
+        <div id="tree-misfits" class="tree-misfits hidden"></div>
+      </aside>
+      </div>
     </div>
   </div>
 
@@ -461,41 +472,42 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/economy.js?v=20"></script>
-  <script src="js/factoring.js?v=20"></script>
-  <script src="js/catalog.js?v=20"></script>
-  <script src="js/store.js?v=20"></script>
-  <script src="js/trophies.js?v=20"></script>
-  <script src="js/books-data.js?v=20"></script>
-  <script src="js/library.js?v=20"></script>
-  <script src="js/content.js?v=20"></script>
-  <script src="js/textures.js?v=20"></script>
-  <script src="js/avatar.js?v=20"></script>
-  <script src="js/pets.js?v=20"></script>
-  <script src="js/dorm.js?v=20"></script>
-  <script src="js/dormroom.js?v=20"></script>
-  <script src="js/usmap-data.js?v=20"></script>
-  <script src="js/usmap.js?v=20"></script>
-  <script src="js/flag.js?v=20"></script>
-  <script src="js/blueprint.js?v=20"></script>
-  <script src="js/sandbox.js?v=20"></script>
-  <script src="js/world.js?v=20"></script>
-  <script src="js/showcase.js?v=20"></script>
-  <script src="js/player.js?v=20"></script>
-  <script src="js/ui.js?v=20"></script>
-  <script src="js/shop.js?v=20"></script>
-  <script src="js/crafting.js?v=20"></script>
-  <script src="js/trinomials.js?v=20"></script>
-  <script src="js/trinomial-game.js?v=20"></script>
-  <script src="js/radicals.js?v=20"></script>
-  <script src="js/radical-game.js?v=20"></script>
-  <script src="js/parabolas.js?v=20"></script>
-  <script src="js/parabola-game.js?v=20"></script>
-  <script src="js/arithmetic.js?v=20"></script>
-  <script src="js/arithmetic-game.js?v=20"></script>
-  <script src="js/map-game.js?v=20"></script>
-  <script src="js/reader-game.js?v=20"></script>
-  <script src="js/dorm-planner.js?v=20"></script>
-  <script src="js/main.js?v=20"></script>
+  <script src="js/economy.js?v=22"></script>
+  <script src="js/factoring.js?v=22"></script>
+  <script src="js/catalog.js?v=22"></script>
+  <script src="js/store.js?v=22"></script>
+  <script src="js/trophies.js?v=22"></script>
+  <script src="js/books-data.js?v=22"></script>
+  <script src="js/library.js?v=22"></script>
+  <script src="js/content.js?v=22"></script>
+  <script src="js/textures.js?v=22"></script>
+  <script src="js/avatar.js?v=22"></script>
+  <script src="js/pets.js?v=22"></script>
+  <script src="js/dorm.js?v=22"></script>
+  <script src="js/dormroom.js?v=22"></script>
+  <script src="js/usmap-data.js?v=22"></script>
+  <script src="js/usmap.js?v=22"></script>
+  <script src="js/flag.js?v=22"></script>
+  <script src="js/blueprint.js?v=22"></script>
+  <script src="js/sandbox.js?v=22"></script>
+  <script src="js/casino-interior.js?v=22"></script>
+  <script src="js/world.js?v=22"></script>
+  <script src="js/showcase.js?v=22"></script>
+  <script src="js/player.js?v=22"></script>
+  <script src="js/ui.js?v=22"></script>
+  <script src="js/shop.js?v=22"></script>
+  <script src="js/crafting.js?v=22"></script>
+  <script src="js/trinomials.js?v=22"></script>
+  <script src="js/trinomial-game.js?v=22"></script>
+  <script src="js/radicals.js?v=22"></script>
+  <script src="js/radical-game.js?v=22"></script>
+  <script src="js/parabolas.js?v=22"></script>
+  <script src="js/parabola-game.js?v=22"></script>
+  <script src="js/arithmetic.js?v=22"></script>
+  <script src="js/arithmetic-game.js?v=22"></script>
+  <script src="js/map-game.js?v=22"></script>
+  <script src="js/reader-game.js?v=22"></script>
+  <script src="js/dorm-planner.js?v=22"></script>
+  <script src="js/main.js?v=22"></script>
 </body>
 </html>

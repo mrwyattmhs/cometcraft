@@ -51,10 +51,39 @@ const Factoring = (() => {
   /** Chips for a solved practice round: more dice make a harder number, so they pay more (2 dice 10, 3 dice 25, 4 dice 50). */
   const practiceReward = dice => E.PAY.practice[dice] || E.PAY.practice[3];
 
+  /* ---- the factor tree, as you build it ---- */
+  /** The most prime factors any sum can have: 2 x 2 x ... for the biggest throw (4 dice make at most 80, and 64 is six 2s). */
+  const MAX_TREE_FACTORS = 6;
+
+  /** The factor tree so far, from the target and the primes placed in the grid (in grid order).
+      Each prime that divides what is left splits off a leaf, and what is left carries on as a new node. A prime that does not divide
+      what is left changes nothing and is listed in misfits. When what is left IS the prime placed, that node itself becomes a leaf.
+      Nodes sit on a staircase: the number left to factor goes down and to the right, each leaf down and to the left.
+        nodes:  { v, col, lvl, kind } with kind 'split' (a number already broken up), 'prime' (a leaf you placed), or 'pending' (still to factor)
+        lines:  [parentCol, parentLvl, childCol, childLvl]
+        left:   what is still to factor (1 when it is all done), or null before the dice are rolled
+      With no sum yet (sum is null) the tree is a single "?" waiting for the throw. */
+  function treeSteps(sum, placed) {
+    if (!sum) return { nodes: [{ v: '?', col: 1, lvl: 0, kind: 'pending' }], lines: [], misfits: [], left: null, done: false };
+    const nodes = [{ v: sum, col: 1, lvl: 0, kind: 'pending' }], lines = [], misfits = [];
+    let rem = sum, i = 0;                       // i: how many times the tree has split so far
+    for (const p of placed) {
+      if (rem % p !== 0) { misfits.push(p); continue; }          // once everything is factored rem is 1, so every later prime lands here
+      const cur = nodes[nodes.length - 1];
+      if (rem === p) { cur.kind = 'prime'; rem = 1; continue; }
+      cur.kind = 'split';
+      nodes.push({ v: p, col: i, lvl: i + 1, kind: 'prime' });
+      rem /= p; i++;
+      nodes.push({ v: rem, col: i + 1, lvl: i, kind: 'pending' });
+      lines.push([cur.col, cur.lvl, i - 1, i], [cur.col, cur.lvl, i + 1, i]);
+    }
+    return { nodes, lines, misfits, left: rem, done: rem === 1 };
+  }
+
   return {
     isPrime, primesUpTo, primeFactors, product, rollDice,
     isValidFactorization, toExponentForm,
-    practiceReward,
+    practiceReward, MAX_TREE_FACTORS, treeSteps,
   };
 })();
 

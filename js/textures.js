@@ -58,6 +58,44 @@ const Tex = (() => {
       },
     },
     asphalt: { base: [58, 60, 66], v: 7 },
+    // the casino's grand hall: cream and green-black marble in a checkerboard (a 32 px tile spans 2 blocks, so each square is one block)
+    marbleCheck: {
+      size: 32, span: 2, base: [238, 231, 216], v: 4,
+      draw: g => {
+        g.fillStyle = 'rgb(36,48,44)'; g.fillRect(16, 0, 16, 16); g.fillRect(0, 16, 16, 16);
+        px(g, 'rgba(255,255,255,.10)', [[18, 3, 3, 1], [25, 9, 2, 1], [3, 20, 4, 1], [10, 27, 2, 1], [22, 5, 1, 4], [5, 24, 1, 3]]);   // pale flecks in the dark squares
+        px(g, 'rgba(176,150,112,.40)', [[2, 3, 6, 1], [6, 4, 1, 5], [3, 11, 7, 1], [20, 19, 6, 1], [24, 20, 1, 6], [19, 28, 7, 1]]);      // veins in the cream ones
+        px(g, 'rgba(110,92,60,.55)', [[0, 0, 32, 1], [0, 16, 32, 1], [0, 0, 1, 32], [16, 0, 1, 32]]);                                       // grout
+      },
+    },
+    // veined cream marble for columns and the fountain
+    marble: {
+      base: [238, 234, 226], v: 3,
+      draw: g => px(g, 'rgba(150,140,128,.32)', [[2, 0, 1, 7], [3, 7, 1, 5], [4, 12, 1, 4], [11, 0, 1, 4], [12, 4, 1, 8], [13, 12, 1, 4]]),
+    },
+    // dark green marble with gold veins, in panels, for the lower walls
+    marbleDark: {
+      base: [30, 52, 46], v: 5,
+      draw: g => {
+        px(g, 'rgba(214,184,104,.30)', [[3, 0, 1, 5], [4, 5, 1, 4], [5, 9, 1, 3], [11, 6, 1, 4], [12, 10, 1, 5]]);
+        px(g, 'rgba(0,0,0,.40)', [[0, 0, 16, 1], [0, 0, 1, 16]]);
+      },
+    },
+    // cream walls in gilded panels
+    wallGild: {
+      base: [226, 208, 172], v: 4,
+      draw: g => { px(g, 'rgba(168,128,52,.55)', [[0, 0, 1, 16], [15, 0, 1, 16]]); px(g, 'rgba(168,128,52,.45)', [[6, 7, 4, 2]]); },
+    },
+    // a cream coffered ceiling
+    ceilingCream: { base: [238, 228, 206], v: 3, draw: g => px(g, 'rgba(170,140,90,.35)', [[0, 0, 16, 1], [0, 0, 1, 16]]) },
+    // royal blue carpet with a gold diamond, for the graphing wing (the factoring wing keeps the red one)
+    carpetBlue: {
+      base: [20, 38, 104], v: 6,
+      draw: g => {
+        const pts = [[0, -3], [-1, -2], [1, -2], [-2, -1], [2, -1], [-3, 0], [3, 0], [-2, 1], [2, 1], [-1, 2], [1, 2], [0, 3]];
+        px(g, 'rgba(226,200,120,.85)', pts.map(([dx, dy]) => [8 + dx, 8 + dy]));
+      },
+    },
     // native blue limestone laid in courses, with the joints staggered row to row (Wilson Hall's walls)
     limestone: {
       base: [116, 132, 150], v: 7,

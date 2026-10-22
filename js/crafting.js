@@ -170,9 +170,7 @@ const CraftingGame = (() => {
     state = 'done';
     setMsg(msg, kind);
     const f = round.factors;
-    $('result').innerHTML =
-      `<div class="factor-line">${round.sum} = ${Factoring.toExponentForm(f)}${f.length === 1 ? ' (prime)' : ''}</div>` +
-      `<div class="tree-wrap">${treeSVG(round.sum)}</div>`;
+    $('result').innerHTML = `<div class="factor-line">${round.sum} = ${Factoring.toExponentForm(f)}${f.length === 1 ? ' (prime)' : ''}</div>`;   // the finished tree is already beside the game
     $('result').classList.remove('hidden');
     $('btn-craft').classList.add('hidden');
     $('btn-next').classList.remove('hidden');
@@ -215,39 +213,45 @@ const CraftingGame = (() => {
 
     $('btn-craft').disabled = state !== 'playing' || !placed.length;
     $('btn-clear').disabled = state !== 'playing' || !placed.length;
+    renderTree(placed);
   }
 
-  /* ---------- factor tree (shown after every round) ---------- */
-  function treeSVG(n) {
-    const f = Factoring.primeFactors(n);
-    const k = f.length;
-    const stepX = 58, rowH = 52, nw = 44, nh = 30, pad = 6;
-    const minCol = k > 1 ? 0 : 1;
-    const X = col => pad + nw / 2 + (col - minCol) * stepX;
-    const Y = lvl => pad + nh / 2 + lvl * rowH;
-    const nodes = [], lines = [];
-    let rem = n;
-    for (let i = 0; i < k - 1; i++) {
-      nodes.push({ v: rem, col: i + 1, lvl: i, prime: false });
-      nodes.push({ v: f[i], col: i, lvl: i + 1, prime: true });
-      lines.push([i + 1, i, i, i + 1], [i + 1, i, i + 2, i + 1]);
-      rem /= f[i];
-    }
-    nodes.push({ v: rem, col: k, lvl: k - 1, prime: true });
+  /* ---------- the factor tree, growing beside the game ---------- */
+  // Every prime you place splits a leaf off the number that is left (the logic is Factoring.treeSteps). The drawing area is always big
+  // enough for the longest tree any throw can need, so it never changes size or jumps: the tree just fills in from the top left.
+  const TREE = { stepX: 48, rowH: 44, nw: 42, nh: 28, pad: 6 };
+  const TREE_W = Factoring.MAX_TREE_FACTORS * TREE.stepX + TREE.nw + 2 * TREE.pad;
+  const TREE_H = (Factoring.MAX_TREE_FACTORS - 1) * TREE.rowH + TREE.nh + 2 * TREE.pad;
 
-    const W = (k - minCol) * stepX + nw + pad * 2;
-    const H = (k - 1) * rowH + nh + pad * 2;
-    let s = `<svg class="tree" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Factor tree for ${n}">`;
-    lines.forEach(([pc, pl, cc, cl]) => {
-      s += `<line x1="${X(pc)}" y1="${Y(pl) + nh / 2}" x2="${X(cc)}" y2="${Y(cl) - nh / 2}" stroke="#555" stroke-width="3"/>`;
+  function treeSVG(sum, placed) {
+    const t = Factoring.treeSteps(sum, placed);
+    const { stepX, rowH, nw, nh, pad } = TREE;
+    const X = col => pad + nw / 2 + col * stepX, Y = lvl => pad + nh / 2 + lvl * rowH;
+    const label = sum ? `Factor tree for ${sum}. ${t.done ? 'It is all factored.' : `${t.left} is left to factor.`}` : 'Factor tree. Waiting for the dice.';
+    let out = `<svg class="tree" viewBox="0 0 ${TREE_W} ${TREE_H}" role="img" aria-label="${label}">`;
+    t.lines.forEach(([pc, pl, cc, cl]) => {
+      out += `<line x1="${X(pc)}" y1="${Y(pl) + nh / 2}" x2="${X(cc)}" y2="${Y(cl) - nh / 2}" stroke="#555" stroke-width="3"/>`;
     });
-    nodes.forEach(nd => {
-      const fill = nd.prime ? gemColor(nd.v) : '#e4e4e4';
-      const ink = nd.prime ? '#ffffff' : '#222222';
-      s += `<rect x="${X(nd.col) - nw / 2}" y="${Y(nd.lvl) - nh / 2}" width="${nw}" height="${nh}" fill="${fill}" stroke="#373737" stroke-width="3"/>` +
-           `<text x="${X(nd.col)}" y="${Y(nd.lvl)}" text-anchor="middle" dominant-baseline="central" font-family="Silkscreen, 'Courier New', monospace" font-size="14" fill="${ink}">${nd.v}</text>`;
+    t.nodes.forEach(nd => {
+      const prime = nd.kind === 'prime', pending = nd.kind === 'pending';
+      const fill = prime ? gemColor(nd.v) : pending ? '#f7f7f7' : '#e4e4e4';
+      const ink = prime ? '#ffffff' : pending ? '#555555' : '#222222';
+      out += `<rect class="node ${nd.kind}" x="${X(nd.col) - nw / 2}" y="${Y(nd.lvl) - nh / 2}" width="${nw}" height="${nh}" fill="${fill}" stroke="${pending ? '#666' : '#373737'}" stroke-width="3"${pending ? ' stroke-dasharray="6 3"' : ''}/>` +
+             `<text x="${X(nd.col)}" y="${Y(nd.lvl)}" text-anchor="middle" dominant-baseline="central" font-family="Silkscreen, 'Courier New', monospace" font-size="14" fill="${ink}">${nd.v}</text>`;
     });
-    return s + '</svg>';
+    return out + '</svg>';
+  }
+
+  function renderTree(placed) {
+    const sum = round && state !== 'rolling' ? round.sum : null;
+    const t = Factoring.treeSteps(sum, placed);
+    $('tree-live').innerHTML = treeSVG(sum, placed);
+    $('tree-note').textContent = sum === null ? 'Throw the dice to start the tree.'
+      : t.done ? 'All factored!'
+      : placed.length ? `Left to factor: ${t.left}` : `Place a prime and watch ${sum} split.`;
+    const m = $('tree-misfits');
+    m.classList.toggle('hidden', !t.misfits.length);
+    m.innerHTML = t.misfits.length ? 'Does not fit: ' + t.misfits.map(p => `<span class="tree-chip">${p}</span>`).join('') : '';
   }
 
   return { open, close, isOpen };
