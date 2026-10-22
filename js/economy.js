@@ -3,7 +3,7 @@
 
    Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
 const Economy = (() => {
-  const BUILD = 22; // bump together with the ?v= numbers in index.html
+  const BUILD = 24; // bump together with the ?v= numbers in index.html
   const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
   const PAY = {
     // casino tables (chips for each correct answer, by level)
@@ -12,6 +12,7 @@ const Economy = (() => {
     trinomial: [10, 25, 50, 100],
     parabola: [25, 50, 100],
     vertex: [25, 50, 100],
+    lines: 25,                             // every line graphed pays the same, in any form (slope-intercept, point-slope or standard)
     // Arithmetic Academy: chips for each correct answer
     arithmetic: { add: 2, sub: 2, mul: 4, div: 5 },
     // the wall map: chips for each state found on the first try

@@ -3,13 +3,14 @@ const assert = require('assert');
 const T = require('../js/trophies.js');
 
 /* ---------- one trophy for each game ---------- */
-assert.deepStrictEqual(T.IDS, ['add', 'sub', 'mul', 'div', 'practice', 'radical', 'trinomial', 'parabola', 'vertex', 'map', 'blueprint']);
-assert.strictEqual(T.GAMES.length, 11); assert.strictEqual(new Set(T.IDS).size, 11);
+assert.deepStrictEqual(T.IDS, ['add', 'sub', 'mul', 'div', 'practice', 'radical', 'trinomial', 'lines', 'parabola', 'vertex', 'map', 'blueprint']);
+assert.strictEqual(T.GAMES.length, 12); assert.strictEqual(new Set(T.IDS).size, 12);
 T.GAMES.forEach(g => { assert.ok(g.name && g.noun && Number.isInteger(g.goal) && g.goal > 0 && Number.isInteger(g.color)); assert.strictEqual(T.byId[g.id], g); });
+assert.strictEqual(T.byId.lines.goal, 100, 'the lines trophy takes 100 lines, in any of the three forms'); assert.strictEqual(T.byId.lines.symbol, 'linegraph');
 assert.deepStrictEqual(T.GAMES.filter(g => g.goal !== 100).map(g => [g.id, g.goal]), [['blueprint', 25]], '100 right everywhere, except 25 blueprints in the sandbox');
 // each trophy carries its table's symbol
 assert.deepStrictEqual(T.GAMES.map(g => typeof g.symbol === 'string' ? g.symbol : g.symbol.words.join(' ')),
-  ['plus', 'minus', 'times', 'divide', 'd20', 'sqrt', 'STANDARD FORM', 'parabola', 'VERTEX FORM', 'map', 'blocks']);
+  ['plus', 'minus', 'times', 'divide', 'd20', 'sqrt', 'STANDARD FORM', 'linegraph', 'parabola', 'VERTEX FORM', 'map', 'blocks']);
 assert.deepStrictEqual(T.GAMES.filter(g => g.symbol.words).map(g => [g.id, g.symbol.words.join(' ')]), [['trinomial', 'STANDARD FORM'], ['vertex', 'VERTEX FORM']], 'the two formula tables say Standard Form and Vertex Form');
 // the colors are the table colors
 assert.deepStrictEqual(['add', 'sub', 'mul', 'div'].map(id => T.byId[id].color), [0xf7e98e, 0xf6b0c8, 0xa8d8f0, 0xcdb8f0]);
@@ -40,7 +41,7 @@ assert.deepStrictEqual(T.shelves(['mul', 'add']), [['mul', 'add']], 'in the orde
 const eight = T.IDS.slice(0, 8), nine = T.IDS.slice(0, 9), all = T.IDS;
 assert.strictEqual(T.shelves(eight).length, 1, 'eight fit on the first shelf');
 assert.deepStrictEqual(T.shelves(nine).map(row => row.length), [8, 1], 'the ninth starts a second shelf below');
-assert.deepStrictEqual(T.shelves(all).map(row => row.length), [8, 3], 'all eleven: eight, then three');
+assert.deepStrictEqual(T.shelves(all).map(row => row.length), [8, 4], 'all twelve: eight, then four');
 assert.deepStrictEqual(T.shelves(all).flat(), all, 'nothing lost and nothing reordered');
 assert.deepStrictEqual(T.shelves(['add', 'add', 'sub', 'nope']), [['add', 'sub']], 'duplicates and unknown ids are dropped');
 assert.ok(T.shelves(all.concat(all)).length <= 2, 'never more than two shelves');
@@ -51,11 +52,11 @@ assert.strictEqual(T.progressText({}, [], 'add'), 'Trophy: 0 of 100'); assert.st
 assert.strictEqual(T.progressText({ add: 140 }, [], 'add'), 'Trophy: 100 of 100', 'never shows more than the goal');
 assert.strictEqual(T.progressText({ add: 140 }, ['add'], 'add'), 'Trophy earned!'); assert.strictEqual(T.progressText({}, [], 'nope'), '');
 
-/* ---------- earning all eleven, in any order ---------- */
+/* ---------- earning all twelve, in any order ---------- */
 let sv = {}, tr = [], order = [...T.IDS].sort((a, b) => (a.charCodeAt(1) * 7 + a.length) - (b.charCodeAt(1) * 7 + b.length)), earnedLog = [];
 for (const id of order) for (let i = 0; i < T.byId[id].goal; i++) { const x = T.apply(sv, tr, id); sv = x.solved; tr = x.trophies; if (x.earned) earnedLog.push(x.earned.id); }
 assert.deepStrictEqual(earnedLog, order, 'each is earned exactly once, as its count reaches the goal'); assert.deepStrictEqual(tr, order);
-assert.deepStrictEqual(T.shelves(tr).map(row => row.length), [8, 3]);
+assert.deepStrictEqual(T.shelves(tr).map(row => row.length), [8, 4]);
 console.log('trophy tests passed');
 
 /* ---------- the progress label (needs a little fake page) ---------- */

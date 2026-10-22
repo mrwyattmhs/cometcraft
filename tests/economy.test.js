@@ -7,7 +7,7 @@ const R = require('../js/radicals.js'), T = require('../js/trinomials.js'), P = 
 assert.deepStrictEqual(E.LEVELS, ['Easy', 'Medium', 'Hard', 'Expert']);
 assert.deepStrictEqual(E.PAY, {
   practice: { 2: 10, 3: 25, 4: 50 },
-  radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100],
+  radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], lines: 25,
   arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200],
 });
 assert.deepStrictEqual([1, 2, 3, 4, 0, 9].map(l => E.levelName(l)), ['Easy', 'Medium', 'Hard', 'Expert', 'Easy', 'Expert'], 'names, kept in range');
@@ -28,6 +28,7 @@ assert.deepStrictEqual([2, 3, 4].map(F.practiceReward), Object.values(E.PAY.prac
 assert.deepStrictEqual(['add', 'sub', 'mul', 'div'].map(A.rewardFor), ['add', 'sub', 'mul', 'div'].map(o => E.PAY.arithmetic[o]));
 assert.deepStrictEqual([1, 2, 3, 4].map(l => B.LEVELS[l].pay), E.PAY.blueprint);
 assert.strictEqual(M.REWARD, E.PAY.map);
+assert.strictEqual(require('../js/lines.js').PAY, E.PAY.lines); assert.strictEqual(E.PAY.lines, 25, 'a line pays 25 chips in every form');
 
 // and there is no wagering left to configure: nothing a player can lose by answering
 [R, T, P, F].forEach(m => ['multiplier', 'wagerMultiplier', 'wagerPayout', 'WAGER', 'MULT', 'PRACTICE_REWARD'].forEach(k => assert.strictEqual(m[k], undefined, `${k} is gone`)));

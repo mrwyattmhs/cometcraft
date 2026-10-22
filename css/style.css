@@ -501,3 +501,30 @@ div.pair-box { cursor: default; }
   .reader-page { padding-right: 48px; }
 }
 
+/* ---------- the lines table: a plane you click on ---------- */
+#lin .craft-panel { width: min(1100px, 100%); }
+.lin-play { display: flex; gap: 24px; align-items: flex-start; margin-top: 12px; }
+.lin-board { flex: 0 1 540px; min-width: 0; }
+.lin-graph { outline: none; }
+.lin-graph svg { display: block; width: 100%; height: auto; background: #17131f; border: 4px solid; border-color: #373737 #fff #fff #373737; cursor: crosshair; touch-action: manipulation; user-select: none; }
+.lin-graph:focus-visible svg { outline: 4px solid #ffd36b; outline-offset: 2px; }
+.lin-graph.shake { animation: shake .35s; }
+.lin-graph .tick { font-family: var(--body); font-size: 12px; fill: #b9b4cc; }
+.lin-graph .plabel { font-family: var(--px); font-size: 11px; paint-order: stroke; stroke: #17131f; stroke-width: 4px; stroke-linejoin: round; }   /* a dark edge, so a label stays readable over the line */
+.lin-coords { min-height: 28px; margin-top: 6px; font-family: var(--px); font-size: 13px; }
+.lin-side { flex: 1 1 320px; min-width: 0; }
+.lin-formname { font-family: var(--px); font-size: 12px; margin-bottom: 6px; }
+.lin-eq { font-family: var(--body); font-size: 38px; line-height: 1.1; background: var(--dark); color: #fff; padding: 10px 16px; overflow-wrap: anywhere; }   /* the body font keeps lower case: x is not X, and A is not a */
+.lin-steps { list-style: none; margin: 12px 0 0; padding: 0; }
+.lin-steps li { position: relative; margin: 0 0 8px; padding: 8px 10px 8px 46px; background: var(--slot); border: 3px solid; border-color: #373737 #fff #fff #373737; font-size: 22px; line-height: 1.1; }
+.lin-steps li::before { content: attr(data-n); position: absolute; left: 9px; top: 9px; width: 26px; height: 26px; display: grid; place-items: center; font-family: var(--px); font-size: 13px; background: #8b8b8b; color: #fff; }
+.lin-steps li b { display: block; margin-bottom: 4px; font-family: var(--px); font-size: 12px; font-weight: 400; }
+.lin-steps li.active { background: #fff6cf; box-shadow: 0 0 0 3px #ffd36b; }
+.lin-steps li.active::before { background: #e08a00; }
+.lin-steps li.done { opacity: .8; }
+.lin-steps li.done::before { content: '\2713'; background: #3f8f2a; }
+.lin-result { margin-top: 10px; font-size: 22px; line-height: 1.15; }
+.lin-result ul { margin: 6px 0 0; padding-left: 20px; }
+.lin-result .factor-line { font-family: var(--body); font-size: 30px; }
+@media (max-width: 900px) { .lin-play { flex-wrap: wrap; } .lin-board { flex: 1 1 100%; } }
+

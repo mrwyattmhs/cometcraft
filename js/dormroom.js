@@ -113,7 +113,7 @@ const DormRoom = (() => {
       box(g, lambert(0xe9e6dc), 0.5, 0.07, 0.34, 0, 0.035, 0);                 // a marble base
       box(g, lambert(0xc9a24a), 0.36, 0.04, 0.24, 0, 0.09, 0);                 // with a gold step
       const sym = def.symbol, y0 = 0.115;
-      if (typeof sym === 'string' && symbolSize && ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola'].includes(sym)) {
+      if (typeof sym === 'string' && symbolSize && ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola', 'linegraph'].includes(sym)) {
         const top = buildSymbol(sym, def.color, { emissive: 0.4 }), sz = symbolSize(sym), k = Math.min(0.44 / sz.w, 0.36 / sz.h);
         top.scale.setScalar(k); top.position.set(0, y0 + sz.h * k / 2, 0); g.add(top);
       } else if (sym === 'd20') {

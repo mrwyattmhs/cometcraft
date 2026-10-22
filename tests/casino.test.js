@@ -34,17 +34,18 @@ Object.values(WINGS).forEach(w => {
 });
 assert.ok(2 * ARCH.halfWidth >= 8, 'a wide, grand archway');
 
-// the five tables: three in Factoring (practice nearest the hall), two in Graphing (standard form nearest)
+// the six tables: three in Factoring (practice nearest the hall) and three in Graphing (lines nearest, then parabola, then vertex)
 const inWing = (t, w) => t.x - TABLE.w / 2 > w.minX && t.x + TABLE.w / 2 < w.maxX && t.z - TABLE.d / 2 > w.minZ && t.z + TABLE.d / 2 < w.maxZ;
 ['practice', 'radical', 'trinomial'].forEach(k => assert.ok(inWing(TABLES[k], WINGS.factoring), `${k} fits in the Factoring wing`));
-['parabola', 'vertex'].forEach(k => assert.ok(inWing(TABLES[k], WINGS.graphing), `${k} fits in the Graphing wing`));
+['lines', 'parabola', 'vertex'].forEach(k => assert.ok(inWing(TABLES[k], WINGS.graphing), `${k} fits in the Graphing wing`));
 assert.ok(TABLES.practice.x > TABLES.radical.x && TABLES.radical.x > TABLES.trinomial.x);
-assert.ok(TABLES.parabola.x < TABLES.vertex.x);
-assert.deepStrictEqual(new Set(Object.values(TABLES).map(t => t.z)).size, 1, 'all five stand in a row');
+assert.ok(TABLES.lines.x < TABLES.parabola.x && TABLES.parabola.x < TABLES.vertex.x, 'lines nearest the hall, then parabola, then vertex');
+assert.deepStrictEqual(new Set(Object.values(TABLES).map(t => t.z)).size, 1, 'all six stand in a row');
 const row = ks => ks.map(k => TABLES[k].x).sort((a, b) => a - b);
-[row(['practice', 'radical', 'trinomial']), row(['parabola', 'vertex'])].forEach(xs => xs.forEach((x, i) => { if (i) assert.ok(x - xs[i - 1] - TABLE.w >= 2 * PLAYER + 0.7, 'room to walk between neighbouring tables'); }));
+[row(['practice', 'radical', 'trinomial']), row(['lines', 'parabola', 'vertex'])].forEach(xs => xs.forEach((x, i) => { if (i) assert.ok(x - xs[i - 1] - TABLE.w >= 2 * PLAYER + 0.7, 'room to walk between neighbouring tables'); }));
 Object.values(TABLES).forEach(t => assert.ok(t.z + TABLE.d / 2 + 2.8 < WING.depth / 2, 'and room in front of each (the seat is 2.8 south of the middle)'));
-assert.strictEqual(Object.keys(TABLES).length, 5);
+assert.strictEqual(Object.keys(TABLES).length, 6);
+assert.deepStrictEqual(Object.keys(TABLES).map(k => TABLES[k].x), [-24, -31.5, -39, 24, 31.5, 39], 'the Graphing wing is laid out like the Factoring wing, mirrored');
 
 // the fountain sits in the middle of the hall with room to walk all round it
 assert.deepStrictEqual([F.x, F.z, F.radius], [0, -1, 5.4]);

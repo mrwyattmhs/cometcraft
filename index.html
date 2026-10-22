@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=22">
+  <link rel="stylesheet" href="css/style.css?v=24">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -28,7 +28,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 22</p>
+      <p class="fine build">Build 24</p>
     </div>
   </div>
 
@@ -326,6 +326,42 @@
     </div>
   </div>
 
+  <div id="lin" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel lin-panel" role="dialog" aria-modal="true" aria-labelledby="lin-title">
+      <header class="craft-head">
+        <h2 id="lin-title">Lines Table</h2>
+        <div class="craft-meta">
+          <span id="lin-pay" class="pay-chip"></span>
+          <span id="lin-wallet" class="wallet-chip">0 chips</span>
+          <button id="lin-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+
+      <section id="lin-pick" class="lin-pick">
+        <p class="bet-prompt">Pick a form first. Every line you graph pays the same.</p>
+        <div id="lin-forms" class="bet-grid"></div>
+      </section>
+
+      <div id="lin-play" class="lin-play hidden">
+        <div class="lin-board">
+          <div id="lin-graph" class="lin-graph" tabindex="0" role="group" aria-label="Coordinate grid. Click a point to plot it, or use the arrow keys and Enter."></div>
+          <div id="lin-coords" class="lin-coords"></div>
+        </div>
+        <div class="lin-side">
+          <div id="lin-formname" class="lin-formname"></div>
+          <div id="lin-eq" class="lin-eq"></div>
+          <ol id="lin-steps" class="lin-steps"></ol>
+          <div id="lin-msg" class="msg" role="status" aria-live="polite"></div>
+          <div class="craft-actions">
+            <button id="lin-next" class="btn primary hidden" type="button">Next line</button>
+            <button id="lin-again" class="btn" type="button">Pick a form</button>
+          </div>
+          <div id="lin-result" class="lin-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="lib" class="overlay hidden">
     <div class="lib-box" role="dialog" aria-modal="true" aria-labelledby="lib-title">
       <header class="lib-head">
@@ -472,42 +508,44 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/economy.js?v=22"></script>
-  <script src="js/factoring.js?v=22"></script>
-  <script src="js/catalog.js?v=22"></script>
-  <script src="js/store.js?v=22"></script>
-  <script src="js/trophies.js?v=22"></script>
-  <script src="js/books-data.js?v=22"></script>
-  <script src="js/library.js?v=22"></script>
-  <script src="js/content.js?v=22"></script>
-  <script src="js/textures.js?v=22"></script>
-  <script src="js/avatar.js?v=22"></script>
-  <script src="js/pets.js?v=22"></script>
-  <script src="js/dorm.js?v=22"></script>
-  <script src="js/dormroom.js?v=22"></script>
-  <script src="js/usmap-data.js?v=22"></script>
-  <script src="js/usmap.js?v=22"></script>
-  <script src="js/flag.js?v=22"></script>
-  <script src="js/blueprint.js?v=22"></script>
-  <script src="js/sandbox.js?v=22"></script>
-  <script src="js/casino-interior.js?v=22"></script>
-  <script src="js/world.js?v=22"></script>
-  <script src="js/showcase.js?v=22"></script>
-  <script src="js/player.js?v=22"></script>
-  <script src="js/ui.js?v=22"></script>
-  <script src="js/shop.js?v=22"></script>
-  <script src="js/crafting.js?v=22"></script>
-  <script src="js/trinomials.js?v=22"></script>
-  <script src="js/trinomial-game.js?v=22"></script>
-  <script src="js/radicals.js?v=22"></script>
-  <script src="js/radical-game.js?v=22"></script>
-  <script src="js/parabolas.js?v=22"></script>
-  <script src="js/parabola-game.js?v=22"></script>
-  <script src="js/arithmetic.js?v=22"></script>
-  <script src="js/arithmetic-game.js?v=22"></script>
-  <script src="js/map-game.js?v=22"></script>
-  <script src="js/reader-game.js?v=22"></script>
-  <script src="js/dorm-planner.js?v=22"></script>
-  <script src="js/main.js?v=22"></script>
+  <script src="js/economy.js?v=24"></script>
+  <script src="js/factoring.js?v=24"></script>
+  <script src="js/catalog.js?v=24"></script>
+  <script src="js/store.js?v=24"></script>
+  <script src="js/trophies.js?v=24"></script>
+  <script src="js/books-data.js?v=24"></script>
+  <script src="js/library.js?v=24"></script>
+  <script src="js/content.js?v=24"></script>
+  <script src="js/textures.js?v=24"></script>
+  <script src="js/avatar.js?v=24"></script>
+  <script src="js/pets.js?v=24"></script>
+  <script src="js/dorm.js?v=24"></script>
+  <script src="js/dormroom.js?v=24"></script>
+  <script src="js/usmap-data.js?v=24"></script>
+  <script src="js/usmap.js?v=24"></script>
+  <script src="js/flag.js?v=24"></script>
+  <script src="js/blueprint.js?v=24"></script>
+  <script src="js/sandbox.js?v=24"></script>
+  <script src="js/casino-interior.js?v=24"></script>
+  <script src="js/world.js?v=24"></script>
+  <script src="js/showcase.js?v=24"></script>
+  <script src="js/player.js?v=24"></script>
+  <script src="js/ui.js?v=24"></script>
+  <script src="js/shop.js?v=24"></script>
+  <script src="js/crafting.js?v=24"></script>
+  <script src="js/trinomials.js?v=24"></script>
+  <script src="js/trinomial-game.js?v=24"></script>
+  <script src="js/radicals.js?v=24"></script>
+  <script src="js/radical-game.js?v=24"></script>
+  <script src="js/parabolas.js?v=24"></script>
+  <script src="js/lines.js?v=24"></script>
+  <script src="js/parabola-game.js?v=24"></script>
+  <script src="js/lines-game.js?v=24"></script>
+  <script src="js/arithmetic.js?v=24"></script>
+  <script src="js/arithmetic-game.js?v=24"></script>
+  <script src="js/map-game.js?v=24"></script>
+  <script src="js/reader-game.js?v=24"></script>
+  <script src="js/dorm-planner.js?v=24"></script>
+  <script src="js/main.js?v=24"></script>
 </body>
 </html>

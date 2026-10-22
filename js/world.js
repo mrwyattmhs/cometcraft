@@ -1269,6 +1269,16 @@ const World = (() => {
     w: 14, h: 14,
   });
 
+  // a line with two dots on a pair of axes, floating over the lines table
+  const lineGraphCells = () => ({
+    cells: [
+      ...strokeCells([[2, 0.8], [2, 13.2]], 15, 14, 0.55), ...strokeCells([[2, 2], [14.2, 2]], 15, 14, 0.55),      // the axes
+      ...strokeCells([[3.2, 3.4], [13.4, 12.4]], 15, 14, 0.8),                                                      // the line
+      ...strokeCells([[5.2, 5.2], [5.3, 5.3]], 15, 14, 1.25), ...strokeCells([[11.2, 10.6], [11.3, 10.7]], 15, 14, 1.25),   // the two points
+    ].filter(([c, r], i, a) => a.findIndex(([c2, r2]) => c2 === c && r2 === r) === i),
+    w: 15, h: 14,
+  });
+
   const parabolaCells = () => {
     const pts = [];
     for (let t = -1; t <= 1.0001; t += 0.05) pts.push([7.5 + 7 * t, 0.7 + 12.6 * t * t]);
@@ -1298,6 +1308,7 @@ const World = (() => {
     sqrt:      { shape: radicalCells,   u: 0.1,   mirrorBack: false },
     quadratic: { shape: quadraticCells, u: 0.08,  mirrorBack: false },
     parabola:  { shape: parabolaCells,  u: 0.1,   mirrorBack: false },
+    linegraph: { shape: lineGraphCells, u: 0.1,   mirrorBack: false },
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },

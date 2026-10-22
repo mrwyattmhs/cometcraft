@@ -10,7 +10,7 @@ const Store = (() => {
     chips: 100,
     practiceWins: 0, wagerWins: 0, wagerLosses: 0,
     trinomialWins: 0, trinomialLosses: 0, radicalWins: 0, radicalLosses: 0,
-    parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0,
+    parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0, linesWins: 0, linesLosses: 0,
     arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
     blueprintsSolved: 0,
     mapFound: [],            // two-letter codes of the states you have found on the map (first try)

@@ -5,13 +5,13 @@
    under a crystal chandelier, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
 
      Factoring wing (west, left):   Practice table, Radical table, Trinomial table
-     Graphing wing  (east, right):  Parabola table (standard form), Vertex table (vertex form)
+     Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form)
      North wing:                    not built yet. Its doors are in the north wall and its floor space is reserved.
 
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 22; // bump together with the ?v= numbers in index.html
+  const BUILD = 24; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -27,7 +27,7 @@ const CasinoInterior = (() => {
   const FOUNTAIN = { x: 0, z: -1, radius: 5.4 };
   const TABLES = {
     practice: { x: -24, z: -5 }, radical: { x: -31.5, z: -5 }, trinomial: { x: -39, z: -5 },
-    parabola: { x: 25.5, z: -5 }, vertex: { x: 35.5, z: -5 },
+    lines: { x: 24, z: -5 }, parabola: { x: 31.5, z: -5 }, vertex: { x: 39, z: -5 },
   };
   const SPAWN = { x: 0, z: 10.5, yaw: 0 };
   const GOLD = 0xd4a843;
@@ -71,6 +71,20 @@ const CasinoInterior = (() => {
     [[n72, n8], [n72, n9], [n8, n2a], [n8, n4], [n9, n3a], [n9, n3b], [n4, n2b], [n4, n2c]].forEach(([a, b]) => line(a, b));
     node(n72, '72'); node(n8, '8'); node(n9, '9'); node(n2a, '2', true); node(n4, '4'); node(n3a, '3', true); node(n3b, '3', true); node(n2b, '2', true); node(n2c, '2', true);
     c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.075); c.textAlign = 'center'; c.fillText('72 = 2 \u00d7 2 \u00d7 2 \u00d7 3 \u00d7 3', W * 0.5, H * 0.93);
+  }
+  /** The same line, y = 2x + 1, in all three forms, beside its graph. */
+  function artLines(c, cv) {
+    frame(c, cv, 'ONE LINE, THREE FORMS');
+    const W = cv.width, H = cv.height, L = W * 0.07, R = W * 0.42, Tp = H * 0.24, B = H * 0.9, xr = [-3, 3], yr = [-3, 5];
+    const px = x => L + (x - xr[0]) / (xr[1] - xr[0]) * (R - L), py = y => B - (y - yr[0]) / (yr[1] - yr[0]) * (B - Tp);
+    c.strokeStyle = 'rgba(143,160,208,.28)'; c.lineWidth = 1;
+    for (let x = xr[0]; x <= xr[1]; x++) { c.beginPath(); c.moveTo(px(x), Tp); c.lineTo(px(x), B); c.stroke(); }
+    for (let y = yr[0]; y <= yr[1]; y++) { c.beginPath(); c.moveTo(L, py(y)); c.lineTo(R, py(y)); c.stroke(); }
+    c.strokeStyle = '#8fa0d0'; c.lineWidth = 3; c.beginPath(); c.moveTo(px(0), Tp); c.lineTo(px(0), B); c.moveTo(L, py(0)); c.lineTo(R, py(0)); c.stroke();
+    c.strokeStyle = '#f3d27a'; c.lineWidth = 4; c.beginPath(); c.moveTo(px(-2), py(-3)); c.lineTo(px(2), py(5)); c.stroke();
+    [[0, 1], [1, 3]].forEach(([x, y]) => { c.beginPath(); c.arc(px(x), py(y), H * 0.024, 0, Math.PI * 2); c.fillStyle = '#52f08f'; c.fill(); });
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    [['y = 2x + 1', '#f3e8c9', 0.34], ['y \u2212 3 = 2(x \u2212 1)', '#8fd8ff', 0.57], ['2x \u2212 y = \u22121', '#ff9a9a', 0.8]].forEach(([t, col, fy]) => { c.fillStyle = col; c.font = serif(H * 0.105); c.fillText(t, W * 0.72, H * fy); });
   }
   function artRadical(c, cv) {
     frame(c, cv, 'SIMPLIFY');
@@ -161,8 +175,8 @@ const CasinoInterior = (() => {
     const inlay = lambert(GOLD);
     decal(inlay, hw - 2.4, 0.34, 0, 0.03, HALL.minZ + 0.9);
     [-1, 1].forEach(s => { decal(inlay, 0.34, hd - 2.0, s * (HALL.maxX - 0.9), 0.03, 0); decal(inlay, (hw / 2 - 1.2 - 2.9), 0.34, s * (2.9 + (hw / 2 - 1.2 - 2.9) / 2), 0.03, HALL.maxZ - 0.9); });
-    flat(g, 'carpet', 4.6, 7.6, 0, 0.02, 10.0);                                  // starts clear of the rings round the fountain
-    [-1, 1].forEach(s => decal(inlay, 0.2, 7.6, s * 2.4, 0.04, 10.0));
+    flat(g, 'carpet', 4.6, 7.6, 0, 0.04, 10.0);                                  // starts clear of the rings round the fountain (4 cm above the marble, and its gold edges 3 cm above it)
+    [-1, 1].forEach(s => decal(inlay, 0.2, 7.6, s * 2.4, 0.07, 10.0));
 
     // the fountain, and rings of gold and green marble round it in the floor
     ring(lambert(GOLD), FOUNTAIN.radius + 0.6, FOUNTAIN.radius + 0.95, FOUNTAIN.x, 0.03, FOUNTAIN.z);
@@ -194,7 +208,7 @@ const CasinoInterior = (() => {
       c.strokeStyle = '#d4a843'; c.lineWidth = 10; c.strokeRect(6, 6, cv.width - 12, cv.height - 12);
       c.fillStyle = 'rgba(255,236,170,.9)'; c.beginPath(); c.arc(cv.width / 2, cv.height / 2, 46, 0, Math.PI * 2); c.fill();
     }, 32);
-    mural.rotation.x = Math.PI / 2; mural.position.set(0, HH - 0.02, 0); g.add(mural);
+    mural.rotation.x = Math.PI / 2; mural.position.set(0, HH - 0.06, 0); g.add(mural);          // 6 cm under the ceiling: far enough that even a low-precision depth buffer cannot mix them up
     [-12, 12].forEach(x => box(g, gold, 0.6, 0.5, hd, x, HH - 0.25, 0));
     [-10, 10].forEach(z => box(g, gold, hw, 0.5, 0.6, 0, HH - 0.25, z));
 
@@ -206,7 +220,7 @@ const CasinoInterior = (() => {
     [-8, 8].forEach(x => { box(g, gold, 0.5, 0.9, 0.16, x, 4.6, HALL.minZ + 0.08); box(g, glow(0xfff0b8), 0.26, 0.55, 0.1, x, 4.7, HALL.minZ + 0.2); });
 
     // wing signs over the archways, facing the hall
-    [['factoring', '#2a0d14', 'practice. radicals. trinomials.'], ['graphing', '#0d1d3a', 'standard form. vertex form.']].forEach(([id, bg, sub]) => {
+    [['factoring', '#2a0d14', 'practice. radicals. trinomials.'], ['graphing', '#0d1d3a', 'lines and parabolas.']].forEach(([id, bg, sub]) => {
       const w = WINGS[id], sign = makeSign({ w: 9, h: 2.2, title: w.name, sub, fg: '#f3d27a', bg, border: '#d4a843', subColor: '#f3e8c9' });
       sign.rotation.y = -w.side * Math.PI / 2; sign.position.set(w.side * (HALL.maxX - 0.05), 9.9, 0); g.add(sign);
     });
@@ -215,7 +229,7 @@ const CasinoInterior = (() => {
     const door = NORTH_WING.door;
     [-1, 1].forEach(s => box(g, 'wood', door.width / 2 - 0.1, door.height, 0.2, s * (door.width / 4), door.height / 2, HALL.minZ + 0.1));
     [-1, 1].forEach(s => box(g, gold, 0.5, door.height + 0.5, 0.4, s * (door.width / 2 + 0.25), (door.height + 0.5) / 2, HALL.minZ + 0.2));
-    box(g, gold, door.width + 1, 0.5, 0.4, 0, door.height + 0.25, HALL.minZ + 0.2); box(g, goldDeep, door.width + 1.4, 0.2, 0.5, 0, door.height + 0.62, HALL.minZ + 0.2);
+    box(g, gold, door.width + 1.04, 0.52, 0.44, 0, door.height + 0.26, HALL.minZ + 0.2); box(g, goldDeep, door.width + 1.4, 0.2, 0.5, 0, door.height + 0.63, HALL.minZ + 0.2);
     box(g, gold, 0.18, 7, 0.1, 0, 4, HALL.minZ + 0.31);                                                                   // the seam between the two doors
     // gilded panels on each door, and a handle on each
     [-1, 1].forEach(s => {
@@ -234,7 +248,7 @@ const CasinoInterior = (() => {
 
     // the way out
     [-1, 1].forEach(s => box(g, 'wood', 1.7, 6.4, 0.2, s * 0.9, 3.2, HALL.maxZ - 0.1));
-    [-1, 1].forEach(s => box(g, gold, 0.4, 6.8, 0.4, s * 2.1, 3.4, HALL.maxZ - 0.2)); box(g, gold, 4.6, 0.4, 0.4, 0, 6.6, HALL.maxZ - 0.2);
+    [-1, 1].forEach(s => box(g, gold, 0.4, 6.8, 0.4, s * 2.1, 3.4, HALL.maxZ - 0.2)); box(g, gold, 4.64, 0.44, 0.44, 0, 6.62, HALL.maxZ - 0.2);
     solid(zone, 0, HALL.maxZ - 0.5, 5.2, 0.8);                                    // the same at the way out
     const exit = makeSign({ w: 2.8, h: 0.8, title: 'EXIT', fg: '#7dffa8', bg: '#0c2a18', border: '#52f08f' });
     exit.rotation.y = Math.PI; exit.position.set(0, 7.5, HALL.maxZ - 0.06); g.add(exit);
@@ -254,14 +268,15 @@ const CasinoInterior = (() => {
     };
     Object.entries(WINGS).forEach(([id, wing]) => {
       const side = wing.side, st = wingStyle[id], cx = (wing.minX + wing.maxX) / 2, WH = WING.height;
-      const wallCx = side * 30.5;                                                         // the long walls run from the hall wall to the end wall
+      const wallCx = side * 30.75, wallLen = 28.5;                                       // the long walls run from the OUTER face of the hall wall (16.5) to the end wall (45): they must not reach into the hall wall,
+                                                                                         // or their ends would lie on the hall's wall and the two would flicker
       flat(g, st.carpet, WING.length, WING.depth, cx, 0, 0);
-      box(g, 'ceilingCream', 29, 0.3, 23, wallCx, WH + 0.15, 0);
-      slab(wallCx, -(wing.maxZ + WALL / 2), 29, WALL, { h: WH, lower: 'wood', lowerH: 1.4 });
-      slab(wallCx, wing.maxZ + WALL / 2, 29, WALL, { h: WH, lower: 'wood', lowerH: 1.4 });
+      box(g, 'ceilingCream', wallLen, 0.3, 23, wallCx, WH + 0.15, 0);
+      slab(wallCx, -(wing.maxZ + WALL / 2), wallLen, WALL, { h: WH, lower: 'wood', lowerH: 1.4 });
+      slab(wallCx, wing.maxZ + WALL / 2, wallLen, WALL, { h: WH, lower: 'wood', lowerH: 1.4 });
       slab(side * (Math.abs(side < 0 ? wing.minX : wing.maxX) + WALL / 2), 0, WALL, 23, { h: WH, lower: 'wood', lowerH: 1.4 });
       // gold crown molding, and beams with lights between them
-      [-1, 1].forEach(s => box(g, gold, 28.6, 0.28, 0.14, wallCx + side * 0.2, WH - 0.4, s * (wing.maxZ - 0.07)));
+      [-1, 1].forEach(s => box(g, gold, WING.length, 0.28, 0.14, side * 30.5, WH - 0.4, s * (wing.maxZ - 0.07)));
       box(g, gold, 0.14, 0.28, 22, side * (Math.abs(side < 0 ? wing.minX : wing.maxX) - 0.07), WH - 0.4, 0);
       [24.5, 30.5, 36.5].forEach(ax => box(g, goldDeep, 0.5, 0.5, 22, side * ax, WH - 0.25, 0));
       [27.5, 33.5].forEach(ax => [-5.5, 5.5].forEach(z => box(g, glow(0xfff0c8), 3.4, 0.06, 3.0, side * ax, WH - 0.03, z)));
@@ -280,12 +295,13 @@ const CasinoInterior = (() => {
     buildTable(zone, T_.practice.x, T_.practice.z, 'felt', 'PRACTICE TABLE', 'live product. 10 to 50 chips.', '#52f08f', () => actions.openTable('practice'));
     buildTable(zone, T_.radical.x, T_.radical.z, 'feltBlue', 'RADICAL TABLE', 'factor, pair up, simplify', '#38e8ff', () => actions.openTable('radical'), { prop: 'sqrt', accent: 0x38e8ff });
     buildTable(zone, T_.trinomial.x, T_.trinomial.z, 'feltRed', 'TRINOMIAL TABLE', 'split the middle. pick a level.', '#ff6a6a', () => actions.openTable('trinomial'), { prop: 'quadratic', accent: 0xff6a6a });
+    buildTable(zone, T_.lines.x, T_.lines.z, 'feltTeal', 'LINES TABLE', 'slope. points. intercepts.', '#4fe0c0', () => actions.openTable('lines'), { prop: 'linegraph', accent: 0x4fe0c0 });
     buildTable(zone, T_.parabola.x, T_.parabola.z, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'), { prop: 'parabola', accent: 0xd58bff });
     buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347 });
 
     // a picture over each table that shows the kind of question it asks
     const art = [[T_.practice, artFactorTree], [T_.radical, artRadical], [T_.trinomial, artTrinomial],
-      [T_.parabola, artGraph('STANDARD FORM', 'y = x\u00b2 \u2212 4x + 3', x => x * x - 4 * x + 3, [-1, 5], [-2, 5], [[2, -1, true], [1, 0], [3, 0], [0, 3]])],
+      [T_.lines, artLines], [T_.parabola, artGraph('STANDARD FORM', 'y = x\u00b2 \u2212 4x + 3', x => x * x - 4 * x + 3, [-1, 5], [-2, 5], [[2, -1, true], [1, 0], [3, 0], [0, 3]])],
       [T_.vertex, artGraph('VERTEX FORM', 'y = \u2212(x + 1)\u00b2 + 4', x => -((x + 1) ** 2) + 4, [-4, 2], [-3, 5], [[-1, 4, true], [-3, 0], [1, 0]])]];
     art.forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, -10.95); g.add(p); });
 
@@ -424,7 +440,7 @@ const CasinoInterior = (() => {
     box(g, wood, 3.4, 0.25, 1.4, x, 0.12, z);
     box(g, velvet, 3.2, 0.45, 1.2, x, 0.5, z - 0.05);
     box(g, velvet, 3.2, 1.0, 0.35, x, 1.2, z + 0.55);
-    [-1, 1].forEach(s => box(g, velvet, 0.3, 0.85, 1.3, x + s * 1.65, 0.65, z));
+    [-1, 1].forEach(s => box(g, velvet, 0.3, 0.85, 1.34, x + s * 1.65, 0.65, z));       // (a hair deeper than the seat, so no two faces are flush)
     box(g, gold, 3.5, 0.08, 0.1, x, 1.72, z + 0.62);
     solid(zone, x, z, 3.6, 1.5);
   }
