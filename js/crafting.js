@@ -219,7 +219,7 @@ const CraftingGame = (() => {
   /* ---------- the factor tree, growing beside the game ---------- */
   // Every prime you place splits a leaf off the number that is left (the logic is Factoring.treeSteps). The drawing area is always big
   // enough for the longest tree any throw can need, so it never changes size or jumps: the tree just fills in from the top left.
-  const TREE = { stepX: 48, rowH: 44, nw: 42, nh: 28, pad: 6 };
+  const TREE = { stepX: 38, rowH: 30, nw: 34, nh: 22, pad: 5 };
   const TREE_W = Factoring.MAX_TREE_FACTORS * TREE.stepX + TREE.nw + 2 * TREE.pad;
   const TREE_H = (Factoring.MAX_TREE_FACTORS - 1) * TREE.rowH + TREE.nh + 2 * TREE.pad;
 
@@ -237,7 +237,7 @@ const CraftingGame = (() => {
       const fill = prime ? gemColor(nd.v) : pending ? '#f7f7f7' : '#e4e4e4';
       const ink = prime ? '#ffffff' : pending ? '#555555' : '#222222';
       out += `<rect class="node ${nd.kind}" x="${X(nd.col) - nw / 2}" y="${Y(nd.lvl) - nh / 2}" width="${nw}" height="${nh}" fill="${fill}" stroke="${pending ? '#666' : '#373737'}" stroke-width="3"${pending ? ' stroke-dasharray="6 3"' : ''}/>` +
-             `<text x="${X(nd.col)}" y="${Y(nd.lvl)}" text-anchor="middle" dominant-baseline="central" font-family="Silkscreen, 'Courier New', monospace" font-size="14" fill="${ink}">${nd.v}</text>`;
+             `<text x="${X(nd.col)}" y="${Y(nd.lvl)}" text-anchor="middle" dominant-baseline="central" font-family="Silkscreen, 'Courier New', monospace" font-size="12" fill="${ink}">${nd.v}</text>`;
     });
     return out + '</svg>';
   }

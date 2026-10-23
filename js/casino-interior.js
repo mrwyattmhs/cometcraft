@@ -2,7 +2,7 @@
    wing to the north. (The building outside is in world.js and is not touched.)
 
    You come in through the south door facing north. The hall is a big tiled room with a ceiling 16 blocks up, a dancing fountain
-   under a crystal chandelier, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
+   under a glass sculpture in the style of Chihuly's Fiori di Como, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
 
      Factoring wing (west, left):   Practice table, Radical table, Trinomial table
      Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form)
@@ -11,7 +11,7 @@
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 24; // bump together with the ?v= numbers in index.html
+  const BUILD = 26; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -30,6 +30,9 @@ const CasinoInterior = (() => {
     lines: { x: 24, z: -5 }, parabola: { x: 31.5, z: -5 }, vertex: { x: 39, z: -5 },
   };
   const SPAWN = { x: 0, z: 10.5, yaw: 0 };
+  /** A little wedding chapel in the middle of the Graphing wing's south wall: ivory doors under a gilded arch with a sign over them, a red rope hung
+      across in front, and the ceremony sign on its stand to one side. (The sofa that stood there is gone.) */
+  const CHAPEL = { x: 30.75, wallZ: 11, doorW: 4, doorH: 5.2, ropeZ: 9.0, ropeHalf: 2.5, stand: { x: 26.2, z: 9.5 } };
   const GOLD = 0xd4a843;
 
   // (made when first needed, so this file can be loaded in Node for the plan tests without THREE)
@@ -124,6 +127,36 @@ const CasinoInterior = (() => {
       marks.forEach(([x, y, hot]) => { c.beginPath(); c.arc(px(x), py(y), H * 0.022, 0, Math.PI * 2); c.fillStyle = hot ? '#ff8a8a' : '#f3e8c9'; c.fill(); });
       c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.09); c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(label, W / 2, H * 0.17);
     };
+  }
+
+  /** The font for script lettering at a size: the calligraphy font (Great Vibes) if it really loaded, otherwise an italic serif.
+      (A font that failed to load quietly falls back to something plain, so it is detected by measuring: the two only differ in width if the font is there.) */
+  function scriptFont(c, size) {
+    c.font = '40px "Great Vibes", monospace'; const withScript = c.measureText('Winters & Wyatt Wedding').width;
+    c.font = '40px monospace'; const without = c.measureText('Winters & Wyatt Wedding').width;
+    return Math.abs(withScript - without) > 0.5 ? `${size}px "Great Vibes", cursive` : `italic ${size}px Georgia, "Times New Roman", serif`;
+  }
+
+  /** The ceremony card: flowers across the top, then the names in script. */
+  function paintWeddingCard(c, cv) {
+    const W = cv.width, H = cv.height, bh = H * 0.31;
+    c.fillStyle = '#f7f5f2'; c.fillRect(0, 0, W, H);
+    c.save(); c.beginPath(); c.rect(0, 0, W, bh); c.clip();
+    c.fillStyle = '#3f5a2c'; c.fillRect(0, 0, W, bh);
+    const blob = (x, y, rx, ry, col, rot = 0) => { c.save(); c.translate(x * W, y * bh); c.rotate(rot); c.fillStyle = col; c.beginPath(); c.ellipse(0, 0, rx * W, ry * bh, 0, 0, Math.PI * 2); c.fill(); c.restore(); };
+    [[0.04, 0.5, 0.1, 0.45, '#6f8a37', 0.3], [0.12, 0.8, 0.09, 0.3, '#2c4520', -0.4], [0.2, 0.35, 0.07, 0.3, '#86a043', 0.8], [0.3, 0.7, 0.08, 0.35, '#34502a', 0.2], [0.93, 0.2, 0.09, 0.35, '#5a7a30', 0.5]].forEach(a => blob(...a));
+    [[0.34, 0.55, 0.14, 0.6, '#7d1b57', -0.5], [0.46, 0.2, 0.1, 0.5, '#b4246f', 0.9], [0.76, 0.45, 0.12, 0.55, '#a02466', 0.6], [0.6, 0.9, 0.12, 0.4, '#8c1d52', 0]].forEach(a => blob(...a));    // the calla lilies
+    const rose = (x, y, r, a, b, d) => [[r, a], [r * 0.72, b], [r * 0.46, d], [r * 0.22, a]].forEach(([rr, col]) => { c.fillStyle = col; c.beginPath(); c.arc(x * W, y * bh, rr, 0, Math.PI * 2); c.fill(); });
+    rose(0.56, 0.45, bh * 0.52, '#7b0f1d', '#c4162a', '#8c1020');                                                   // red roses
+    rose(0.68, 0.7, bh * 0.36, '#6a0a18', '#b01226', '#7b0f1d');
+    rose(0.9, 0.5, bh * 0.5, '#aab446', '#cbd36a', '#b6c04f');                                                      // a lime-green rose
+    c.restore();
+    c.strokeStyle = '#c7c9d1'; c.lineWidth = 2;
+    for (const off of [0, 3]) { c.beginPath(); for (let x = 0; x <= W; x += 4) c.lineTo(x, bh + H * 0.035 + off + Math.sin(x / 22 + off) * 2.5); c.stroke(); }          // the thin wavy line under the flowers
+    c.fillStyle = '#1b2a3a'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.font = scriptFont(c, Math.round(H * 0.19));
+    c.fillText('Winters & Wyatt', W / 2, H * 0.57);
+    c.fillText('Wedding Ceremony', W / 2, H * 0.8);
   }
 
   /* ---------- the build ---------- */
@@ -258,8 +291,8 @@ const CasinoInterior = (() => {
     // topiary in the corners of the hall
     [[-14, 12], [14, 12], [-14, -12], [14, -12]].forEach(([x, z]) => topiary(zone, H, x, z));
 
-    // the chandelier, hung over the fountain
-    addChandelier(zone, H, FOUNTAIN.x, FOUNTAIN.z, { ceilingY: HH, scale: 1, lights: true });
+    // a glass sculpture in the style of Chihuly's Fiori di Como, over the fountain
+    addGlassSculpture(zone, H, FOUNTAIN.x, FOUNTAIN.z, { ceilingY: HH });
 
     /* ===== the wings ===== */
     const wingStyle = {
@@ -286,7 +319,8 @@ const CasinoInterior = (() => {
       const nameSign = makeSign({ w: 12, h: 2.8, title: `${wing.name} WING`, sub: st.sub, fg: '#f3d27a', bg: st.bg, border: '#d4a843', subColor: '#f3e8c9' });
       nameSign.rotation.y = -side * Math.PI / 2; nameSign.position.set(side * (Math.abs(side < 0 ? wing.minX : wing.maxX) - 0.05), 7.0, 0); g.add(nameSign);
       // lounge seating along the south wall, and topiary in the far corners
-      [-1, 0, 1].forEach(k => addSofa(zone, H, wallCx + k * 8.5, 9.8, st.sofa));
+      [-1, 0, 1].forEach(k => { if (!(id === 'graphing' && k === 0)) addSofa(zone, H, wallCx + k * 8.5, 9.8, st.sofa); });      // (the middle one in the Graphing wing makes way for the chapel)
+      if (id === 'graphing') addWeddingChapel(zone, H);
       [-1, 1].forEach(s => topiary(zone, H, side * 43.2, s * 9.8));
     });
 
@@ -312,7 +346,7 @@ const CasinoInterior = (() => {
     spawnNPCs(zone, 3);
 
     // what the tests and the next wing need to know
-    zone.casino = { HALL, WING, ARCH, WINGS, NORTH_WING, FOUNTAIN, TABLES };
+    zone.casino = { HALL, WING, ARCH, WINGS, NORTH_WING, FOUNTAIN, TABLES, CHAPEL };
     return zone;
   }
 
@@ -364,7 +398,7 @@ const CasinoInterior = (() => {
       pivot.add(col, puff); g.add(pivot);
       jets.push({ col, puff, base: o.base, amp: o.amp, speed: o.speed, ring: o.ring, i: o.i, n: o.n });
     };
-    addJet(x, 3.83, z, { w: 0.4, base: 1.5, amp: 2.0, speed: 1.1, ring: 0, i: 0, n: 1 });     // tops out at 7.3 blocks, well under the chandelier
+    addJet(x, 3.83, z, { w: 0.4, base: 1.5, amp: 2.0, speed: 1.1, ring: 0, i: 0, n: 1 });     // tops out at 7.3 blocks, well under the glass sculpture
     const rings = [[8, 1.2, 3.83, 0.8, 1.0, -0.3, 1.7, 1], [12, 2.45, 1.54, 1.0, 1.4, -0.35, 1.5, 2], [16, 4.35, 0.62, 0.8, 1.3, 0.45, 1.3, 3]];
     rings.forEach(([cnt, r, y, base, amp, lean, speed, ringId]) => {
       for (let i = 0; i < cnt; i++) {
@@ -390,7 +424,81 @@ const CasinoInterior = (() => {
     }
   }
 
-  /** A crystal chandelier: gold rings and spokes, rings of little lamps, and glass drops that twinkle. */
+  /** A glass sculpture in the style of Chihuly's "Fiori di Como": a canopy of hundreds of blown-glass flowers in every colour growing from a bronze armature
+      against the ceiling. Open blossoms, long trumpets, ruffled saucers, buds and curling tendrils (a few instanced shapes, each piece its own colour and angle),
+      denser in the middle. It is still: nothing flickers. The layout is seeded, so it is the same every time. */
+  function addGlassSculpture(zone, H, x, z, { ceilingY }) {
+    const { lambert } = H;
+    const g = new THREE.Group(); g.position.set(x, 0, z); zone.group.add(g);
+    const y0 = ceilingY - 0.1, A = 10.2, B = 8.8, D = 2.4;                  // the armature: the lower half of an ellipsoid, hung against the ceiling
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x7a5a26 }));      // (unlit warm bronze, so any gap between pieces is warm, never a black hole)
+    bowl.scale.set(A, D, B); bowl.position.y = y0; g.add(bowl);
+
+    // shapes that grow along +y from the point where they are attached; the colour of a vertex is darker at the attached end and lighter at the lip
+    const shade = (geo, top) => {
+      const pos = geo.attributes.position, col = new Float32Array(pos.count * 3);
+      for (let i = 0; i < pos.count; i++) { const f = Math.min(1, Math.max(0, pos.getY(i) / top)), v = 0.6 + 0.4 * f; col[i * 3] = col[i * 3 + 1] = col[i * 3 + 2] = v; }
+      geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals(); geo.computeBoundingBox(); return geo;
+    };
+    const lathe = (profile, seg, ruffle) => {
+      const geo = new THREE.LatheGeometry(profile.map(([r, h]) => new THREE.Vector2(r, h)), seg);
+      const pos = geo.attributes.position, top = Math.max(...profile.map(q => q[1])), rim = Math.max(...profile.map(q => q[0]));
+      if (ruffle) for (let i = 0; i < pos.count; i++) {                                                  // a wavy lip, like blown glass
+        const px = pos.getX(i), pz = pos.getZ(i), r = Math.hypot(px, pz);
+        if (r > rim * 0.55) pos.setY(i, pos.getY(i) + ruffle.amp * ((r - rim * 0.55) / (rim * 0.45)) * Math.sin(ruffle.lobes * Math.atan2(pz, px)));
+      }
+      return shade(geo, top);
+    };
+    const tendril = (turns, length) => {                                                                // a curling vine
+      const pts = []; for (let i = 0; i <= 10; i++) { const t = i / 10, a = t * turns * Math.PI * 2, rr = 0.42 * Math.sin(t * Math.PI * 0.9); pts.push(new THREE.Vector3(rr * Math.cos(a), t * length, rr * Math.sin(a))); }
+      return shade(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 22, 0.04, 4), length);
+    };
+    const kinds = [
+      { name: 'blossom', n: 180, size: [0.9, 1.7], geo: lathe([[0.04, 0], [0.1, 0.25], [0.26, 0.55], [0.5, 0.8], [0.66, 0.98], [0.7, 1.02]], 14, { amp: 0.08, lobes: 6 }) },
+      { name: 'trumpet', n: 85, size: [0.55, 0.95], geo: lathe([[0.03, 0], [0.05, 0.6], [0.08, 1.3], [0.2, 1.9], [0.38, 2.3], [0.46, 2.4]], 12, { amp: 0.1, lobes: 5 }) },
+      { name: 'saucer', n: 75, size: [0.7, 1.3], geo: lathe([[0.03, 0], [0.2, 0.1], [0.55, 0.22], [0.9, 0.4], [1.0, 0.52]], 16, { amp: 0.12, lobes: 8 }) },
+      { name: 'bud', n: 95, size: [0.5, 1.0], geo: lathe([[0.001, 0], [0.18, 0.12], [0.22, 0.45], [0.14, 0.8], [0.001, 1.0]], 10, null) },
+      { name: 'tendril', n: 40, size: [0.8, 1.3], geo: tendril(1.5, 2.2) }, { name: 'tendril', n: 40, size: [0.8, 1.3], geo: tendril(2.5, 2.8) }, { name: 'tendril', n: 40, size: [0.8, 1.3], geo: tendril(3.5, 1.7) },
+    ];
+    const palette = [0xe8202a, 0xff3b30, 0xc21e56, 0xff7a1a, 0xff9a2e, 0xffd21f, 0xffe55c, 0x6fd13a, 0x2fbf71, 0x16c9c7, 0x21b0e0, 0x2f6bff, 0x5b8cff, 0x8f45ff, 0xb35cf0, 0xff4fa5, 0xff7fbf, 0xd81b84, 0xfff3e0].map(c => new THREE.Color(c));
+    const glass = new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false });
+    let seed = 1941; const rng = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const q = new THREE.Quaternion(), qs = new THREE.Quaternion(), m = new THREE.Matrix4(), P = new THREE.Vector3(), S = new THREE.Vector3(), N = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0), box = new THREE.Box3();
+    const CEIL_CLEAR = ceilingY - 0.12, X_CLEAR = 10.6;                                  // 12 cm under the ceiling; and no further out than 10.6 where the beams and capitals are (x = +-12)
+    let lowest = Infinity, pieces = 0; const used = new Set(), perKind = {};
+    kinds.forEach(k => {
+      const mesh = new THREE.InstancedMesh(k.geo, glass, k.n);
+      for (let i = 0; i < k.n; i++) {
+        // a piece is only kept if it stays clear of the ceiling and, up near the ceiling, of the beams and column capitals at x = +-12; otherwise it is tried again
+        for (let attempt = 0; ; attempt++) {
+          const u = Math.pow(rng(), 0.62), th = rng() * Math.PI * 2;                                     // denser towards the middle
+          const px = A * u * Math.cos(th), pz = B * u * Math.sin(th), s2 = Math.sqrt(Math.max(0, 1 - u * u)), py = y0 - D * s2;
+          N.set(px / (A * A), -s2 / D, pz / (B * B)).normalize();                                        // straight out from the armature...
+          N.x += (rng() - 0.5) * 0.9; N.y += (rng() - 0.5) * 0.5; N.z += (rng() - 0.5) * 0.9;            // ...then every piece leans its own way
+          if (N.y > -0.1) N.y = -0.1;                                                                     // (never up into the ceiling)
+          N.normalize();
+          q.setFromUnitVectors(UP, N); qs.setFromAxisAngle(UP, rng() * Math.PI * 2); q.multiply(qs);
+          const sc = k.size[0] + (k.size[1] - k.size[0]) * rng(); S.set(sc, sc * (0.85 + rng() * 0.4), sc);
+          P.set(px, py, pz).addScaledVector(N, 0.04);
+          m.compose(P, q, S); box.copy(k.geo.boundingBox).applyMatrix4(m);
+          if (box.max.y > CEIL_CLEAR) { P.y -= box.max.y - CEIL_CLEAR; m.compose(P, q, S); box.copy(k.geo.boundingBox).applyMatrix4(m); }   // too high: slide it down
+          const reach = Math.max(Math.abs(box.min.x), Math.abs(box.max.x));
+          if ((reach <= X_CLEAR || box.max.y < 14.8) || attempt > 40) break;
+        }
+        mesh.setMatrixAt(i, m);
+        const c = palette[Math.floor(rng() * palette.length)]; mesh.setColorAt(i, c); used.add(c.getHex());
+        lowest = Math.min(lowest, box.min.y);
+        pieces++; perKind[k.name] = (perKind[k.name] || 0) + 1;
+      }
+      mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; mesh.frustumCulled = false; g.add(mesh);
+    });
+    // the same two warm lights the chandelier gave the hall
+    const warm = new THREE.PointLight(0xfff0d0, 0.55, 70); warm.position.set(x, y0 - 6.4, z); zone.group.add(warm);
+    const high = new THREE.PointLight(0xffe2b0, 0.3, 50); high.position.set(x, y0 - 2.0, z); zone.group.add(high);
+    zone.glassSculpture = { x, z, ceilingY, group: g, pieces, perKind, lowest, radiusX: A, radiusZ: B, colors: used.size, meshes: kinds.length };
+  }
+
+  /** A crystal chandelier: gold rings and spokes, rings of little lamps, and glass drops that twinkle. (Now only the small ones in the wings.) */
   function addChandelier(zone, H, x, z, { ceilingY, scale: k = 1, lights = true }) {
     const { lambert } = H;
     const g = new THREE.Group(); g.position.set(x, 0, z); zone.group.add(g);
@@ -433,6 +541,58 @@ const CasinoInterior = (() => {
     zone.chandeliers.push({ x, z, ceilingY, scale: k, group: g });
   }
 
+  /** Doors, a gilded arch, a sign, a red rope and the ceremony sign on a stand. See CHAPEL. */
+  function addWeddingChapel(zone, H) {
+    const { box, lambert, makeSign, textPlane, solid } = H;
+    const g = zone.group, C = CHAPEL, cx = C.x, wz = C.wallZ, dh = C.doorH, hw = C.doorW / 2;
+    const ivory = lambert(0xf1ebdd), gold = lambert(GOLD), goldDeep = lambert(0xa97f2a), silver = lambert(0xc3c7cc);
+    // ivory double doors set back in a gold frame, with gilded panels, a seam and handles, and a marble step
+    [-1, 1].forEach(sd => {
+      const lx = cx + sd * (hw / 2 + 0.02);
+      box(g, ivory, hw - 0.04, dh, 0.2, lx, dh / 2, wz - 0.1);
+      [[1.3, 2.2], [3.6, 2.8]].forEach(([y, ph]) => {
+        const pw = hw - 0.5;
+        box(g, goldDeep, pw, 0.07, 0.05, lx, y + ph / 2, wz - 0.225); box(g, goldDeep, pw, 0.07, 0.05, lx, y - ph / 2, wz - 0.225);
+        box(g, goldDeep, 0.07, ph, 0.05, lx - pw / 2, y, wz - 0.225); box(g, goldDeep, 0.07, ph, 0.05, lx + pw / 2, y, wz - 0.225);
+      });
+      box(g, gold, 0.1, 0.9, 0.12, cx + sd * 0.32, 2.4, wz - 0.28);
+      box(g, gold, 0.3, dh, 0.4, cx + sd * (hw + 0.15), dh / 2, wz - 0.2);
+    });
+    box(g, gold, 0.08, dh, 0.1, cx, dh / 2, wz - 0.26);
+    box(g, 'marble', C.doorW + 0.8, 0.1, 0.7, cx, 0.05, wz - 0.35);
+    // the arch over them: a gold half-ring on the two posts, a pale fan window inside it with gold spokes, and a keystone
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(hw + 0.15, 0.15, 8, 30, Math.PI), gold); ring.position.set(cx, dh, wz - 0.2); g.add(ring);
+    const lunette = new THREE.Mesh(new THREE.CircleGeometry(hw, 30, 0, Math.PI), lambert(0xe6dfcf)); lunette.rotation.y = Math.PI; lunette.position.set(cx, dh, wz - 0.12); g.add(lunette);
+    for (let i = 0; i < 7; i++) {
+      const a = Math.PI * (0.12 + 0.76 * i / 6), spoke = box(g, goldDeep, 0.07, hw - 0.1, 0.05, cx + (hw / 2) * Math.cos(a), dh + (hw / 2) * Math.sin(a), wz - 0.17);
+      spoke.rotation.z = a - Math.PI / 2;
+    }
+    box(g, gold, 0.5, 0.55, 0.36, cx, dh + hw + 0.17, wz - 0.2);
+    const sign = makeSign({ w: 4.8, h: 0.95, title: 'WEDDING CHAPEL', fg: '#fff3d6', bg: '#2a1830', border: '#d4a843' });
+    sign.rotation.y = Math.PI; sign.position.set(cx, dh + 3.2, wz - 0.06); g.add(sign);
+    // the red rope: two brass posts with a rope hung between them, in front of the doors (and solid, so the doors stay shut)
+    const rz = C.ropeZ, rope = lambert(0x9b1230);
+    [-1, 1].forEach(sd => {
+      const px = cx + sd * C.ropeHalf;
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.08, 14), gold); base.position.set(px, 0.04, rz); g.add(base);
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.94, 10), gold); pole.position.set(px, 0.55, rz); g.add(pole);
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), gold); ball.position.set(px, 1.08, rz); g.add(ball);
+    });
+    const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(cx - C.ropeHalf, 0.95, rz), new THREE.Vector3(cx, 0.35, rz), new THREE.Vector3(cx + C.ropeHalf, 0.95, rz));
+    const cord = new THREE.Mesh(new THREE.TubeGeometry(curve, 28, 0.05, 8), rope); g.add(cord);
+    // the roped-off space between the rope and the doors is closed to walkers (otherwise you could step round a post and put the camera inside the door frame)
+    solid(zone, cx, (rz - 0.15 + wz) / 2, 2 * C.ropeHalf + 0.5, wz - rz + 0.15);
+    // the ceremony sign on its post, to the left: a silver frame round the card, on an ivory post with a stepped top and a monogram
+    const sx = C.stand.x, sz = C.stand.z;
+    box(g, 'marble', 0.9, 0.12, 0.6, sx, 0.06, sz); box(g, ivory, 0.26, 0.95, 0.26, sx, 0.6, sz); box(g, ivory, 1.1, 0.22, 0.34, sx, 1.18, sz);
+    box(g, silver, 1.5, 1.0, 0.1, sx, 1.78, sz);
+    const card = textPlane(1.32, 0.84, paintWeddingCard, 300); card.rotation.y = Math.PI; card.position.set(sx, 1.78, sz - 0.09); g.add(card);
+    box(g, ivory, 0.9, 0.12, 0.3, sx, 2.34, sz); box(g, ivory, 0.6, 0.12, 0.28, sx, 2.46, sz); box(g, ivory, 0.3, 0.12, 0.26, sx, 2.58, sz);
+    const mono = textPlane(0.5, 0.3, (c, cv) => { c.fillStyle = '#f1ebdd'; c.fillRect(0, 0, cv.width, cv.height); c.fillStyle = '#9aa0a8'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = scriptFont(c, Math.round(cv.height * 0.7)); c.fillText('W&W', cv.width / 2, cv.height * 0.52); }, 300);
+    mono.rotation.y = Math.PI; mono.position.set(sx, 2.46, sz - 0.2); g.add(mono);          // 5 cm proud of the steps it is mounted on
+    solid(zone, sx, sz, 1.1, 0.6);
+  }
+
   /** A plush sofa against the south wall, facing north. It is solid. */
   function addSofa(zone, H, x, z, color) {
     const { box, lambert, solid } = H;
@@ -454,7 +614,7 @@ const CasinoInterior = (() => {
     solid(zone, x, z, 1.3, 1.3);
   }
 
-  return { BUILD, WALL, HALL, WING, ARCH, WINGS, NORTH_WING, FOUNTAIN, TABLES, SPAWN, build };
+  return { BUILD, WALL, HALL, WING, ARCH, WINGS, NORTH_WING, FOUNTAIN, TABLES, SPAWN, CHAPEL, build };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = CasinoInterior;

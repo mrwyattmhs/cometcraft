@@ -15,7 +15,7 @@ const ArithmeticGame = (() => {
     chipEl = Trophies.chip(op);
     $('arith-wallet').parentNode.insertBefore(chipEl, $('arith-wallet'));
   }
-  const BUILD = 24; // must match Arithmetic.BUILD
+  const BUILD = 26; // must match Arithmetic.BUILD
   const MAX_DIGITS = 3;
   const SAID = { add: 'plus', sub: 'minus', mul: 'times', div: 'divided by' };   // for screen readers
   const TICK_MS = 100;

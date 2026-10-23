@@ -12,7 +12,7 @@
 
   // let the pixel font load so canvas signs use it
   try {
-    await Promise.race([document.fonts.load('20px Silkscreen'), new Promise(r => setTimeout(r, 1500))]);
+    await Promise.race([Promise.all([document.fonts.load('20px Silkscreen'), document.fonts.load('40px "Great Vibes"')]), new Promise(r => setTimeout(r, 1500))]);
   } catch (e) { /* fall back to monospace */ }
 
   const canvas = $('view');

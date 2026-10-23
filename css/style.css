@@ -156,17 +156,42 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 .result { margin-top: 14px; padding-top: 12px; border-top: 4px solid #8b8b8b; }
 .factor-line { font-family: var(--px); font-size: 18px; margin-bottom: 10px; }
 
-/* the practice table: the game on the left, and the factor tree growing beside it as you place primes */
-#craft .craft-panel { width: min(1240px, 100%); }
-.craft-layout { display: flex; gap: 22px; align-items: flex-start; }
-.craft-main { flex: 1 1 0; min-width: 0; }
-.tree-side { flex: 0 0 372px; margin-top: 10px; padding: 10px 14px 12px; background: var(--slot); border: 4px solid; border-color: #373737 #fff #fff #373737; }
-.tree-side h3 { font-family: var(--px); font-size: 13px; margin: 0 0 8px; }
+/* the practice table, compact: a slim strip for the dice and the target, then one toolbar row with the grid, the factor tree growing as you
+   place primes, and the prime gems side by side. Scoped to #craft so the other tables keep their own sizes. */
+#craft .craft-panel { width: min(940px, 100%); padding: 12px 18px 14px; }
+#craft .craft-top { display: flex; align-items: center; gap: 16px; padding: 8px 14px; margin: 8px 0 10px; text-align: left; }
+#craft .dice-row { gap: 8px; min-height: 0; flex: 0 0 auto; }
+#craft .die { width: 40px; height: 44px; font-size: 13px; }
+#craft .dice-sum { margin: 0; min-height: 0; font-size: 22px; flex: 1 1 auto; color: #d6f5e3; }
+#craft .target { margin: 0; font-size: 24px; color: #fff; white-space: nowrap; }
+#craft .target strong { font-size: 24px; margin-left: 6px; padding: 1px 10px; }
+.craft-toolbar { display: flex; gap: 14px; align-items: flex-start; }
+#craft .grid-col { flex: 0 0 auto; }
+#craft .grid-wrap { gap: 8px; }
+#craft .grid-col .craft-actions { margin-top: 12px; gap: 8px; flex-wrap: nowrap; }
+#craft .grid { grid-template-columns: repeat(3, 52px); }
+#craft .slot { width: 52px; height: 52px; }
+#craft .slot.output { width: 64px; height: 64px; font-size: 19px; }
+#craft .arrow { width: 26px; height: 20px; }
+#craft .slot .gem-face { width: 42px; height: 42px; font-size: 14px; }
+#craft .inv-wrap { flex: 1 1 250px; min-width: 0; }
+#craft .inv-wrap h3, .tree-side h3 { font-family: var(--px); font-size: 12px; margin: 0 0 5px; }
+#craft .inventory { grid-template-columns: repeat(auto-fill, 42px); max-height: 190px; }
+#craft .gem { width: 42px; height: 42px; }
+#craft .gem-face { width: 34px; height: 34px; border-width: 3px; font-size: 12px; }
+.tree-side { flex: 0 0 300px; padding: 7px 10px 8px; background: var(--slot); border: 4px solid; border-color: #373737 #fff #fff #373737; }
 .tree-live svg { display: block; width: 100%; height: auto; }
-.tree-note { margin-top: 8px; min-height: 26px; font-family: var(--px); font-size: 12px; line-height: 1.5; }
-.tree-misfits { margin-top: 6px; font-size: 22px; color: #a02020; }
-.tree-chip { display: inline-block; min-width: 34px; margin: 0 4px 2px 0; padding: 0 8px; text-align: center; font-family: var(--px); font-size: 14px; color: #fff; background: #a03a3a; border: 3px solid #5c1c1c; }
-@media (max-width: 1060px) { .craft-layout { flex-wrap: wrap; } .tree-side { flex: 1 1 100%; } }
+.tree-note { margin-top: 5px; min-height: 18px; font-family: var(--px); font-size: 11px; line-height: 1.5; }
+.tree-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 2px 8px; margin-bottom: 4px; min-height: 26px; }
+.tree-head h3 { margin: 0 !important; }
+.tree-misfits { margin: 0; font-size: 17px; color: #a02020; white-space: nowrap; }
+.tree-chip { display: inline-block; min-width: 26px; margin: 0 0 0 3px; padding: 0 6px; text-align: center; font-family: var(--px); font-size: 12px; color: #fff; background: #a03a3a; border: 3px solid #5c1c1c; }
+.craft-foot { margin-top: 10px; }
+.craft-foot .msg { margin: 0; min-height: 28px; font-size: 24px; }
+#craft .result { margin-top: 8px; padding-top: 8px; border-top-width: 3px; }
+#craft .factor-line { margin-bottom: 0; font-size: 16px; }
+@media (max-width: 980px) { .craft-toolbar { flex-wrap: wrap; } .tree-side { flex: 1 1 280px; } #craft .inv-wrap { flex: 1 1 100%; } #craft .craft-top { flex-wrap: wrap; } }
+@media (max-width: 640px) { #craft .grid-wrap { flex-wrap: wrap; } #craft .grid-col .craft-actions { flex-wrap: wrap; } }
 
 
 /* ---------- trinomial table ---------- */

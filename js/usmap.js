@@ -4,7 +4,7 @@
 
    Coordinates are map units on a frame sized to fit every outline (WIDTH x HEIGHT), with Alaska and Hawaii in their inset boxes. */
 const USMap = (() => {
-  const BUILD = 24; // bump together with the ?v= numbers in index.html
+  const BUILD = 26; // bump together with the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const REWARD = E.PAY.map; // chips for finding a state on the first try (economy.js)
   const Data = typeof USMapData !== 'undefined' ? USMapData : require('./usmap-data.js');
