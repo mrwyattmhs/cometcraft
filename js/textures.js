@@ -25,6 +25,7 @@ const Tex = (() => {
     feltBlue: { base: [28, 70, 150], v: 5 },
     feltPurple: { base: [96, 46, 150], v: 5 },
     feltTeal: { base: [18, 98, 104], v: 5 },
+    feltIron: { base: [74, 80, 90], v: 5 },
     feltGold: { base: [160, 108, 24], v: 5 },
     ceiling: { base: [26, 18, 40], v: 4 },
     wood: { base: [86, 54, 34], v: 8 },

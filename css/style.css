@@ -553,3 +553,70 @@ div.pair-box { cursor: default; }
 .lin-result .factor-line { font-family: var(--body); font-size: 30px; }
 @media (max-width: 900px) { .lin-play { flex-wrap: wrap; } .lin-board { flex: 1 1 100%; } }
 
+
+/* ---------- the polynomial coaster: build a minecart track from an equation (a Minecraft look: iron rails on oak ties, block buttons, TNT) ---------- */
+#cst .craft-panel { width: min(980px, 100%); padding: 12px 18px 16px; }
+.cst-app { margin-top: 8px; text-align: left; }
+.cst-intro { margin: 6px 0 10px; font-size: 24px; line-height: 1.1; }
+.cst-how { margin: 12px 0 0; padding: 8px 14px; background: var(--slot); border: 3px solid; border-color: #373737 #fff #fff #373737; font-size: 22px; line-height: 1.15; }
+.cst-how h3 { font-family: var(--px); font-size: 12px; margin: 0 0 4px; }
+.cst-how ol { margin: 0; padding-left: 22px; }
+.cst-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.cst-modename { font-family: var(--px); font-size: 12px; }
+.cst-dots { display: flex; gap: 5px; }
+.cst-dot { width: 16px; height: 16px; background: #8b8b8b; border: 3px solid; border-color: #373737 #fff #fff #373737; }
+.cst-dot.s3 { background: #f2c744; } .cst-dot.s2 { background: #d7dbe0; } .cst-dot.s1 { background: #c9783c; } .cst-dot.s0 { background: #4f4f4f; }
+.cst-dot.now { outline: 3px solid #ffd36b; outline-offset: 1px; }
+.cst-score { margin-left: auto; font-family: var(--px); font-size: 13px; background: var(--dark); color: #ffd36b; padding: 4px 10px; }
+.cst-main { display: flex; gap: 16px; align-items: flex-start; }
+.cst-left { flex: 0 0 600px; min-width: 0; }
+.cst-right { flex: 1 1 280px; min-width: 0; }
+.cst-stage svg { display: block; width: 100%; height: auto; background: #1b1d23; border: 4px solid; border-color: #373737 #fff #fff #373737; user-select: none; touch-action: manipulation; }
+.cst-eq { font-family: var(--body); font-size: 34px; line-height: 1.1; background: var(--dark); color: #fff; padding: 8px 14px; overflow-wrap: anywhere; }
+.cst-eq i, .cst-fb i, .cst-hint i { font-style: italic; }
+.cst-sub { margin: 6px 0 0; font-size: 22px; line-height: 1.05; color: #333; }
+.cst-status { margin: 8px 0 4px; min-height: 48px; font-size: 22px; line-height: 1.1; }
+.cst-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.cst-hints { list-style: none; margin: 8px 0 0; padding: 0; }
+.cst-hint { margin: 0 0 6px; padding: 5px 10px; background: #fff6cf; border: 3px solid #b8942f; font-size: 21px; line-height: 1.1; }
+.cst-fb { margin-top: 10px; padding: 8px 12px 10px; border: 4px solid; border-color: #373737 #fff #fff #373737; background: var(--slot); outline: none; }
+.cst-fb.good { background: #d9f2d0; } .cst-fb.bad { background: #f7d6d2; } .cst-fb.info { background: #e3e6ff; }
+.cst-fb h3 { font-family: var(--px); font-size: 13px; margin: 0 0 6px; }
+.cst-fb p, .cst-fb li { margin: 0 0 5px; font-size: 21px; line-height: 1.1; }
+.cst-fb ul { margin: 4px 0 8px; padding-left: 20px; }
+.cst-fb .why { margin-bottom: 6px; }
+.cst-fb .math { font-size: 26px; font-family: var(--body); }
+.cst-big { font-family: var(--px); font-size: 22px; margin: 4px 0 8px; }
+.cst-results { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.cst-res { min-width: 86px; padding: 6px 8px; text-align: center; background: var(--slot); border: 3px solid; border-color: #373737 #fff #fff #373737; font-size: 20px; line-height: 1.1; }
+.cst-res small { display: block; font-family: var(--px); font-size: 10px; margin-bottom: 3px; }
+/* the stage */
+.cst-gl { stroke: #2c2f37; stroke-width: 1; }
+.cst-ay { stroke: #8e95a3; stroke-width: 2; }
+.cst-ax { stroke: #a9afbc; stroke-width: 3; }
+.cst-tick { stroke: #a9afbc; stroke-width: 2; }
+.cst-axl, .cst-tl, .cst-sw, .cst-endlabel, .cst-q { font-family: Silkscreen, "Courier New", monospace; text-anchor: middle; }
+.cst-axl { fill: #a9afbc; font-size: 13px; text-anchor: end; }
+.cst-tl { fill: #d6d9e0; font-size: 12px; }
+.cst-sw { fill: #aeb4c0; font-size: 10px; }
+.cst-endlabel { fill: #aeb4c0; font-size: 11px; }
+.cst-q { fill: #e6e6e6; font-size: 16px; }
+.cst-ties { fill: none; stroke: #8a5a2c; stroke-width: 15; stroke-dasharray: 5 9; shape-rendering: crispEdges; }
+.cst-rail { fill: none; stroke: #d3d6dc; stroke-width: 5; stroke-linejoin: round; shape-rendering: crispEdges; }
+.cst-gold { fill: none; stroke: #f2c13a; stroke-width: 5; stroke-linejoin: round; shape-rendering: crispEdges; }
+.cst-red { fill: none; stroke: #e0352b; stroke-width: 3; stroke-dasharray: 2 16; shape-rendering: crispEdges; }
+.cst-node, .cst-spot { cursor: pointer; outline: none; }
+.cst-node .hit, .cst-spot .hit { fill: transparent; }
+.cst-blk { fill: #7c7c7c; stroke: #262626; stroke-width: 4; shape-rendering: crispEdges; }
+.cst-spot.st-unset .cst-blk { fill: #6a6a6a; } .cst-spot.st-cross .cst-blk { fill: #35b46a; } .cst-spot.st-bounce .cst-blk { fill: #d9a21b; }
+.cst-node.on .cst-blk { fill: #58b83a; }
+.cst-node.flag .cst-blk, .cst-spot.flag .cst-blk { fill: #c4352b; }
+.cst-node:hover .cst-blk, .cst-spot:hover .cst-blk { stroke: #fff; }
+.cst-node:focus-visible .cst-blk, .cst-spot:focus-visible .cst-blk { stroke: #ffd36b; stroke-width: 5; }
+.cst-arrow { fill: #f0f0f0; stroke: none; }
+.cst-glyph { fill: none; stroke: #fff; stroke-width: 4; stroke-linecap: square; stroke-linejoin: miter; }
+.cst-tnt .body { fill: #cf3a2c; stroke: #4a0f0a; stroke-width: 3; } .cst-tnt .band { fill: #f1ede0; } .cst-tnt text { font: 9px Silkscreen, monospace; fill: #222; text-anchor: middle; }
+.cst-cart .body { fill: #8f929b; stroke: #34363c; stroke-width: 3; } .cst-cart .inner { fill: #2a2c32; } .cst-cart .wheel { fill: #4a4d56; stroke: #222; stroke-width: 2; }
+.cst-cart .head { fill: #c99a6a; } .cst-cart .hair { fill: #4a2f1a; } .cst-cart .eye { fill: #2b2b2b; }
+.cst-spark { fill: #ffd36b; font-size: 26px; text-anchor: middle; }
+@media (max-width: 1020px) { .cst-main { flex-wrap: wrap; } .cst-left { flex: 1 1 100%; } }

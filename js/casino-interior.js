@@ -5,13 +5,13 @@
    under a glass sculpture in the style of Chihuly's Fiori di Como, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
 
      Factoring wing (west, left):   Practice table, Radical table, Trinomial table
-     Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form)
+     Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form), and in a second row the Polynomial Coaster table
      North wing:                    not built yet. Its doors are in the north wall and its floor space is reserved.
 
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 26; // bump together with the ?v= numbers in index.html
+  const BUILD = 27; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -28,6 +28,7 @@ const CasinoInterior = (() => {
   const TABLES = {
     practice: { x: -24, z: -5 }, radical: { x: -31.5, z: -5 }, trinomial: { x: -39, z: -5 },
     lines: { x: 24, z: -5 }, parabola: { x: 31.5, z: -5 }, vertex: { x: 39, z: -5 },
+    coaster: { x: 39, z: 5.2 },                       // the Polynomial Coaster table: a second row, on the south side of the Graphing wing, facing north
   };
   const SPAWN = { x: 0, z: 10.5, yaw: 0 };
   /** A little wedding chapel in the middle of the Graphing wing's south wall: ivory doors under a gilded arch with a sign over them, a red rope hung
@@ -104,6 +105,23 @@ const CasinoInterior = (() => {
     c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.15); c.fillText('x\u00b2 + 5x + 6', W / 2, H * 0.33);
     c.fillStyle = '#ff9a9a'; c.font = serif(H * 0.1); c.fillText('2 \u00d7 3 = 6   and   2 + 3 = 5', W / 2, H * 0.55);
     c.fillStyle = '#f3d27a'; c.font = serif(H * 0.15); c.fillText('(x + 2)(x + 3)', W / 2, H * 0.78);
+  }
+  /** The coaster table's picture: f(x) = (x + 2)(x - 1)^2 as a minecart track (iron rails on oak ties), passing through at x = -2 and bouncing at x = 1. */
+  function artCoaster(c, cv) {
+    frame(c, cv, 'POLYNOMIAL COASTER');
+    const W = cv.width, H = cv.height, L = W * 0.12, R = W * 0.88, Tp = H * 0.24, B = H * 0.9, xr = [-3, 2.5], yr = [-6, 6];
+    const px = x => L + (x - xr[0]) / (xr[1] - xr[0]) * (R - L), py = y => B - (y - yr[0]) / (yr[1] - yr[0]) * (B - Tp), f = x => (x + 2) * (x - 1) * (x - 1);
+    c.strokeStyle = 'rgba(143,160,208,.22)'; c.lineWidth = 1;
+    for (let x = -3; x <= 2; x++) { c.beginPath(); c.moveTo(px(x), Tp); c.lineTo(px(x), B); c.stroke(); }
+    c.strokeStyle = '#8fa0d0'; c.lineWidth = 3; c.beginPath(); c.moveTo(L, py(0)); c.lineTo(R, py(0)); c.moveTo(px(0), Tp); c.lineTo(px(0), B); c.stroke();
+    const track = () => { c.beginPath(); let go = false; for (let i = 0; i <= 90; i++) { const x = xr[0] + (xr[1] - xr[0]) * i / 90, y = f(x); if (y < yr[0] || y > yr[1]) { go = false; continue; } if (!go) { c.moveTo(px(x), py(y)); go = true; } else c.lineTo(px(x), py(y)); } c.stroke(); };
+    c.setLineDash([H * 0.02, H * 0.028]); c.strokeStyle = '#8a5a2c'; c.lineWidth = H * 0.05; track();      // the ties
+    c.setLineDash([]); c.strokeStyle = '#d3d6dc'; c.lineWidth = H * 0.016; track();                       // the rail
+    [[-2, 'pass'], [1, 'bounce']].forEach(([x, w]) => {
+      c.fillStyle = w === 'pass' ? '#35b46a' : '#d9a21b'; c.fillRect(px(x) - H * 0.026, py(0) - H * 0.026, H * 0.052, H * 0.052);
+      c.fillStyle = '#f3e8c9'; c.font = `${Math.round(H * 0.055)}px Silkscreen, "Courier New", monospace`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(w, px(x), py(0) + H * 0.085);
+    });
+    c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.085); c.textAlign = 'left'; c.fillText('f(x) = (x + 2)(x \u2212 1)\u00b2', W * 0.14, H * 0.2); c.textAlign = 'center';
   }
   /** A graph on squared paper: f is the function, xr and yr the visible ranges, marks the dots to draw. */
   function artGraph(title, label, f, xr, yr, marks) {
@@ -333,11 +351,15 @@ const CasinoInterior = (() => {
     buildTable(zone, T_.parabola.x, T_.parabola.z, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'), { prop: 'parabola', accent: 0xd58bff });
     buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347 });
 
+    buildTable(zone, T_.coaster.x, T_.coaster.z, 'feltIron', 'COASTER TABLE', 'ends. zeros. ride it.', '#ff9a3d', () => actions.openTable('coaster'), { prop: 'coaster', accent: 0xff8a3d, facing: -1 });
+
     // a picture over each table that shows the kind of question it asks
     const art = [[T_.practice, artFactorTree], [T_.radical, artRadical], [T_.trinomial, artTrinomial],
       [T_.lines, artLines], [T_.parabola, artGraph('STANDARD FORM', 'y = x\u00b2 \u2212 4x + 3', x => x * x - 4 * x + 3, [-1, 5], [-2, 5], [[2, -1, true], [1, 0], [3, 0], [0, 3]])],
       [T_.vertex, artGraph('VERTEX FORM', 'y = \u2212(x + 1)\u00b2 + 4', x => -((x + 1) ** 2) + 4, [-4, 2], [-3, 5], [[-1, 4, true], [-3, 0], [1, 0]])]];
     art.forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, -10.95); g.add(p); });
+    // the coaster table is on the south side, so its picture hangs on the south wall behind it (over the sofa), facing north
+    { const p = textPlane(5.8, 3.6, artCoaster, 72); p.rotation.y = Math.PI; p.position.set(T_.coaster.x + 0.25, 6.4, 10.95); g.add(p); }
 
     // the prompts that are not tables come after the tables in the list: the way out, then the closed north doors
     interact(zone, 0, 12.4, 1.8, 'Leave the Casino', actions.leaveCasino);

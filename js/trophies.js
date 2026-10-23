@@ -5,7 +5,7 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 26; // bump together with the ?v= numbers in index.html
+  const BUILD = 27; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 8; // trophies on one shelf; the ninth starts a second shelf below it
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
@@ -21,6 +21,7 @@ const Trophies = (() => {
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed' },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved' },
     { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved' },
+    { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared' },
     { id: 'map', name: 'State Map', symbol: 'map', color: 0x6fcf7a, goal: 100, noun: 'states found' },
     { id: 'blueprint', name: 'Sandbox', symbol: 'blocks', color: 0xe8b868, goal: 25, noun: 'blueprints solved' },
   ];

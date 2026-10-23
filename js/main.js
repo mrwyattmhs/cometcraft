@@ -50,6 +50,7 @@
       if (m === 'trinomial') TrinomialGame.open();
       else if (m === 'radical') RadicalGame.open();
       else if (m === 'lines') LinesGame.open();
+      else if (m === 'coaster') CoasterGame.open();
       else if (m === 'parabola') ParabolaGame.open();
       else if (m === 'vertex') VertexGame.open();
       else CraftingGame.open(m);
@@ -230,6 +231,7 @@
       else if (TrinomialGame.isOpen()) TrinomialGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
+      else if (CoasterGame.isOpen()) CoasterGame.close();
       else if (ParabolaGame.isOpen()) ParabolaGame.close();
       else if (VertexGame.isOpen()) VertexGame.close();
       else if (Shop.isOpen()) Shop.close();

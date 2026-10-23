@@ -1279,6 +1279,16 @@ const World = (() => {
     w: 15, h: 14,
   });
 
+  // a coaster track: a hill and a valley across the axis, with a dot where it crosses
+  const coasterCells = () => ({
+    cells: [
+      ...strokeCells([[0.6, 6.5], [16.4, 6.5]], 17, 14, 0.4),                                                                                           // the axis
+      ...strokeCells([[1, 2.5], [2.6, 5], [4.2, 8.6], [5.8, 11.4], [7.2, 12], [8.6, 10.4], [10, 6.5], [11.4, 2.6], [13, 1.4], [14.6, 3.6], [16, 8]], 17, 14, 0.8),   // the track
+      ...strokeCells([[4.3, 6.6], [4.4, 6.7]], 17, 14, 1.25), ...strokeCells([[10, 6.5], [10.1, 6.6]], 17, 14, 1.25),                                    // two zeros
+    ].filter(([c, r], i, a) => a.findIndex(([c2, r2]) => c2 === c && r2 === r) === i),
+    w: 17, h: 14,
+  });
+
   const parabolaCells = () => {
     const pts = [];
     for (let t = -1; t <= 1.0001; t += 0.05) pts.push([7.5 + 7 * t, 0.7 + 12.6 * t * t]);
@@ -1309,6 +1319,7 @@ const World = (() => {
     quadratic: { shape: quadraticCells, u: 0.08,  mirrorBack: false },
     parabola:  { shape: parabolaCells,  u: 0.1,   mirrorBack: false },
     linegraph: { shape: lineGraphCells, u: 0.1,   mirrorBack: false },
+    coaster:   { shape: coasterCells,   u: 0.1,   mirrorBack: false },
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },

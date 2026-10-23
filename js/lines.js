@@ -8,7 +8,7 @@
    The plane runs from -10 to 10 each way, and every point is a whole-number point. Counting the slope m = p/q means going q across
    and p up (or the opposite way: q back and p down). Any other point on the line is accepted too. */
 const Lines = (() => {
-  const BUILD = 26; // bump together with the ?v= numbers in index.html
+  const BUILD = 27; // bump together with the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const GRID = 10;
   const PAY = E.PAY.lines;                   // chips for every line, whatever the form

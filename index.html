@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&family=Great+Vibes&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=26">
+  <link rel="stylesheet" href="css/style.css?v=27">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -28,7 +28,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 26</p>
+      <p class="fine build">Build 27</p>
     </div>
   </div>
 
@@ -363,6 +363,20 @@
     </div>
   </div>
 
+  <div id="cst" class="overlay hidden" data-state="idle">
+    <div class="mc-panel craft-panel cst-panel" role="dialog" aria-modal="true" aria-labelledby="cst-title">
+      <header class="craft-head">
+        <h2 id="cst-title">Polynomial Coaster</h2>
+        <div class="craft-meta">
+          <span id="cst-pay" class="pay-chip"></span>
+          <span id="cst-wallet" class="wallet-chip">0 chips</span>
+          <button id="cst-close" class="btn small" type="button">Leave table</button>
+        </div>
+      </header>
+      <div id="cst-app" class="cst-app"></div>
+    </div>
+  </div>
+
   <div id="lib" class="overlay hidden">
     <div class="lib-box" role="dialog" aria-modal="true" aria-labelledby="lib-title">
       <header class="lib-head">
@@ -509,44 +523,46 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/economy.js?v=26"></script>
-  <script src="js/factoring.js?v=26"></script>
-  <script src="js/catalog.js?v=26"></script>
-  <script src="js/store.js?v=26"></script>
-  <script src="js/trophies.js?v=26"></script>
-  <script src="js/books-data.js?v=26"></script>
-  <script src="js/library.js?v=26"></script>
-  <script src="js/content.js?v=26"></script>
-  <script src="js/textures.js?v=26"></script>
-  <script src="js/avatar.js?v=26"></script>
-  <script src="js/pets.js?v=26"></script>
-  <script src="js/dorm.js?v=26"></script>
-  <script src="js/dormroom.js?v=26"></script>
-  <script src="js/usmap-data.js?v=26"></script>
-  <script src="js/usmap.js?v=26"></script>
-  <script src="js/flag.js?v=26"></script>
-  <script src="js/blueprint.js?v=26"></script>
-  <script src="js/sandbox.js?v=26"></script>
-  <script src="js/casino-interior.js?v=26"></script>
-  <script src="js/world.js?v=26"></script>
-  <script src="js/showcase.js?v=26"></script>
-  <script src="js/player.js?v=26"></script>
-  <script src="js/ui.js?v=26"></script>
-  <script src="js/shop.js?v=26"></script>
-  <script src="js/crafting.js?v=26"></script>
-  <script src="js/trinomials.js?v=26"></script>
-  <script src="js/trinomial-game.js?v=26"></script>
-  <script src="js/radicals.js?v=26"></script>
-  <script src="js/radical-game.js?v=26"></script>
-  <script src="js/parabolas.js?v=26"></script>
-  <script src="js/lines.js?v=26"></script>
-  <script src="js/parabola-game.js?v=26"></script>
-  <script src="js/lines-game.js?v=26"></script>
-  <script src="js/arithmetic.js?v=26"></script>
-  <script src="js/arithmetic-game.js?v=26"></script>
-  <script src="js/map-game.js?v=26"></script>
-  <script src="js/reader-game.js?v=26"></script>
-  <script src="js/dorm-planner.js?v=26"></script>
-  <script src="js/main.js?v=26"></script>
+  <script src="js/economy.js?v=27"></script>
+  <script src="js/factoring.js?v=27"></script>
+  <script src="js/catalog.js?v=27"></script>
+  <script src="js/store.js?v=27"></script>
+  <script src="js/trophies.js?v=27"></script>
+  <script src="js/books-data.js?v=27"></script>
+  <script src="js/library.js?v=27"></script>
+  <script src="js/content.js?v=27"></script>
+  <script src="js/textures.js?v=27"></script>
+  <script src="js/avatar.js?v=27"></script>
+  <script src="js/pets.js?v=27"></script>
+  <script src="js/dorm.js?v=27"></script>
+  <script src="js/dormroom.js?v=27"></script>
+  <script src="js/usmap-data.js?v=27"></script>
+  <script src="js/usmap.js?v=27"></script>
+  <script src="js/flag.js?v=27"></script>
+  <script src="js/blueprint.js?v=27"></script>
+  <script src="js/sandbox.js?v=27"></script>
+  <script src="js/casino-interior.js?v=27"></script>
+  <script src="js/world.js?v=27"></script>
+  <script src="js/showcase.js?v=27"></script>
+  <script src="js/player.js?v=27"></script>
+  <script src="js/ui.js?v=27"></script>
+  <script src="js/shop.js?v=27"></script>
+  <script src="js/crafting.js?v=27"></script>
+  <script src="js/trinomials.js?v=27"></script>
+  <script src="js/trinomial-game.js?v=27"></script>
+  <script src="js/radicals.js?v=27"></script>
+  <script src="js/radical-game.js?v=27"></script>
+  <script src="js/parabolas.js?v=27"></script>
+  <script src="js/lines.js?v=27"></script>
+  <script src="js/coaster.js?v=27"></script>
+  <script src="js/parabola-game.js?v=27"></script>
+  <script src="js/lines-game.js?v=27"></script>
+  <script src="js/coaster-game.js?v=27"></script>
+  <script src="js/arithmetic.js?v=27"></script>
+  <script src="js/arithmetic-game.js?v=27"></script>
+  <script src="js/map-game.js?v=27"></script>
+  <script src="js/reader-game.js?v=27"></script>
+  <script src="js/dorm-planner.js?v=27"></script>
+  <script src="js/main.js?v=27"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@ const R = require('../js/radicals.js'), T = require('../js/trinomials.js'), P = 
 assert.deepStrictEqual(E.LEVELS, ['Easy', 'Medium', 'Hard', 'Expert']);
 assert.deepStrictEqual(E.PAY, {
   practice: { 2: 10, 3: 25, 4: 50 },
-  radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], lines: 25,
+  radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], coaster: { easy: 10, factor: 20 }, lines: 25,
   arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200],
 });
 assert.deepStrictEqual([1, 2, 3, 4, 0, 9].map(l => E.levelName(l)), ['Easy', 'Medium', 'Hard', 'Expert', 'Easy', 'Expert'], 'names, kept in range');
