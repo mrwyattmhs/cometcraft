@@ -555,8 +555,9 @@ div.pair-box { cursor: default; }
 
 
 /* ---------- the polynomial coaster: build a minecart track from an equation (a Minecraft look: iron rails on oak ties, block buttons, TNT) ---------- */
+#cst { grid-template-columns: minmax(0, 1fr); }   /* the window is never wider than the screen: a long line must fit INSIDE it (without this the grid column grows to fit the line and the window with it) */
 #cst .craft-panel { width: min(980px, 100%); padding: 12px 18px 16px; }
-.cst-app { margin-top: 8px; text-align: left; }
+.cst-app { margin-top: 8px; text-align: left; min-width: 0; }   /* (min-width 0: a flex item will not shrink below its widest line otherwise, and a long equation would push the box past the window edge) */
 .cst-intro { margin: 6px 0 10px; font-size: 24px; line-height: 1.1; }
 .cst-how { margin: 12px 0 0; padding: 8px 14px; background: var(--slot); border: 3px solid; border-color: #373737 #fff #fff #373737; font-size: 22px; line-height: 1.15; }
 .cst-how h3 { font-family: var(--px); font-size: 12px; margin: 0 0 4px; }
@@ -568,11 +569,11 @@ div.pair-box { cursor: default; }
 .cst-dot.s3 { background: #f2c744; } .cst-dot.s2 { background: #d7dbe0; } .cst-dot.s1 { background: #c9783c; } .cst-dot.s0 { background: #4f4f4f; }
 .cst-dot.now { outline: 3px solid #ffd36b; outline-offset: 1px; }
 .cst-score { margin-left: auto; font-family: var(--px); font-size: 13px; background: var(--dark); color: #ffd36b; padding: 4px 10px; }
-.cst-main { display: flex; gap: 16px; align-items: flex-start; }
+.cst-main { display: flex; gap: 16px; align-items: flex-start; min-width: 0; }
 .cst-left { flex: 0 0 600px; min-width: 0; }
 .cst-right { flex: 1 1 280px; min-width: 0; }
 .cst-stage svg { display: block; width: 100%; height: auto; background: #1b1d23; border: 4px solid; border-color: #373737 #fff #fff #373737; user-select: none; touch-action: manipulation; }
-.cst-eq { font-family: var(--body); font-size: 34px; line-height: 1.1; background: var(--dark); color: #fff; padding: 8px 14px; overflow-wrap: anywhere; }
+.cst-eq { margin: 0 0 10px; font-family: var(--body); font-size: 34px; line-height: 1.1; background: var(--dark); color: #fff; padding: 8px 14px; white-space: nowrap; overflow: hidden; min-width: 0; max-width: 100%; box-sizing: border-box; }   /* one line, always: the game shrinks the type a little if it must (see fitLine) */
 .cst-eq i, .cst-fb i, .cst-hint i { font-style: italic; }
 .cst-sub { margin: 6px 0 0; font-size: 22px; line-height: 1.05; color: #333; }
 .cst-status { margin: 8px 0 4px; min-height: 48px; font-size: 22px; line-height: 1.1; }
@@ -585,7 +586,7 @@ div.pair-box { cursor: default; }
 .cst-fb p, .cst-fb li { margin: 0 0 5px; font-size: 21px; line-height: 1.1; }
 .cst-fb ul { margin: 4px 0 8px; padding-left: 20px; }
 .cst-fb .why { margin-bottom: 6px; }
-.cst-fb .math { font-size: 26px; font-family: var(--body); }
+.cst-fb .math { font-size: 26px; font-family: var(--body); white-space: nowrap; overflow: hidden; min-width: 0; max-width: 100%; }
 .cst-big { font-family: var(--px); font-size: 22px; margin: 4px 0 8px; }
 .cst-results { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
 .cst-res { min-width: 86px; padding: 6px 8px; text-align: center; background: var(--slot); border: 3px solid; border-color: #373737 #fff #fff #373737; font-size: 20px; line-height: 1.1; }
@@ -620,3 +621,27 @@ div.pair-box { cursor: default; }
 .cst-cart .head { fill: #c99a6a; } .cst-cart .hair { fill: #4a2f1a; } .cst-cart .eye { fill: #2b2b2b; }
 .cst-spark { fill: #ffd36b; font-size: 26px; text-anchor: middle; }
 @media (max-width: 1020px) { .cst-main { flex-wrap: wrap; } .cst-left { flex: 1 1 100%; } }
+
+/* ---------- the trophy case: every trophy there is, the ones you have lit up and the rest faint outlines ---------- */
+#tcase { grid-template-columns: minmax(0, 1fr); }
+#tcase .tcase-panel { position: relative; width: min(860px, 100%); padding: 12px 18px 16px; }
+.tcase-hint { margin: 2px 0 8px; font-size: 22px; line-height: 1.05; color: #333; }
+.tcase-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; padding: 14px 10px 4px; background: linear-gradient(#2b2433, #1a1520); border: 4px solid; border-color: #373737 #fff #fff #373737; }
+.tc-card { appearance: none; font: inherit; color: inherit; background: transparent; border: 0; padding: 6px 4px 0; cursor: default; text-align: center; display: flex; flex-direction: column; align-items: center; border-bottom: 12px solid #8a5a2c; box-shadow: inset 0 -3px 0 #5c3a1a; }
+.tc-card.empty { pointer-events: none; }
+.tc-card canvas { display: block; width: 100%; max-width: 118px; height: auto; }
+.tc-name { margin: 2px 0 5px; min-height: 22px; font-family: var(--px); font-size: 9px; line-height: 1.3; color: #8f94a8; }
+.tc-card.earned .tc-name { color: #ffe08a; }
+.tc-card.earned canvas { filter: drop-shadow(0 0 7px rgba(255, 215, 120, .5)); }
+.tc-card:hover, .tc-card:focus-visible { background: rgba(255, 255, 255, .07); outline: none; }
+.tc-card:focus-visible { box-shadow: inset 0 0 0 3px #ffd36b; }
+.tcase-tip { position: absolute; z-index: 5; width: 290px; padding: 8px 12px 10px; background: #fff6cf; border: 4px solid #b8942f; color: #222; pointer-events: none; box-shadow: 0 6px 0 rgba(0, 0, 0, .25); }
+.tcase-tip b { display: block; margin-bottom: 4px; font-family: var(--px); font-size: 12px; font-weight: 400; }
+.tcase-tip p { margin: 0 0 6px; font-size: 22px; line-height: 1.05; }
+.tcase-tip .bar { height: 12px; background: #8b8b8b; border: 3px solid; border-color: #373737 #fff #fff #373737; }
+.tcase-tip .bar i { display: block; height: 100%; background: #58b83a; }
+.tcase-tip .prog { margin-top: 4px; font-family: var(--px); font-size: 11px; }
+.tcase-tip.got { background: #e4f6d6; border-color: #4b9a3a; }
+.tcase-tip.got .prog { color: #1c5d12; }
+@media (max-width: 760px) { .tcase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+

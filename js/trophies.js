@@ -5,25 +5,26 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 27; // bump together with the ?v= numbers in index.html
+  const BUILD = 29; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 8; // trophies on one shelf; the ninth starts a second shelf below it
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
-      formula tables, or 'd20', 'map' and 'blocks' for the practice table, the wall map and the sandbox. */
+      formula tables, or 'd20', 'map' and 'blocks' for the practice table, the wall map and the sandbox. how: a sentence for the trophy case saying how it is earned
+      and where (the wing it says is checked against the real table positions in tests/trophies.test.js). */
   const GAMES = [
-    { id: 'add', name: 'Addition', symbol: 'plus', color: 0xf7e98e, goal: 100, noun: 'correct answers' },
-    { id: 'sub', name: 'Subtraction', symbol: 'minus', color: 0xf6b0c8, goal: 100, noun: 'correct answers' },
-    { id: 'mul', name: 'Multiplication', symbol: 'times', color: 0xa8d8f0, goal: 100, noun: 'correct answers' },
-    { id: 'div', name: 'Division', symbol: 'divide', color: 0xcdb8f0, goal: 100, noun: 'correct answers' },
-    { id: 'practice', name: 'Practice Table', symbol: 'd20', color: 0x52f08f, goal: 100, noun: 'solved' },
-    { id: 'radical', name: 'Radical Table', symbol: 'sqrt', color: 0x38e8ff, goal: 100, noun: 'solved' },
-    { id: 'trinomial', name: 'Trinomial Table', symbol: { words: ['STANDARD', 'FORM'] }, color: 0xff6a6a, goal: 100, noun: 'solved' },
-    { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed' },
-    { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved' },
-    { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved' },
-    { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared' },
-    { id: 'map', name: 'State Map', symbol: 'map', color: 0x6fcf7a, goal: 100, noun: 'states found' },
-    { id: 'blueprint', name: 'Sandbox', symbol: 'blocks', color: 0xe8b868, goal: 25, noun: 'blueprints solved' },
+    { id: 'add', name: 'Addition', symbol: 'plus', color: 0xf7e98e, goal: 100, noun: 'correct answers', how: "Get 100 correct answers at the Addition table in the Arithmetic Academy." },
+    { id: 'sub', name: 'Subtraction', symbol: 'minus', color: 0xf6b0c8, goal: 100, noun: 'correct answers', how: "Get 100 correct answers at the Subtraction table in the Arithmetic Academy." },
+    { id: 'mul', name: 'Multiplication', symbol: 'times', color: 0xa8d8f0, goal: 100, noun: 'correct answers', how: "Get 100 correct answers at the Multiplication table in the Arithmetic Academy." },
+    { id: 'div', name: 'Division', symbol: 'divide', color: 0xcdb8f0, goal: 100, noun: 'correct answers', how: "Get 100 correct answers at the Division table in the Arithmetic Academy." },
+    { id: 'practice', name: 'Practice Table', symbol: 'd20', color: 0x52f08f, goal: 100, noun: 'solved', how: "Solve 100 rounds at the Practice Table in the casino's Factoring wing: drop prime gems in the grid until their product is the sum of the dice." },
+    { id: 'radical', name: 'Radical Table', symbol: 'sqrt', color: 0x38e8ff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Radical Table in the casino's Factoring wing." },
+    { id: 'trinomial', name: 'Trinomial Table', symbol: { words: ['STANDARD', 'FORM'] }, color: 0xff6a6a, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Trinomial Table in the casino's Factoring wing." },
+    { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
+    { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },
+    { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Vertex Table in the casino's Graphing wing." },
+    { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared', how: "Clear 100 rides at the Polynomial Coaster table in the casino's Graphing wing. A ride you give up on doesn't count." },
+    { id: 'map', name: 'State Map', symbol: 'map', color: 0x6fcf7a, goal: 100, noun: 'states found', how: "Click 100 states correctly in the Find the State game, on the wall map in the Arithmetic Academy." },
+    { id: 'blueprint', name: 'Sandbox', symbol: 'blocks', color: 0xe8b868, goal: 25, noun: 'blueprints solved', how: "Solve 25 blueprints in the Sandbox behind the school." },
   ];
   const IDS = GAMES.map(g => g.id);
   const byId = Object.fromEntries(GAMES.map(g => [g.id, g]));
@@ -50,6 +51,18 @@ const Trophies = (() => {
     if (list.length > SHELF_CAPACITY) rows.push(list.slice(SHELF_CAPACITY, 2 * SHELF_CAPACITY));
     return rows;
   }
+
+  /** Every trophy there is, in table order, for the trophy case: whether you have it, how far along you are, and how it is earned. A trophy you
+      have always shows as full (the count of a trophy you have is the goal), and anything else is clamped to the goal. */
+  function entries(solved, trophies) {
+    const have = new Set((trophies || []).filter(valid));
+    return GAMES.map(g => {
+      const earned = have.has(g.id), n = earned ? g.goal : Math.min(count(solved, g.id), g.goal);
+      return { id: g.id, name: g.name, symbol: g.symbol, color: g.color, goal: g.goal, noun: g.noun, how: g.how, earned, count: n, percent: Math.floor(100 * n / g.goal) };
+    });
+  }
+  /** How many different trophies you have. */
+  const earnedCount = trophies => new Set((trophies || []).filter(valid)).size;
 
   /** "Trophy: 37 of 100", or a note that you have it. */
   function progressText(solved, trophies, id) {
@@ -93,7 +106,7 @@ const Trophies = (() => {
     return el;
   }
 
-  return { BUILD, SHELF_CAPACITY, GAMES, IDS, byId, valid, count, apply, shelves, progressText, award, chip };
+  return { BUILD, SHELF_CAPACITY, GAMES, IDS, byId, valid, count, apply, shelves, entries, earnedCount, progressText, award, chip };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Trophies;

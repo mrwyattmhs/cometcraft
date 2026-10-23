@@ -7,7 +7,7 @@
    The pages, and the rules for them, live in library.js and books-data.js. Everything on the page is drawn as plain text, never as HTML. */
 const LittleLibrary = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 27; // must match Library.BUILD
+  const BUILD = 29; // must match Library.BUILD
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
 
   let wired = false, book = null, page = 1, fontIdx = Library.DEFAULT_FONT;

@@ -6,7 +6,7 @@
 
    Every star pays chips (10 on Factored form, 20 on Factor first), a wrong ride costs nothing, and every ride you clear counts toward the Polynomial Coaster trophy. */
 const CoasterGame = (() => {
-  const BUILD = 27; // must match Coaster.BUILD
+  const BUILD = 29; // must match Coaster.BUILD
   const C = Coaster;
   const root = () => document.getElementById('cst');
   const app = () => document.getElementById('cst-app');
@@ -73,6 +73,18 @@ const CoasterGame = (() => {
     return s + '</svg>';
   }
 
+  /** Keep a line of maths on ONE line: it starts at its normal size and shrinks only as far as it must to fit the width (never below min). Returns the size used. */
+  function fitLine(el, base, min) {
+    let size = base; el.style.fontSize = size + 'px';
+    while (el.scrollWidth > el.clientWidth + 0.5 && size > min) { size -= 1; el.style.fontSize = size + 'px'; }
+    return size;
+  }
+  function fitAll() {
+    const a = app(), e = a.querySelector('.cst-eq'), m = a.querySelector('.cst-fb .math');
+    if (e) fitLine(e, 34, 15);
+    if (m) fitLine(m, 26, 13);
+  }
+
   /* ---------- the screens ---------- */
   function dotsHTML() {
     let h = '';
@@ -104,8 +116,8 @@ const CoasterGame = (() => {
     if (S.phase === 'revealed') {
       fb = `<div class="cst-fb info" id="cst-fb" tabindex="-1" role="status"><h3>Here is the full track</h3><div class="why">${C.explainHTML(S)}</div><div class="cst-row"><button class="btn primary" type="button" data-action="next" data-key="next">${last ? 'See results' : 'Next ride'}</button></div></div>`;
     }
+    h += `<div class="cst-eq" id="cst-eq">${C.fOf}${easy ? C.factoredHTML(p) : C.polyHTML(p.coeffs)}</div>`;         // a row of its own, the full width of the window, so a long one has room
     h += `<div class="cst-main"><div class="cst-left"><div class="cst-stage">${stageSVG()}</div></div><div class="cst-right">`;
-    h += `<div class="cst-eq">${C.fOf}${easy ? C.factoredHTML(p) : C.polyHTML(p.coeffs)}</div>`;
     if (S.phase === 'edit') {                                  // while you build: what to do, what is missing, any hints, and the buttons
       h += `<p class="cst-sub">${easy ? 'Read the factors to build the track.' : 'Factor it to find the real zeros, then build the track.'}</p>`;
       h += `<p class="cst-status" aria-live="polite">${C.statusText(S)}</p>`;
@@ -125,6 +137,7 @@ const CoasterGame = (() => {
     const a = app(), ae = document.activeElement, fk = ae && ae.dataset ? ae.dataset.key : null;
     root().dataset.state = S.screen;
     a.innerHTML = S.screen === 'start' ? startHTML() : S.screen === 'end' ? endHTML() : gameHTML();
+    fitAll();
     if (S.fbFresh) {
       const fb = a.querySelector('#cst-fb');
       if (fb) { fb.focus(); if (fb.scrollIntoView) fb.scrollIntoView({ block: 'nearest' }); }
@@ -183,6 +196,8 @@ const CoasterGame = (() => {
     $('wallet').parentNode.insertBefore(Trophies.chip('coaster'), $('wallet'));
     Store.onChange(() => { $('wallet').textContent = `${Store.get().chips} chips`; });
     $('close').addEventListener('click', close);
+    window.addEventListener('resize', () => { if (isOpen()) fitAll(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (isOpen()) fitAll(); });
     const a = app();
     a.addEventListener('click', e => { const t = e.target.closest('[data-action]'); if (t && !t.disabled) act(t); });
     a.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('g[data-action]')) { e.preventDefault(); act(e.target); } });
@@ -204,5 +219,5 @@ const CoasterGame = (() => {
   }
   function close() { root().classList.add('hidden'); UI.setOpen('cst', false); }
 
-  return { BUILD, open, close, isOpen, status: () => JSON.parse(JSON.stringify(Object.assign({}, S, { track: undefined }))) };
+  return { BUILD, open, close, isOpen, fitLine, status: () => JSON.parse(JSON.stringify(Object.assign({}, S, { track: undefined }))) };
 })();

@@ -1120,10 +1120,7 @@ const World = (() => {
     // the trophy shelves themselves (one shelf, and a second below it once the first is full) are built by DormRoom
     const shelf = makeSign({ w: 1.3, h: 0.34, title: 'TROPHIES', fg: '#fff3c4', bg: '#6b4a26', border: '#c89a54' });
     shelf.position.set(3.95, 3.2, 2.08); g.add(shelf);      // 4 cm in front of the painted wall layer (at exactly 2.04 it flickered)
-    interact(zone, 7.6, 3.2, 2.2, 'Look at the trophy shelf', () => {
-      const n = (Store.get().trophies || []).filter(Trophies.valid).length;
-      UI.toast(n ? `Trophies: ${n} of ${Trophies.GAMES.length}.` : 'No trophies yet. Get 100 right at any table to win one.');
-    });
+    interact(zone, 7.6, 3.2, 2.2, 'Look at the trophy shelf', () => TrophyCase.open());      // zooms in on every trophy there is, earned or not (js/trophy-case.js)
     interact(zone, 7, 5.2, 3.3, 'Arrange your room', actions.openPlanner);
 
     zone.dormRoom = DormRoom.attach(zone);
@@ -1329,6 +1326,8 @@ const World = (() => {
 
   /** The size of a symbol in world units, so something else (a trophy) can scale it to fit. */
   const symbolSize = kind => { const d = SYMBOLS[kind], s = d.shape(); return { w: s.w * d.u, h: s.h * d.u }; };
+  /** The blocks a symbol is made of, for drawing it flat: { cells: [[column, row]...], w, h } with row 0 at the bottom. */
+  const symbolCells = kind => SYMBOLS[kind].shape();
 
   /** Two layers thick so it never vanishes edge-on. (mirrorBack flips the rear layer, but a flipped
       copy shows through the gaps between letters, so the text uses a plain solid slab instead.) */
@@ -1656,5 +1655,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, symbolCells, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

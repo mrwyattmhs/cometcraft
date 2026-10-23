@@ -232,6 +232,7 @@
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
       else if (CoasterGame.isOpen()) CoasterGame.close();
+      else if (TrophyCase.isOpen()) TrophyCase.close();
       else if (ParabolaGame.isOpen()) ParabolaGame.close();
       else if (VertexGame.isOpen()) VertexGame.close();
       else if (Shop.isOpen()) Shop.close();

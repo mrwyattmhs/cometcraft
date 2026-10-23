@@ -84,5 +84,50 @@ console.log('trophy tests passed');
   state = { solved: { add: 102 }, trophies: ['add'] }; listener(state);
   assert.strictEqual(first.textContent, 'untouched', 'a label that has left the page is dropped, not updated forever');
   delete global.document; delete global.Store;
-  console.log('trophy label tests passed');
+  
+/* ---------- the trophy case: every trophy, earned or not, and how each is earned ---------- */
+{
+  const empty = T.entries({}, []);
+  assert.deepStrictEqual(empty.map(e => e.id), T.IDS, 'every trophy there is, in table order');
+  assert.strictEqual(empty.length, 13);
+  assert.ok(empty.every(e => !e.earned && e.count === 0 && e.percent === 0), 'none earned and no progress at the start');
+  assert.ok(empty.every((e, i) => e.name === T.GAMES[i].name && e.goal === T.GAMES[i].goal && e.symbol === T.GAMES[i].symbol && e.color === T.GAMES[i].color && e.noun === T.GAMES[i].noun), 'each carries its own name, goal, symbol and colour');
+  // progress, and what counts as earned
+  const some = T.entries({ add: 37, sub: 100, blueprint: 10, coaster: 250, lines: 3.9, radical: -4, mul: 'x' }, ['coaster', 'lines', 'nope', 'lines']);
+  const by = id => some.find(e => e.id === id);
+  assert.deepStrictEqual([by('add').count, by('add').percent, by('add').earned], [37, 37, false]);
+  assert.deepStrictEqual([by('blueprint').count, by('blueprint').percent], [10, 40], 'the blueprint trophy takes 25, so 10 is 40%');
+  assert.deepStrictEqual([by('sub').count, by('sub').earned], [100, false], 'reaching the goal in the count is not the same as having the trophy: the trophy is earned when award() says so');
+  assert.deepStrictEqual([by('coaster').count, by('coaster').earned, by('coaster').percent], [100, true, 100], 'a trophy you have is always full, and a count past the goal is clamped');
+  assert.deepStrictEqual([by('lines').earned, by('lines').count, by('lines').percent], [true, 100, 100], 'a trophy you have stays full even if the count is lower');
+  assert.deepStrictEqual([by('radical').count, by('mul').count], [0, 0], 'junk in the save counts as nothing');
+  assert.strictEqual(some.filter(e => e.earned).length, 2, 'unknown and repeated ids are ignored');
+  assert.strictEqual(T.entries(undefined, undefined).length, 13, 'an empty save is fine');
+  assert.strictEqual(T.entries({}, T.IDS).every(e => e.earned && e.percent === 100), true, 'all of them earned');
+  assert.deepStrictEqual([T.earnedCount([]), T.earnedCount(['add', 'add']), T.earnedCount(['add', 'sub', 'nope']), T.earnedCount(T.IDS), T.earnedCount(undefined)], [0, 1, 2, 13, 0]);
+  // the input is not touched
+  const solved = { add: 5 }, tr = ['add']; T.entries(solved, tr); assert.deepStrictEqual([solved, tr], [{ add: 5 }, ['add']]);
+  // the earned trophies and the entries agree with progressText
+  T.GAMES.forEach(g => { const e = T.entries({ [g.id]: 7 }, []).find(x => x.id === g.id); assert.strictEqual(T.progressText({ [g.id]: 7 }, [], g.id), `Trophy: ${e.count} of ${e.goal}`); });
+
+  // how each is earned: a real sentence, with the real goal, and the right place
+  const hows = T.GAMES.map(g => g.how);
+  assert.ok(hows.every(h => typeof h === 'string' && h.length > 30 && /\.$/.test(h)), 'a full sentence for each');
+  assert.strictEqual(new Set(hows).size, 13, 'no two the same');
+  T.GAMES.forEach(g => assert.ok(g.how.includes(String(g.goal)), `${g.id}: the sentence says the goal (${g.goal})`));
+  T.GAMES.forEach(g => { assert.ok(!/\bbet|wager|gambl/i.test(g.how), `${g.id}: no talk of betting`); });
+  const C = require('../js/casino-interior.js');
+  Object.entries(C.TABLES).forEach(([id, t]) => {
+    const wing = t.x < 0 ? 'Factoring wing' : 'Graphing wing';
+    assert.ok(T.byId[id].how.includes(`casino's ${wing}`), `${id}: its table is in the ${wing} (x = ${t.x}), and the sentence says so`);
+    assert.ok(T.byId[id].how.includes(T.byId[id].name) || T.byId[id].how.includes(T.byId[id].name.replace(' Table', ' table')), `${id}: and names the table`);
+  });
+  assert.deepStrictEqual(Object.keys(C.TABLES).sort(), ['coaster', 'lines', 'parabola', 'practice', 'radical', 'trinomial', 'vertex'], 'every casino table has a trophy');
+  ['add', 'sub', 'mul', 'div'].forEach(id => assert.ok(T.byId[id].how.includes('Arithmetic Academy') && T.byId[id].how.includes(T.byId[id].name), `${id}: at its table in the Arithmetic Academy`));
+  assert.ok(/wall map/.test(T.byId.map.how) && /Arithmetic Academy/.test(T.byId.map.how), 'the map game is on the wall map in the Arithmetic Academy');
+  assert.ok(/Sandbox behind the school/.test(T.byId.blueprint.how) && /25 blueprints/.test(T.byId.blueprint.how));
+  assert.ok(/doesn't count/.test(T.byId.lines.how) && /doesn't count/.test(T.byId.coaster.how), 'the two trophies that skip help-assisted rounds say so');
+}
+
+console.log('trophy label tests passed');
 }
