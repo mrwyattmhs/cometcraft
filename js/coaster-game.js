@@ -6,7 +6,7 @@
 
    Every star pays chips (10 on Factored form, 20 on Factor first), a wrong ride costs nothing, and every ride you clear counts toward the Polynomial Coaster trophy. */
 const CoasterGame = (() => {
-  const BUILD = 31; // must match Coaster.BUILD
+  const BUILD = 32; // must match Coaster.BUILD
   const C = Coaster;
   const root = () => document.getElementById('cst');
   const app = () => document.getElementById('cst-app');

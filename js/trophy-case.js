@@ -91,7 +91,7 @@ const TrophyCase = (() => {
       const nm = document.createElement('span'); nm.className = 'tc-name'; nm.textContent = e.name;
       card.append(cv, nm); grid.append(card);
     });
-    for (let i = 0; i < 2; i++) { const f = document.createElement('div'); f.className = 'tc-card empty'; f.setAttribute('aria-hidden', 'true'); grid.append(f); }      // so every shelf board runs the full width
+    for (let i = 0, pad = (5 - (list.length % 5)) % 5; i < pad; i++) { const f = document.createElement('div'); f.className = 'tc-card empty'; f.setAttribute('aria-hidden', 'true'); grid.append(f); }      // so every shelf board runs the full width
     $('count').textContent = `${Trophies.earnedCount(s.trophies || [])} of ${list.length} earned`;
   }
 

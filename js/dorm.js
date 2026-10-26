@@ -8,7 +8,7 @@
    An item is { type, x, z, rot }: (x, z) is the top-left cell of the space it covers once turned, and rot is quarter turns
    clockwise (seen from above, north up). Turned 0, an item faces south; 1 faces west, 2 north, 3 east. */
 const Dorm = (() => {
-  const BUILD = 31; // bump together with the ?v= numbers in index.html
+  const BUILD = 32; // bump together with the ?v= numbers in index.html
   const ROOM = { w: 8, d: 6 };
   const DOOR = { x: 0, z: 2 };                       // the doorway is in the west wall, beside cell (0, 2)
   const KEEP_CLEAR = [[0, 2], [1, 2]];               // the cells just inside the door stay empty, so you can always walk in

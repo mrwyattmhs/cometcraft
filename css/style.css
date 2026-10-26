@@ -682,7 +682,7 @@ div.pair-box { cursor: default; }
   font-family: var(--k-body); font-size: 18px; font-weight: 800; color: var(--k-text); background: transparent; border: 2px solid var(--k-text); border-radius: 6px;
 }
 .kelly .btn.small { padding: 0 16px; font-size: 18px; }
-.kelly .btn:hover:not(:disabled) { background: rgba(255, 255, 255, .14); }
+.kelly .btn:hover:not(:disabled) { background: rgba(6, 32, 10, .38); }          /* hover darkens (white text stays readable); lightening dropped it under 4.5:1 */
 .kelly .btn:active:not(:disabled) { border-color: var(--k-text); transform: translateY(1px); }
 .kelly .btn.primary { background: var(--k-gold); border-color: var(--k-gold); color: var(--k-ink); text-shadow: none; }
 .kelly .btn.primary:hover:not(:disabled) { background: #ffd27a; }
@@ -810,3 +810,37 @@ div.pair-box { cursor: default; }
 .kelly .work { font-family: var(--k-body); font-size: 19px; font-weight: 700; color: #fff; }
 .kelly .work small { font-family: var(--k-body); font-size: 17px; font-weight: 600; color: var(--k-muted); }
 .kelly .graph-svg .plabel { font-family: var(--k-body); font-size: 15px; font-weight: 800; paint-order: stroke; stroke: var(--k-outline); stroke-width: 4px; stroke-linejoin: round; }
+
+/* ---------- Minesweeper (next to the sandbox) ---------- */
+.mines-panel { width: min(900px, 100%); padding: 24px 28px 28px; }
+.mines-panel .craft-head { margin-bottom: 14px; }
+.kelly .mines-how { margin: 18px 0 0; padding-left: 26px; display: flex; flex-direction: column; gap: 8px; font-size: 18px; font-weight: 600; line-height: 1.35; color: #fff; }
+.kelly .mines-how li::marker { color: var(--k-gold); font-weight: 800; }
+.kelly .mines-how b { padding: 0 7px; background: var(--k-deep); border-radius: 4px; font-weight: 800; color: #fff; text-shadow: var(--k-pop); }   /* keys look like keycaps: white on the deep green (gold text is not readable straight on the ground) */
+.kelly #mines-result { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px 4px 4px; }
+.kelly #mines-result.hidden { display: none; }
+.kelly #mines-result h3 { margin: 0; font-family: var(--px); font-weight: 400; font-size: 36px; letter-spacing: .04em; text-transform: uppercase; color: #fff; text-shadow: var(--k-pop); }
+.kelly #mines-result[data-result="won"] h3 { color: var(--k-gold); }
+.kelly #mines-result p { margin: 0; font-size: 22px; font-weight: 700; color: #fff; text-shadow: var(--k-pop); }
+.kelly #mines-result .k-note { font-size: 18px; text-shadow: none; }
+.kelly #mines-result[data-result="lost"] #mines-result-text { padding: 6px 14px; background: #5a2323; border-radius: 6px; }
+.kelly #mines-result[data-result="won"] #mines-result-text { padding: 6px 14px; background: var(--k-deep); border-radius: 6px; }
+.mines-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+
+/* the panel at the top of the screen while you are near the field */
+#mines-hud {
+  position: fixed; top: 14px; left: 50%; z-index: 6; transform: translateX(-50%); display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px 16px;
+  max-width: min(640px, calc(100vw - 24px)); box-sizing: border-box; padding: 8px 16px; background: rgba(15, 58, 11, .94); border: 2px solid #6cc84a; border-radius: 8px; pointer-events: none;
+  font: 700 17px/1.25 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #fff; text-shadow: -1px -1px 0 #06200a, 1px -1px 0 #06200a, -1px 1px 0 #06200a, 1px 1px 0 #06200a;
+}
+#mines-hud b { font-family: var(--px); font-size: 14px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; color: #ffc45c; }
+#mines-hud strong { font-size: 21px; font-weight: 800; color: #fff; }
+#mines-hud small { flex-basis: 100%; text-align: center; font-size: 14px; font-weight: 600; color: #e6f4de; }
+#mines-hud.hidden { display: none; }
+
+/* a red flash when a bomb goes off (the screen shake is done in main.js) */
+#boom-flash { position: fixed; inset: 0; z-index: 7; pointer-events: none; opacity: 0; background: rgba(255, 70, 20, .6); }
+#boom-flash.go { animation: boomflash .55s ease-out; }
+@keyframes boomflash { from { opacity: .75; } to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #boom-flash { display: none; } }
+@media (max-width: 760px) { .kelly #mines-result h3 { font-size: 26px; } }

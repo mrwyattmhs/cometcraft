@@ -5,7 +5,7 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 31; // bump together with the ?v= numbers in index.html
+  const BUILD = 32; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 8; // trophies on one shelf; the ninth starts a second shelf below it
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
@@ -25,6 +25,7 @@ const Trophies = (() => {
     { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared', how: "Clear 100 rides at the Polynomial Coaster table in the casino's Graphing wing. A ride you give up on doesn't count." },
     { id: 'map', name: 'State Map', symbol: 'map', color: 0x6fcf7a, goal: 100, noun: 'states found', how: "Click 100 states correctly in the Find the State game, on the wall map in the Arithmetic Academy." },
     { id: 'blueprint', name: 'Sandbox', symbol: 'blocks', color: 0xe8b868, goal: 25, noun: 'blueprints solved', how: "Solve 25 blueprints in the Sandbox behind the school." },
+    { id: 'mines', name: 'Minesweeper', symbol: 'flag', color: 0xff6b5a, goal: 25, noun: 'games won', how: "Win 25 games of Minesweeper in the minefield next to the Sandbox behind the school: dig every safe square and flag every bomb." },
   ];
   const IDS = GAMES.map(g => g.id);
   const byId = Object.fromEntries(GAMES.map(g => [g.id, g]));

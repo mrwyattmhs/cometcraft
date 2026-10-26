@@ -11,6 +11,7 @@ const Store = (() => {
     practiceWins: 0, wagerWins: 0, wagerLosses: 0,
     trinomialWins: 0, trinomialLosses: 0, radicalWins: 0, radicalLosses: 0,
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0, linesWins: 0, linesLosses: 0, coasterWins: 0, coasterDerails: 0,
+    minesWins: 0, minesLosses: 0,                    // Minesweeper games won and lost (a win pays chips and counts toward the trophy)
     arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
     blueprintsSolved: 0,
     mapFound: [],            // two-letter codes of the states you have found on the map (first try)
@@ -41,6 +42,7 @@ const Store = (() => {
     state.arithBest = { add: whole(best.add), sub: whole(best.sub), mul: whole(best.mul), div: whole(best.div) };
 
     state.blueprintsSolved = whole(state.blueprintsSolved);
+    state.minesWins = whole(state.minesWins); state.minesLosses = whole(state.minesLosses);
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
     state.reading = state.reading && typeof state.reading === 'object' && !Array.isArray(state.reading)

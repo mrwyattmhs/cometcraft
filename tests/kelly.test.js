@@ -35,6 +35,14 @@ need(tok.edge, tok.card, 3, 'the edge of a card against the card'); need(tok.edg
 const hoverBg = sel => { const m = css.match(new RegExp(sel.replace(/[.:()]/g, '\\$&') + ' \\{ background: (#[0-9a-f]{6})', 'i')); assert.ok(m, `${sel} has a hover colour`); return m[1].toLowerCase(); };
 for (const sel of ['.kelly .k-help:hover', '.kelly .bet-card:hover:not(:disabled)']) { const h = hoverBg(sel); assert.notStrictEqual(h, tok.card, `${sel} is visibly different`); need(tok.gold, h, 4.5, `gold text on ${sel}`); need(tok.text, h, 4.5, `white text on ${sel}`); need(tok.muted, h, 4.5, `muted text on ${sel}`); }
 
+/* ---------- hover on an outline button: it darkens the green, so the white text gets more readable, not less ---------- */
+{
+  const m = css.match(/\.kelly \.btn:hover:not\(:disabled\) \{ background: rgba\((\d+), (\d+), (\d+), ([\d.]+)\)/); assert.ok(m, 'outline buttons have a hover colour');
+  const [r, g, b, a] = [Number(m[1]), Number(m[2]), Number(m[3]), Number(m[4])], base = [1, 3, 5].map(i => parseInt(tok.ground.slice(i, i + 2), 16));
+  const mixed = '#' + [r, g, b].map((v, k) => Math.round(v * a + base[k] * (1 - a)).toString(16).padStart(2, '0')).join('');
+  need('#ffffff', mixed, 4.5, 'white text on an outline button while the mouse is over it'); assert.ok(lum(mixed) < lum(tok.ground), 'hover darkens');
+}
+
 /* ---------- the "right" and "wrong" messages: white on a dark pill ---------- */
 const pill = sel => { const m = css.match(new RegExp(sel.replace(/[.]/g, '\\.') + ' \\{ background: ([^;]+); color: (#[0-9a-f]{3,6});', 'i')); assert.ok(m, `${sel} has a pill`); return { bg: m[1].replace('var(--k-deep)', tok.deep), fg: m[2].length === 4 ? '#' + [...m[2].slice(1)].map(c => c + c).join('') : m[2] }; };
 const good = pill('.kelly .msg.good'), bad = pill('.kelly .msg.bad');

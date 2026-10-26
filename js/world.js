@@ -885,6 +885,34 @@ const World = (() => {
     solid(zone, sx, sz, 0.5, 0.5);
   }
 
+  /* ---------- the minefield, just north of the sandbox ---------- */
+  /** A low log frame round the 18 x 18 plot (you step over it, as with the sandbox), a signpost on the west side with a flag over it, and the game itself (Minefield.create).
+      Walking over the field is allowed; digging and flagging only work while you stand on it. Villagers never wander this far east. */
+  function buildMinefield(zone, actions) {
+    const g = zone.group, P = Minesweeper.PLOT, { x0, z0 } = Minesweeper.PLOT_AT;
+    const cx = x0 + P / 2, cz = z0 + P / 2, t = 0.5, fh = 0.45;
+    box(g, 'log', t, fh, P + 2 * t, x0 - t / 2, fh / 2, cz);
+    box(g, 'log', t, fh, P + 2 * t, x0 + P + t / 2, fh / 2, cz);
+    box(g, 'log', P, fh, t, cx, fh / 2, z0 - t / 2);
+    box(g, 'log', P, fh, t, cx, fh / 2, z0 + P + t / 2);
+    [[x0 - t / 2, z0 - t / 2], [x0 + P + t / 2, z0 - t / 2], [x0 - t / 2, z0 + P + t / 2], [x0 + P + t / 2, z0 + P + t / 2]]
+      .forEach(([x, z]) => box(g, 'planks', 0.6, 0.9, 0.6, x, 0.45, z));
+
+    zone.mines = Minefield.create(zone);
+
+    // the signpost, facing west (the way you come from), with the flag turning up above it
+    const sx = 31.9, sz = -2.0;
+    box(g, 'log', 0.3, 2.6, 0.3, sx, 1.3, sz);
+    const sign = makeSign({ w: 3.6, h: 1.0, title: 'MINESWEEPER', sub: "dig it. flag it. don't boom.", fg: '#ffffff', bg: '#16401a', border: '#6cc84a', subColor: '#e6f4de' });
+    sign.position.set(sx - 0.17, 2.2, sz); sign.rotation.y = -Math.PI / 2;
+    g.add(sign);
+    const flag = buildSymbol('flag', 0xff6b5a, { emissive: 0.5, outline: 0x3a0d06, outlineWidth: 0.05 });
+    flag.position.set(sx - 0.1, 4.0, sz); flag.rotation.y = -Math.PI / 2;
+    g.add(flag);
+    solid(zone, sx, sz, 0.5, 0.5);
+    interact(zone, sx - 0.5, sz, 2.4, 'Play Minesweeper', actions.openMines);
+  }
+
   /* ---------- Wilson Hall, the dorm ---------- */
   /** The dorm stands on the east side of the road, directly to the right of where you start. It is built to the documented look
       of Wilson Hall at Miami University (Oxford, Ohio), which was Georgian in style, with native blue limestone walls and a red tile
@@ -1197,6 +1225,7 @@ const World = (() => {
     buildSchoolFront(zone, actions);   // across the road from the shops
     buildSandboxArea(zone);            // behind the school
     buildSandboxPath(zone);            // and a paved way round to it
+    buildMinefield(zone, actions);     // and Minesweeper, on the lawn just north of the sandbox
     buildDormFront(zone, actions);     // Wilson Hall, directly on your right at the start
     buildPark(zone, actions);          // and a little park with the great tree, across the road from it
 
@@ -1348,6 +1377,14 @@ const World = (() => {
     return { cells, w: 10, h: rows.length };
   };
 
+  // a flag on a pole with a little base, for the Minesweeper trophy and the sign over the minefield
+  const flagCells = () => {
+    const rows = ['..#.........', '..####......', '..#######...', '..##########', '..#######...', '..####......', '..#.........', '..#.........', '..#.........', '..#.........', '..#.........', '.####.......', '#########...'];
+    const cells = [];
+    rows.forEach((line, i) => [...line].forEach((ch, c) => { if (ch === '#') cells.push([c, rows.length - 1 - i]); }));
+    return { cells, w: 12, h: rows.length };
+  };
+
   const SYMBOLS = {
     question: { shape: questionCells, u: 0.19, mirrorBack: false },
     sqrt:      { shape: radicalCells,   u: 0.1,   mirrorBack: false },
@@ -1356,6 +1393,7 @@ const World = (() => {
     linegraph: { shape: lineGraphCells, u: 0.1,   mirrorBack: false },
     coaster:   { shape: coasterCells,   u: 0.1,   mirrorBack: false },
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
+    flag:      { shape: flagCells,     u: 0.1,   mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },

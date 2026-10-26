@@ -45,6 +45,7 @@
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
     openArithmetic: op => ArithmeticGame.open(op),
     openMap: () => MapGame.open(),
+    openMines: () => minesMenu.open(),
     openLibrary: () => LittleLibrary.open(),
     openTable: m => {
       if (m === 'trinomial') TrinomialGame.open();
@@ -192,6 +193,21 @@
     if (mk !== mapKey) { mapKey = mk; sandbox.drawMap($('sandbox-map'), Player); }
   }
 
+  /* ---------- Minesweeper: the field north of the sandbox ---------- */
+  const mines = hub.mines;
+  const minesMenu = MinesMenu.create(mines);
+  const minesHere = () => zone === hub && mines.contains(Player.x, Player.z, 0.6);
+  let minesToastAt = 0;
+  /** Dig ('dig') or flag ('flag') the square under the crosshair. announce: say why nothing happened (for a key press; a click that is only looking around stays quiet). */
+  function minesAct(kind, announce) {
+    if (Player.third || showcase) { if (announce) UI.toast('Press V for first person, then dig.'); return; }
+    const r = kind === 'flag' ? mines.flag(Player) : mines.dig(Player);
+    if (r.ok) return;
+    const say = { nogame: 'Pick a level first: press R, or press E at the sign.', noaim: announce ? 'Aim at a square of grass.' : '', flagged: 'Take the flag off first (F).', open: 'That square is already dug.', over: 'This game is over. Press R to play again.' }[r.reason];
+    const now = performance.now();
+    if (say && now - minesToastAt > 1500) { minesToastAt = now; UI.toast(say); }
+  }
+
   /* ---------- input ---------- */
   let started = false;
   let locked = false;
@@ -222,7 +238,10 @@
   });
 
   // left click breaks a block, right click places one (both only count inside the sandbox)
-  const sandboxClick = button => { if (button === 2) sandboxAct('place', false); else if (button === 0) sandboxAct('break', false); };
+  const sandboxClick = button => {
+    if (minesHere()) { if (button === 0) minesAct('dig', false); else if (button === 2) minesAct('flag', false); return; }   // on the minefield, the mouse digs and flags
+    if (button === 2) sandboxAct('place', false); else if (button === 0) sandboxAct('break', false);
+  };
   let click = null;
   canvas.addEventListener('mousedown', e => {
     if (!started || UI.isOpen()) return;
@@ -246,6 +265,7 @@
   window.addEventListener('keydown', e => {
     if (e.code === 'Escape') {
       if (LessonPanel.isOpen()) LessonPanel.close();
+      else if (minesMenu.isOpen()) minesMenu.close();
       else if (CraftingGame.isOpen()) CraftingGame.close();
       else if (TrinomialGame.isOpen()) TrinomialGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
@@ -269,7 +289,9 @@
     if (e.code === 'KeyL' && !e.repeat && focused && focused.lesson) LessonPanel.open(focused.lesson);
     if (e.code === 'KeyV') Player.third = !Player.third;
     if (e.code === 'KeyC' && !e.repeat) Shop.openCloset();
-    if (!e.repeat && ['KeyF', 'KeyX', 'Enter', 'KeyH', 'KeyN'].includes(e.code)) sandboxKey(e.code);
+    if (!e.repeat && minesHere() && ['KeyF', 'KeyX'].includes(e.code)) minesAct(e.code === 'KeyF' ? 'flag' : 'dig', true);   // on the minefield F flags and X digs
+    else if (!e.repeat && ['KeyF', 'KeyX', 'Enter', 'KeyH', 'KeyN'].includes(e.code)) sandboxKey(e.code);
+    if (!e.repeat && e.code === 'KeyR' && zone === hub && mines.contains(Player.x, Player.z, 6)) minesMenu.open();   // R near the field: pick a new game
   });
   window.addEventListener('keyup', e => { Player.keys[e.code] = false; });
   window.addEventListener('blur', () => { Player.keys = {}; });
@@ -313,6 +335,10 @@
     follower.update(dt, t, zone, Player, showcase ? showcase.petGoal : null);
     sandbox.showAim(Player, started && !UI.isOpen() && zone === hub && !Player.third && !showcase);
     updateSandboxHud();
+    mines.update(dt, t, Player, started && !UI.isOpen() && zone === hub && !Player.third && !showcase);
+    minesMenu.updateHud(Player, zone === hub && started && !UI.isOpen());
+    if (mines.shaking > 0) canvas.style.transform = `translate(${((Math.random() - 0.5) * mines.shaking * 22).toFixed(1)}px, ${((Math.random() - 0.5) * mines.shaking * 22).toFixed(1)}px)`;
+    else if (canvas.style.transform) canvas.style.transform = '';
 
     const bob = Math.sin(Player.bobT * 9) * 0.035 * Player.moveAmt;
     camera.rotation.set(Player.pitch, Player.yaw, 0);
@@ -345,5 +371,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, dorm, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

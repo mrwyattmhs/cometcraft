@@ -8,15 +8,19 @@ assert.deepStrictEqual(E.LEVELS, ['Easy', 'Medium', 'Hard', 'Expert']);
 assert.deepStrictEqual(E.PAY, {
   practice: { 2: 10, 3: 25, 4: 50 },
   radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], coaster: { easy: 10, factor: 20 }, lines: 25,
-  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200],
+  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200], mines: [100, 200, 300],
 });
 assert.deepStrictEqual([1, 2, 3, 4, 0, 9].map(l => E.levelName(l)), ['Easy', 'Medium', 'Hard', 'Expert', 'Easy', 'Expert'], 'names, kept in range');
 
 // the easiest of anything that has levels is the same small number, and each level pays more than the one before it
 [E.PAY.radical, E.PAY.trinomial].forEach(p => assert.strictEqual(p[0], 10, 'the easiest casino level pays 10'));
-Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, practice: Object.values(E.PAY.practice) })
+Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, mines: E.PAY.mines, practice: Object.values(E.PAY.practice) })
   .forEach(([game, pay]) => pay.forEach((v, i) => { if (i) assert.ok(v > pay[i - 1], `${game}: each level pays more than the one before`); assert.ok(Number.isInteger(v) && v > 0); }));
 assert.deepStrictEqual(E.PAY.blueprint, [50, 100, 150, 200], 'the sandbox pays the most');
+// Minesweeper pays per game WON: 100, 200 and 300 chips for Easy, Medium and Hard, one amount for each of the three grids
+const MS = require('../js/minesweeper.js');
+assert.deepStrictEqual(E.PAY.mines, [100, 200, 300], 'the payouts that were asked for'); assert.strictEqual(E.PAY.mines.length, MS.LEVELS.length, 'one payout for each Minesweeper level');
+assert.ok(Math.min(...E.PAY.mines) >= Math.max(...Object.values(E.PAY.arithmetic), E.PAY.map, ...E.PAY.vertex, ...E.PAY.parabola, E.PAY.lines), 'even an Easy win pays at least as much as the best single answer anywhere');
 assert.ok(Math.min(...E.PAY.blueprint) > Math.max(E.PAY.map, ...Object.values(E.PAY.arithmetic)), 'a blueprint pays more than a single quick answer anywhere');
 
 // every game really pays what the table says: no module keeps its own number

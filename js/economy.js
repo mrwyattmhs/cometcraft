@@ -3,7 +3,7 @@
 
    Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
 const Economy = (() => {
-  const BUILD = 31; // bump together with the ?v= numbers in index.html
+  const BUILD = 32; // bump together with the ?v= numbers in index.html
   const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
   const PAY = {
     // casino tables (chips for each correct answer, by level)
@@ -20,6 +20,8 @@ const Economy = (() => {
     map: 5,
     // the sandbox: chips for each blueprint solved, by level
     blueprint: [50, 100, 150, 200],
+    // Minesweeper next to the sandbox: chips for each game WON, by level (Easy 10 x 10, Medium 15 x 15, Hard 18 x 18). Losing, or giving up, pays nothing and costs nothing.
+    mines: [100, 200, 300],
   };
   /** The name of a level: levelName(2, 4) is "Medium". */
   const levelName = level => LEVELS[Math.max(0, Math.min(LEVELS.length - 1, level - 1))];

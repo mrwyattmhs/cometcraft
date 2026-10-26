@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&family=Great+Vibes&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=31">
+  <link rel="stylesheet" href="css/style.css?v=32">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -17,6 +17,8 @@
     <div id="controls-hint">WASD move &middot; mouse look &middot; Shift run &middot; E interact &middot; C closet &middot; V camera</div>
     <div id="crosshair" aria-hidden="true"></div>
     <div id="sandbox-hud" class="hidden"><div id="sandbox-text"></div><canvas id="sandbox-map" width="242" height="236"></canvas></div>
+    <div id="mines-hud" class="hidden" role="status"></div>
+    <div id="boom-flash" aria-hidden="true"></div>
     <div id="prompt" class="hidden"></div>
     <div id="toast" role="status"></div>
   <div id="trophy-banner" class="hidden" role="status" aria-live="polite"></div>
@@ -28,7 +30,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 31</p>
+      <p class="fine build">Build 32</p>
     </div>
   </div>
 
@@ -565,49 +567,88 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/economy.js?v=31"></script>
-  <script src="js/factoring.js?v=31"></script>
-  <script src="js/catalog.js?v=31"></script>
-  <script src="js/store.js?v=31"></script>
-  <script src="js/trophies.js?v=31"></script>
-  <script src="js/books-data.js?v=31"></script>
-  <script src="js/library.js?v=31"></script>
-  <script src="js/content.js?v=31"></script>
-  <script src="js/textures.js?v=31"></script>
-  <script src="js/avatar.js?v=31"></script>
-  <script src="js/pets.js?v=31"></script>
-  <script src="js/dorm.js?v=31"></script>
-  <script src="js/dormroom.js?v=31"></script>
-  <script src="js/trophy-case.js?v=31"></script>
-  <script src="js/usmap-data.js?v=31"></script>
-  <script src="js/usmap.js?v=31"></script>
-  <script src="js/flag.js?v=31"></script>
-  <script src="js/blueprint.js?v=31"></script>
-  <script src="js/sandbox.js?v=31"></script>
-  <script src="js/casino-interior.js?v=31"></script>
-  <script src="js/world.js?v=31"></script>
-  <script src="js/showcase.js?v=31"></script>
-  <script src="js/player.js?v=31"></script>
-  <script src="js/ui.js?v=31"></script>
-  <script src="js/shop.js?v=31"></script>
-  <script src="js/crafting.js?v=31"></script>
-  <script src="js/trinomials.js?v=31"></script>
-  <script src="js/trinomial-game.js?v=31"></script>
-  <script src="js/radicals.js?v=31"></script>
-  <script src="js/radical-game.js?v=31"></script>
-  <script src="js/parabolas.js?v=31"></script>
-  <script src="js/lines.js?v=31"></script>
-  <script src="js/coaster.js?v=31"></script>
-  <script src="js/lessons.js?v=31"></script>
-  <script src="js/lesson-panel.js?v=31"></script>
-  <script src="js/parabola-game.js?v=31"></script>
-  <script src="js/lines-game.js?v=31"></script>
-  <script src="js/coaster-game.js?v=31"></script>
-  <script src="js/arithmetic.js?v=31"></script>
-  <script src="js/arithmetic-game.js?v=31"></script>
-  <script src="js/map-game.js?v=31"></script>
-  <script src="js/reader-game.js?v=31"></script>
-  <script src="js/dorm-planner.js?v=31"></script>
-  <script src="js/main.js?v=31"></script>
+  <div id="mines" class="overlay hidden kelly" data-state="menu">
+    <div class="mc-panel mines-panel" role="dialog" aria-modal="true" aria-labelledby="mines-title">
+      <header class="craft-head">
+        <div class="k-title">
+          <span class="k-wing">Next to the sandbox</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="mines-title">Minesweeper</h2></div>
+        </div>
+        <div class="craft-meta">
+          <span id="mines-wallet" class="wallet-chip">0 chips</span>
+          <button id="mines-close" class="btn small" type="button">Close</button>
+        </div>
+      </header>
+      <div id="mines-menu">
+        <p class="bet-prompt">Dig up the field without hitting a bomb. Pick a size:</p>
+        <div id="mines-levels" class="bet-grid"></div>
+        <ol class="mines-how">
+          <li>Click or press <b>X</b> to dig the grass. Dirt shows a number: how many bombs touch that square, corners too.</li>
+          <li>Right-click or press <b>F</b> to put a flag on a square you think hides a bomb.</li>
+          <li>Dig every safe square <b>and</b> flag every bomb to win. Digging a bomb ends the game.</li>
+          <li>Your first dig is always safe. Press <b>R</b> near the field any time to pick a new game.</li>
+        </ol>
+        <p id="mines-trophy" class="k-note"></p>
+      </div>
+      <div id="mines-result" class="hidden" role="status">
+        <h3 id="mines-result-title"></h3>
+        <p id="mines-result-text"></p>
+        <p id="mines-result-trophy" class="k-note"></p>
+        <div class="mines-actions">
+          <button id="mines-again" class="btn primary" type="button">Play again</button>
+          <button id="mines-pick" class="btn" type="button">Pick a level</button>
+          <button id="mines-look" class="btn" type="button">Look at the field</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/economy.js?v=32"></script>
+  <script src="js/factoring.js?v=32"></script>
+  <script src="js/catalog.js?v=32"></script>
+  <script src="js/store.js?v=32"></script>
+  <script src="js/trophies.js?v=32"></script>
+  <script src="js/books-data.js?v=32"></script>
+  <script src="js/library.js?v=32"></script>
+  <script src="js/content.js?v=32"></script>
+  <script src="js/textures.js?v=32"></script>
+  <script src="js/avatar.js?v=32"></script>
+  <script src="js/pets.js?v=32"></script>
+  <script src="js/dorm.js?v=32"></script>
+  <script src="js/dormroom.js?v=32"></script>
+  <script src="js/trophy-case.js?v=32"></script>
+  <script src="js/usmap-data.js?v=32"></script>
+  <script src="js/usmap.js?v=32"></script>
+  <script src="js/flag.js?v=32"></script>
+  <script src="js/blueprint.js?v=32"></script>
+  <script src="js/sandbox.js?v=32"></script>
+  <script src="js/casino-interior.js?v=32"></script>
+  <script src="js/world.js?v=32"></script>
+  <script src="js/showcase.js?v=32"></script>
+  <script src="js/player.js?v=32"></script>
+  <script src="js/ui.js?v=32"></script>
+  <script src="js/shop.js?v=32"></script>
+  <script src="js/crafting.js?v=32"></script>
+  <script src="js/trinomials.js?v=32"></script>
+  <script src="js/trinomial-game.js?v=32"></script>
+  <script src="js/radicals.js?v=32"></script>
+  <script src="js/radical-game.js?v=32"></script>
+  <script src="js/parabolas.js?v=32"></script>
+  <script src="js/lines.js?v=32"></script>
+  <script src="js/coaster.js?v=32"></script>
+  <script src="js/lessons.js?v=32"></script>
+  <script src="js/minesweeper.js?v=32"></script>
+  <script src="js/minefield.js?v=32"></script>
+  <script src="js/mines-menu.js?v=32"></script>
+  <script src="js/lesson-panel.js?v=32"></script>
+  <script src="js/parabola-game.js?v=32"></script>
+  <script src="js/lines-game.js?v=32"></script>
+  <script src="js/coaster-game.js?v=32"></script>
+  <script src="js/arithmetic.js?v=32"></script>
+  <script src="js/arithmetic-game.js?v=32"></script>
+  <script src="js/map-game.js?v=32"></script>
+  <script src="js/reader-game.js?v=32"></script>
+  <script src="js/dorm-planner.js?v=32"></script>
+  <script src="js/main.js?v=32"></script>
 </body>
 </html>

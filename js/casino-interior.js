@@ -11,7 +11,7 @@
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 31; // bump together with the ?v= numbers in index.html
+  const BUILD = 32; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
