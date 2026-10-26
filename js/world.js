@@ -69,7 +69,7 @@ const World = (() => {
   }
   const solid = (zone, x, z, w, d) =>
     zone.colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2 });
-  const interact = (zone, x, z, r, label, action) => zone.interactables.push({ x, z, r, label, action });
+  const interact = (zone, x, z, r, label, action, extra) => zone.interactables.push({ x, z, r, label, action, ...extra });   // extra: e.g. { lesson: 'vertex' }
 
   const Collide = {
     /** y is how high your feet are (0 on the ground). A collider with a hits(bottom, top) function, like a column of
@@ -496,48 +496,80 @@ const World = (() => {
     [42, 32, 22, 12, 2, -8].forEach((z, i) => addLamp(zone, i % 2 ? -5.2 : 5.2, z));
   }
 
-  /** A wall block with a textured side (the hotel's windowed sandstone by default) and a plain stone roof. */
-  function hotelBox(g, w, h, d, x, y, z, name = 'hotel') {
+  /** A wall block with a textured side (the hotel's windowed sandstone by default) and a plain stone roof (or opts.top), optionally turned (opts.rotY). */
+  function hotelBox(g, w, h, d, x, y, z, name = 'hotel', opts = {}) {
+    const top = opts.top || 'stone';
     const m = new T.Mesh(new T.BoxGeometry(w, h, d), [
       Tex.mat(name, d, h), Tex.mat(name, d, h),
-      Tex.mat('stone', w, d), Tex.mat('stone', w, d),
+      Tex.mat(top, w, d), Tex.mat(top, w, d),
       Tex.mat(name, w, h), Tex.mat(name, w, h),
     ]);
     m.position.set(x, y, z);
+    if (opts.rotY) m.rotation.y = opts.rotY;
     g.add(m);
     return m;
   }
 
-  /** The casino as a mini grand hotel: a stepped crescent of sandstone (tall center tower, two lower
-      wings each side), gold trim, a window on every other block, and a columned porte-cochere over
-      the entrance. The door, its interaction spot, and the drop-off point are where they always were. */
+  /** The casino's outside, after the Bellagio: ONE long, gently curved crescent tower, the same height from end to end, in warm cream with bronze windows;
+      a low arcade of arched windows with a terracotta roof along its foot; and a taller entrance pavilion in the middle with a gold-edged roof, a gold
+      canopy on two columns, and the sign above. The front of the tower is an arc of radius R, hollow toward the road (the way the Bellagio wraps its lake),
+      built from flat panels turned to follow it. The door, its prompt, the canopy columns and the drop-off point are where they always were. */
+  const CASINO_FRONT = {
+    H: 14,                                   // the one height of the whole tower
+    R: 130, T: 4.5,                          // the front is an arc of radius R, and the tower is T deep behind it
+    zFront: -29.7,                           // where the tower's front is at the middle (x = 0); set well back so the ends of the arcade keep 2 blocks clear of the park's pool (solid from z = -22.2)
+    half: 28,                                // how far the crescent reaches each way (x)
+    segs: 8,                                 // flat panels the curve is built from
+    podiumH: 4.4, podiumD: 2.3,              // the low arcade along the front: its height, and how far it stands out from the tower
+    pavilion: { w: 16, h: 6.4, front: -20 }, // the entrance, standing out in front of the tower (16 wide: the park's pool starts at x = 8.8); its front face is where the old door always was
+  };
+  CASINO_FRONT.zC = CASINO_FRONT.zFront + CASINO_FRONT.R;                                // the centre of the curve, out on the road side
+  const casinoArcZ = (x, r) => CASINO_FRONT.zC - Math.sqrt(r * r - x * x);                // z of the circle of radius r, at x
+  /** The z of the front of whatever stands furthest out at x: the pavilion in the middle, the arcade either side. */
+  const casinoFrontZ = x => {
+    const F = CASINO_FRONT, ax = Math.abs(x);
+    return ax < F.pavilion.w / 2 ? F.pavilion.front : casinoArcZ(ax, F.R - F.podiumD);
+  };
+
   function buildCasinoFront(zone, actions) {
-    const g = zone.group;
-    const gold = lambert(0xc9a24a), goldGlow = glow(0xffd36b);
+    const g = zone.group, F = CASINO_FRONT;
+    const gold = lambert(0xc9a24a), goldGlow = glow(0xffd36b), cream = lambert(0xefe4c4), roof = lambert(0xc7b996);      // (the roof is a tan concrete: pale cream turns to glare in the sun)
+    const turn = (m, phi) => { m.rotation.y = -phi; return m; };
 
-    // front = the z of the face you see; every section ends at z = -32
-    const sections = [
-      { x: 0, w: 16, h: 14, front: -20 },                                   // center tower
-      { x: -14, w: 12, h: 12, front: -23 }, { x: 14, w: 12, h: 12, front: -23 },   // inner wings
-      { x: -25, w: 10, h: 8, front: -26 }, { x: 25, w: 10, h: 8, front: -26 },     // outer wings
-    ];
-    sections.forEach(sec => {
-      const d = sec.front + 32;                               // depth from the front face back to z = -32
-      const cz = sec.front - d / 2;
-      hotelBox(g, sec.w, sec.h, d, sec.x, sec.h / 2, cz);
-      box(g, gold, sec.w + 0.5, 0.5, d + 0.5, sec.x, sec.h + 0.25, cz);      // gold cornice
-      solid(zone, sec.x, cz, sec.w + 0.2, d + 0.2);
+    // the crescent tower: a ring of panels turned to follow the curve, all F.H high, each with a cream cornice
+    const alpha = Math.asin(F.half / F.R), step = 2 * alpha / F.segs, rMid = F.R + F.T / 2;
+    for (let i = 0; i < F.segs; i++) {
+      const phi = -alpha + (i + 0.5) * step, cx = rMid * Math.sin(phi), cz = F.zC - rMid * Math.cos(phi);
+      const w = 2 * F.R * Math.tan(step / 2) + 0.6;                                      // the fronts meet; the extra makes the back edges overlap
+      hotelBox(g, w, F.H, F.T, cx, F.H / 2, cz, 'bellagio', { rotY: -phi });
+      turn(box(g, roof, w + 0.5, 0.5, F.T + 0.6, cx, F.H + 0.25, cz), phi);
+    }
+
+    // the low arcade along the foot of the tower, either side of the entrance: arched windows, a terracotta roof, a thin gold edge
+    const rp = F.R - F.podiumD, dP = F.podiumD + 0.5, nP = 4;
+    [-1, 1].forEach(sd => {
+      const a0 = Math.asin((F.pavilion.w / 2) / rp), a1 = Math.asin(F.half / rp), stepP = (a1 - a0) / nP, rc = rp + dP / 2;
+      for (let j = 0; j < nP; j++) {
+        const phi = sd * (a0 + (j + 0.5) * stepP), cx = rc * Math.sin(phi), cz = F.zC - rc * Math.cos(phi), w = 2 * rp * Math.tan(stepP / 2) + 0.5;
+        hotelBox(g, w, F.podiumH, dP, cx, F.podiumH / 2, cz, 'bellagioBase', { rotY: -phi, top: 'terracotta' });
+        const re = rp + 0.12; turn(box(g, gold, w + 0.1, 0.2, 0.25, re * Math.sin(phi), F.podiumH + 0.1, F.zC - re * Math.cos(phi)), phi);
+      }
     });
-    [-8, 8].forEach(x => box(g, gold, 0.5, 14, 0.5, x, 7, -19.9));            // gold piers on the tower corners
 
-    // the grand entrance: a glowing gold frame, the door, and a sign above it
+    // the entrance pavilion, standing out in front of the middle of the tower: taller than the arcade, a terracotta roof with a gold edge, cream pilasters round the door
+    const pv = F.pavilion, pd = pv.front - F.zFront;
+    hotelBox(g, pv.w, pv.h, pd, 0, pv.h / 2, pv.front - pd / 2, 'bellagioBase', { top: 'terracotta' });
+    box(g, gold, pv.w + 0.4, 0.4, 0.4, 0, pv.h + 0.2, pv.front + 0.1);
+    [-1, 1].forEach(sd => box(g, cream, 0.7, pv.h, 0.4, sd * 3.2, pv.h / 2, pv.front + 0.2));
+
+    // the grand entrance: a glowing gold frame, the door, and the sign above it, on the tower over the pavilion's roof
     box(g, goldGlow, 4.2, 5.0, 0.1, 0, 2.5, -19.95);
     box(g, glow(0x1b1208), 3.6, 4.6, 0.2, 0, 2.3, -19.85);
     const sign = makeSign({
       w: 14, h: 2.4, title: 'PRIME TIME CASINO', sub: 'factor it. solve it. win it.',
       fg: '#ffd36b', bg: '#10162b', border: '#ffd36b', subColor: '#8fd8ff',
     });
-    sign.position.set(0, 9.6, -19.95);
+    sign.position.set(0, 9.6, casinoArcZ(7, F.R) + 0.09);                                  // a hair in front of the curve even at the sign's two ends
     g.add(sign);
 
     // porte-cochere: a gold canopy on two columns, with warm lights underneath
@@ -551,6 +583,12 @@ const World = (() => {
       solid(zone, x, -16, 1.1, 1.1);
     });
     interact(zone, 0, -18.2, 2.2, 'Enter the Casino', actions.enterCasino);
+
+    // you cannot walk into the building: thin strips of solid that follow the curve (and the pavilion) from the front back to the edge of the village
+    for (let x0 = -F.half; x0 < F.half - 1e-9; x0 += 1) {
+      const x1 = x0 + 1, front = Math.abs((x0 + x1) / 2) < F.pavilion.w / 2 ? F.pavilion.front : casinoFrontZ(Math.max(Math.abs(x0), Math.abs(x1)));
+      solid(zone, (x0 + x1) / 2, (front + 0.1 - 34) / 2, 1.02, front + 0.1 + 34);                  // from z = -34 forward to 10 cm in front of the wall
+    }
   }
 
   /** A real double door in a white frame: two wooden leaves with a raised lower panel, a window above a push bar,
@@ -1370,7 +1408,7 @@ const World = (() => {
   }
 
   function buildTable(zone, x, z, felt, title, sub, color, onUse, opts = {}) {
-    const { prop = 'dice', facing = 1, accent = 0xffffff } = opts;
+    const { prop = 'dice', facing = 1, accent = 0xffffff, lesson } = opts;
     const g = zone.group;
     box(g, 'wood', 5.2, 0.9, 2.6, x, 0.45, z);
     box(g, 'wood', 5.8, 0.15, 3.4, x, 0.92, z);
@@ -1407,7 +1445,7 @@ const World = (() => {
     g.add(sign);
 
     solid(zone, x, z, 5.9, 3.5);
-    interact(zone, x, z + 2.8 * facing, 2.2, `Sit at the ${title.toLowerCase()}`, onUse);
+    interact(zone, x, z + 2.8 * facing, 2.2, `Sit at the ${title.toLowerCase()}`, onUse, lesson ? { lesson } : undefined);   // a table with a mini lesson also offers it (L)
   }
 
   /** The casino inside is built by casino-interior.js (a grand hall and two wings). The outside, buildCasinoFront, is above. */
@@ -1655,5 +1693,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, symbolCells, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, CASINO_FRONT, casinoFrontZ, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, symbolCells, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

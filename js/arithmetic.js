@@ -8,7 +8,7 @@
 
    Time is passed in by the caller (now, in milliseconds), so a whole round can be tested instantly. */
 const Arithmetic = (() => {
-  const BUILD = 29; // bump together with arithmetic-game.js and the ?v= numbers in index.html
+  const BUILD = 31; // bump together with arithmetic-game.js and the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const DURATION_MS = 60000;
   /** Chips for every correct answer at a table (the amounts live in economy.js). */

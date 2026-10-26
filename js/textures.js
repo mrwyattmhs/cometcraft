@@ -131,6 +131,37 @@ const Tex = (() => {
         px(g, '#a8946a', [[6, 28, 20, 2]]);                                            // sill
       },
     },
+    // the casino tower after the Bellagio: warm cream stucco with pairs of tall bronze-glass windows in pale frames, one floor per 2 x 2 blocks
+    bellagio: {
+      size: 32, span: 2, base: [246, 236, 208], v: 4,
+      draw: g => {
+        px(g, '#dccfa6', [[0, 28, 32, 3]]);                                            // a tan band between floors
+        px(g, 'rgba(150,128,92,.4)', [[0, 31, 32, 1], [0, 0, 32, 1]]);                 // the floor lines
+        [4, 18].forEach(x => {
+          px(g, '#fdf7e4', [[x - 1, 4, 12, 24]]);                                      // a pale frame
+          px(g, '#3d2f26', [[x, 5, 10, 22]]);                                          // bronze glass
+          px(g, '#6a543f', [[x + 1, 6, 3, 8]]);                                        // a glint of sky
+          px(g, '#b8a47a', [[x - 1, 27, 12, 1]]);                                      // the sill
+        });
+      },
+    },
+    // the low arcade at the foot of the tower: arched bronze windows between cream piers, on a tan plinth
+    bellagioBase: {
+      size: 32, span: 2, base: [240, 224, 188], v: 4,
+      draw: g => {
+        px(g, '#d4c093', [[0, 28, 32, 4]]);                                            // the plinth
+        px(g, '#fbf2d8', [[6, 7, 20, 22]]);                                            // the frame
+        px(g, '#3d2f26', [[8, 12, 16, 16], [10, 10, 12, 2], [12, 9, 8, 1]]);           // the arched glass
+        px(g, '#6a543f', [[9, 13, 4, 7]]);                                             // a glint
+        px(g, '#fbf2d8', [[15, 12, 2, 16]]);                                           // the mullion
+        px(g, '#c9a24a', [[14, 6, 4, 2]]);                                             // a gold keystone
+      },
+    },
+    // terracotta roof tile, a little more orange than the clay of the old buildings: rows of overlapping tiles
+    terracotta: {
+      base: [190, 106, 64], v: 8,
+      draw: g => { px(g, 'rgba(255,196,150,.22)', [[0, 0, 16, 1], [0, 4, 16, 1], [0, 8, 16, 1], [0, 12, 16, 1]]); px(g, 'rgba(96,46,22,.55)', [[0, 3, 16, 1], [0, 7, 16, 1], [0, 11, 16, 1], [0, 15, 16, 1], [4, 0, 1, 3], [12, 0, 1, 3], [0, 4, 1, 3], [8, 4, 1, 3], [4, 8, 1, 3], [12, 8, 1, 3], [0, 12, 1, 3], [8, 12, 1, 3]]); },
+    },
     // red-brick school wall: 64 px = 4 x 4 blocks = one story, with two tall windows per story
     schoolBrick: {
       size: 64, span: 4, base: [158, 72, 60], v: 9,

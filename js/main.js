@@ -119,6 +119,24 @@
   /* ---------- HUD ---------- */
   Store.onChange(s => { $('chips').textContent = s.chips; });
   const promptEl = $('prompt');
+
+  /** The prompt for the nearest thing you can use. A table with a mini lesson gets a second card under it: "Learn to play", with L. */
+  function showPrompt(it) {
+    if (!it) { promptEl.classList.add('hidden'); promptEl.classList.remove('has-lesson'); return; }
+    const L = it.lesson && Lessons.get(it.lesson);
+    if (L) {
+      promptEl.classList.add('has-lesson');
+      promptEl.innerHTML = `<div class="prompt-main"><span class="key">E</span>${it.label}</div>` +
+        `<button type="button" class="prompt-lesson" tabindex="-1" data-lesson="${it.lesson}">` +
+        `<span class="pl-thumb">${LessonPanel.art({ play: true })}<span class="pl-time">${Lessons.clock(L.start)}</span></span>` +
+        `<span class="pl-text"><b>Learn to play</b><span>${L.title}</span></span><span class="key">L</span></button>`;
+    } else {
+      promptEl.classList.remove('has-lesson');
+      promptEl.innerHTML = `<span class="key">E</span>${it.label}`;
+    }
+    promptEl.classList.remove('hidden');
+  }
+  promptEl.addEventListener('click', e => { const b = e.target.closest && e.target.closest('.prompt-lesson'); if (b) LessonPanel.open(b.dataset.lesson); });
   let focused = null;
 
   /* ---------- the sandbox: you can only build while you are standing in it ---------- */
@@ -227,7 +245,8 @@
 
   window.addEventListener('keydown', e => {
     if (e.code === 'Escape') {
-      if (CraftingGame.isOpen()) CraftingGame.close();
+      if (LessonPanel.isOpen()) LessonPanel.close();
+      else if (CraftingGame.isOpen()) CraftingGame.close();
       else if (TrinomialGame.isOpen()) TrinomialGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
@@ -247,6 +266,7 @@
     if (e.code.startsWith('Arrow') || e.code === 'Space') e.preventDefault();
     Player.keys[e.code] = true;
     if (e.code === 'KeyE' && !e.repeat && focused) focused.action();
+    if (e.code === 'KeyL' && !e.repeat && focused && focused.lesson) LessonPanel.open(focused.lesson);
     if (e.code === 'KeyV') Player.third = !Player.third;
     if (e.code === 'KeyC' && !e.repeat) Shop.openCloset();
     if (!e.repeat && ['KeyF', 'KeyX', 'Enter', 'KeyH', 'KeyN'].includes(e.code)) sandboxKey(e.code);
@@ -317,11 +337,7 @@
         if (d < it.r && d < bestD) { best = it; bestD = d; }
       }
     }
-    if (best !== focused) {
-      focused = best;
-      if (best) promptEl.innerHTML = `<span class="key">E</span>${best.label}`;
-      promptEl.classList.toggle('hidden', !best);
-    }
+    if (best !== focused) { focused = best; showPrompt(best); }
 
     renderer.render(scene, camera);
     requestAnimationFrame(frame);

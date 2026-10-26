@@ -11,7 +11,7 @@
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 29; // bump together with the ?v= numbers in index.html
+  const BUILD = 31; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -349,7 +349,7 @@ const CasinoInterior = (() => {
     buildTable(zone, T_.trinomial.x, T_.trinomial.z, 'feltRed', 'TRINOMIAL TABLE', 'split the middle. pick a level.', '#ff6a6a', () => actions.openTable('trinomial'), { prop: 'quadratic', accent: 0xff6a6a });
     buildTable(zone, T_.lines.x, T_.lines.z, 'feltTeal', 'LINES TABLE', 'slope. points. intercepts.', '#4fe0c0', () => actions.openTable('lines'), { prop: 'linegraph', accent: 0x4fe0c0 });
     buildTable(zone, T_.parabola.x, T_.parabola.z, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'), { prop: 'parabola', accent: 0xd58bff });
-    buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347 });
+    buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347, lesson: 'vertex' });
 
     buildTable(zone, T_.coaster.x, T_.coaster.z, 'feltIron', 'COASTER TABLE', 'ends. zeros. ride it.', '#ff9a3d', () => actions.openTable('coaster'), { prop: 'coaster', accent: 0xff8a3d, facing: -1 });
 

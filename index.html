@@ -6,8 +6,8 @@
   <title>Prime Time: a voxel math casino</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&family=Great+Vibes&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=29">
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&family=Great+Vibes&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=31">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -28,7 +28,7 @@
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 29</p>
+      <p class="fine build">Build 31</p>
     </div>
   </div>
 
@@ -276,10 +276,13 @@
     </div>
   </div>
 
-  <div id="vtx" class="overlay hidden" data-state="idle">
+  <div id="vtx" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel par-panel" role="dialog" aria-modal="true" aria-labelledby="vtx-title">
       <header class="craft-head">
-        <h2 id="vtx-title">Vertex Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Graphing wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="vtx-title">Vertex Table</h2><span class="k-formula">y = a(x − h)² + k</span></div>
+        </div>
         <div class="craft-meta">
           <span id="vtx-wallet" class="wallet-chip">0 chips</span>
           <button id="vtx-close" class="btn small" type="button">Leave table</button>
@@ -289,8 +292,15 @@
       <div id="vtx-wager" class="wager-line"></div>
 
       <div id="vtx-bet-row" class="tri-bets">
-        <p class="bet-prompt">Pick a level first. A harder level deals a steeper parabola, farther from the center, and pays more.</p>
-        <div id="vtx-bets" class="bet-grid"></div>
+        <div class="k-pick-layout">
+          <div id="vtx-help" class="k-help-slot"></div>
+          <div class="k-pick">
+            <span class="k-label">Pick a level</span>
+            <p class="bet-prompt">A harder level deals a steeper parabola, farther from the center, and pays more.</p>
+            <div id="vtx-bets" class="bet-grid"></div>
+            <p class="k-note">A wrong answer never costs you chips.</p>
+          </div>
+        </div>
       </div>
 
       <div id="vtx-main" class="par-main">
@@ -324,6 +334,23 @@
         <button id="vtx-craft" class="btn primary" type="button">Craft</button>
         <button id="vtx-next" class="btn primary hidden" type="button">Next problem</button>
       </div>
+    </div>
+  </div>
+
+  <div id="lesson" class="overlay hidden kelly">
+    <div class="mc-panel lesson-panel" role="dialog" aria-modal="true" aria-labelledby="lesson-heading">
+      <header class="lesson-head">
+        <div class="k-title"><span class="k-wing">Mini lesson</span><h2 id="lesson-heading"></h2></div>
+        <button id="lesson-close" class="btn small" type="button">Close</button>
+      </header>
+      <div id="lesson-stage" class="lesson-stage"></div>
+      <footer class="lesson-foot">
+        <span id="lesson-note" class="lesson-note"></span>
+        <div class="lesson-actions">
+          <a id="lesson-yt" class="btn small lesson-yt" href="#" target="_blank" rel="noopener">Open on YouTube</a>
+          <button id="lesson-back" class="btn primary small" type="button">Back to the table</button>
+        </div>
+      </footer>
     </div>
   </div>
 
@@ -538,47 +565,49 @@
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="js/economy.js?v=29"></script>
-  <script src="js/factoring.js?v=29"></script>
-  <script src="js/catalog.js?v=29"></script>
-  <script src="js/store.js?v=29"></script>
-  <script src="js/trophies.js?v=29"></script>
-  <script src="js/books-data.js?v=29"></script>
-  <script src="js/library.js?v=29"></script>
-  <script src="js/content.js?v=29"></script>
-  <script src="js/textures.js?v=29"></script>
-  <script src="js/avatar.js?v=29"></script>
-  <script src="js/pets.js?v=29"></script>
-  <script src="js/dorm.js?v=29"></script>
-  <script src="js/dormroom.js?v=29"></script>
-  <script src="js/trophy-case.js?v=29"></script>
-  <script src="js/usmap-data.js?v=29"></script>
-  <script src="js/usmap.js?v=29"></script>
-  <script src="js/flag.js?v=29"></script>
-  <script src="js/blueprint.js?v=29"></script>
-  <script src="js/sandbox.js?v=29"></script>
-  <script src="js/casino-interior.js?v=29"></script>
-  <script src="js/world.js?v=29"></script>
-  <script src="js/showcase.js?v=29"></script>
-  <script src="js/player.js?v=29"></script>
-  <script src="js/ui.js?v=29"></script>
-  <script src="js/shop.js?v=29"></script>
-  <script src="js/crafting.js?v=29"></script>
-  <script src="js/trinomials.js?v=29"></script>
-  <script src="js/trinomial-game.js?v=29"></script>
-  <script src="js/radicals.js?v=29"></script>
-  <script src="js/radical-game.js?v=29"></script>
-  <script src="js/parabolas.js?v=29"></script>
-  <script src="js/lines.js?v=29"></script>
-  <script src="js/coaster.js?v=29"></script>
-  <script src="js/parabola-game.js?v=29"></script>
-  <script src="js/lines-game.js?v=29"></script>
-  <script src="js/coaster-game.js?v=29"></script>
-  <script src="js/arithmetic.js?v=29"></script>
-  <script src="js/arithmetic-game.js?v=29"></script>
-  <script src="js/map-game.js?v=29"></script>
-  <script src="js/reader-game.js?v=29"></script>
-  <script src="js/dorm-planner.js?v=29"></script>
-  <script src="js/main.js?v=29"></script>
+  <script src="js/economy.js?v=31"></script>
+  <script src="js/factoring.js?v=31"></script>
+  <script src="js/catalog.js?v=31"></script>
+  <script src="js/store.js?v=31"></script>
+  <script src="js/trophies.js?v=31"></script>
+  <script src="js/books-data.js?v=31"></script>
+  <script src="js/library.js?v=31"></script>
+  <script src="js/content.js?v=31"></script>
+  <script src="js/textures.js?v=31"></script>
+  <script src="js/avatar.js?v=31"></script>
+  <script src="js/pets.js?v=31"></script>
+  <script src="js/dorm.js?v=31"></script>
+  <script src="js/dormroom.js?v=31"></script>
+  <script src="js/trophy-case.js?v=31"></script>
+  <script src="js/usmap-data.js?v=31"></script>
+  <script src="js/usmap.js?v=31"></script>
+  <script src="js/flag.js?v=31"></script>
+  <script src="js/blueprint.js?v=31"></script>
+  <script src="js/sandbox.js?v=31"></script>
+  <script src="js/casino-interior.js?v=31"></script>
+  <script src="js/world.js?v=31"></script>
+  <script src="js/showcase.js?v=31"></script>
+  <script src="js/player.js?v=31"></script>
+  <script src="js/ui.js?v=31"></script>
+  <script src="js/shop.js?v=31"></script>
+  <script src="js/crafting.js?v=31"></script>
+  <script src="js/trinomials.js?v=31"></script>
+  <script src="js/trinomial-game.js?v=31"></script>
+  <script src="js/radicals.js?v=31"></script>
+  <script src="js/radical-game.js?v=31"></script>
+  <script src="js/parabolas.js?v=31"></script>
+  <script src="js/lines.js?v=31"></script>
+  <script src="js/coaster.js?v=31"></script>
+  <script src="js/lessons.js?v=31"></script>
+  <script src="js/lesson-panel.js?v=31"></script>
+  <script src="js/parabola-game.js?v=31"></script>
+  <script src="js/lines-game.js?v=31"></script>
+  <script src="js/coaster-game.js?v=31"></script>
+  <script src="js/arithmetic.js?v=31"></script>
+  <script src="js/arithmetic-game.js?v=31"></script>
+  <script src="js/map-game.js?v=31"></script>
+  <script src="js/reader-game.js?v=31"></script>
+  <script src="js/dorm-planner.js?v=31"></script>
+  <script src="js/main.js?v=31"></script>
 </body>
 </html>

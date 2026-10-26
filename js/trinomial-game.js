@@ -13,7 +13,7 @@
    The math lives in trinomials.js; this file is only the interface. */
 const TrinomialGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 29; // must match Trinomials.BUILD
+  const BUILD = 31; // must match Trinomials.BUILD
   const SLOTS = 8;
   const SLOT_NAMES = [
     'Split, first number', 'Split, second number',

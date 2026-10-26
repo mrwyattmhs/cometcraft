@@ -10,7 +10,7 @@
      Factor first (medium):  f(x) = 2x^3 - 2x^2 - 12x                  factor to find the real zeros (some factors have none), mark them, then build
    A run is 8 rides that get harder. A ride is worth 3 stars, minus one for each derail and one for using a hint (never fewer than 1). */
 const Coaster = (() => {
-  const BUILD = 29; // bump together with the ?v= numbers in index.html
+  const BUILD = 31; // bump together with the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const MINUS = '\u2212';
   const W = 760, H = 420, CX = 380, CY = 210, SX = 52, HH = 150, LEFT = 34, RIGHT = 726;       // the stage, in its own units: x = -6..6 is 52 across, the ends are 150 up and down

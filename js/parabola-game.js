@@ -12,7 +12,7 @@
      VertexGame    vertex form,    y = a(x - h)² + k  (overlay #vtx)
 
    The math lives in parabolas.js; this file is only the interface. */
-const BUILD_GRAPH_TABLES = 29; // must match Parabolas.BUILD
+const BUILD_GRAPH_TABLES = 31; // must match Parabolas.BUILD
 
 function createGraphTable(cfg) {
   const P = cfg.prefix;
@@ -48,21 +48,54 @@ function createGraphTable(cfg) {
     return b;
   }
 
+  /** A small sketch of y = a x^2 for the level cards: the parabola gets steeper from Easy to Hard (a = 1, 2, 3). */
+  function levelIcon(level) {
+    const rise = 20 * level;
+    return '<svg width="120" height="72" viewBox="0 0 120 72" aria-hidden="true" focusable="false">' +
+      '<path d="M10 64H110" stroke="#6cc84a" stroke-width="2" fill="none"/>' +
+      `<path d="M20 ${64 - rise} Q60 ${64 + rise} 100 ${64 - rise}" stroke="#ffc45c" stroke-width="3.5" fill="none" stroke-linecap="round"/>` +
+      '<rect x="56" y="60" width="8" height="8" fill="#ffffff"/></svg>';
+  }
+
+  /** The "How to play" card on the level screen: a drawn thumbnail (nothing is fetched from YouTube) that opens the table's mini lesson. */
+  function helpCard() {
+    const L = cfg.lesson && Lessons.get(cfg.lesson);
+    if (!L || !$('help')) return;
+    const b = el('button', 'k-help');
+    b.type = 'button';
+    b.dataset.lesson = cfg.lesson;
+    b.innerHTML =
+      '<span class="k-label gold">New here?</span>' +
+      '<span class="k-help-title">How to play</span>' +
+      `<span class="k-thumb">${LessonPanel.art({ play: true })}<span class="k-badge">Starts at ${Lessons.clock(L.start)}</span></span>` +
+      `<span class="k-help-sub">${L.blurb}</span>` +
+      '<span class="k-cta"><i class="k-tri" aria-hidden="true"></i>Watch the lesson</span>';
+    b.addEventListener('click', () => LessonPanel.open(cfg.lesson, b));
+    $('help').appendChild(b);
+    $('help').closest('.k-pick-layout').classList.add('has-help');
+  }
+
   function wire() {
     if (wired) return;
     wired = true;
 
+    const kelly = root().classList.contains('kelly');
     Parabolas.TIERS.forEach(t => {
       const card = el('button', 'btn bet-card bet');
       card.type = 'button';
       card.dataset.level = t.level;
-      card.innerHTML =
-        `<span class="bet-amt">${t.name}</span>` +
-        `<span class="bet-desc">${t.desc}</span>` +
-        `<span class="bet-win">Pays ${Parabolas.payout(t.level, cfg.game)} chips</span>`;
+      card.innerHTML = kelly
+        ? `<span class="k-ico">${levelIcon(t.level)}</span>` +
+          `<span class="bet-amt">${t.name}</span>` +
+          `<span class="bet-desc">${t.desc.replace(/-(\d)/g, '\u2212$1')}</span>` +
+          `<span class="bet-win"><i class="k-coin" aria-hidden="true"></i><b>${Parabolas.payout(t.level, cfg.game)} chips</b><em> per answer</em></span>`
+        : `<span class="bet-amt">${t.name}</span>` +
+          `<span class="bet-desc">${t.desc}</span>` +
+          `<span class="bet-win">Pays ${Parabolas.payout(t.level, cfg.game)} chips</span>`;
       card.addEventListener('click', () => chooseLevel(t.level));
       $('bets').appendChild(card);
     });
+    helpCard();
     $('wallet').parentNode.insertBefore(Trophies.chip(cfg.game), $('wallet'));
 
     const r1 = $('r1'), r2 = $('r2'), r3 = $('r3');
@@ -141,6 +174,7 @@ function createGraphTable(cfg) {
     problem = p;
     slots = [null, null, null];
     state = 'playing';
+    root().scrollTop = 0;             // on a phone the level screen is tall; start the problem at its top
     setMsg('Fill in the axis of symmetry.');
     render();
   }
@@ -320,7 +354,8 @@ function createGraphTable(cfg) {
     if (!problem) { renderGraph(); return; }
 
     $('wager').textContent = `Level: ${Parabolas.tierFor(level).name}. Pays ${Parabolas.payout(level, cfg.game)} chips if you get it right.`;
-    $('poly').textContent = cfg.fmt(problem);
+    // the green window uses a clean font, so the equation can show a real minus sign (the checks and tests still use the plain text from cfg.fmt)
+    $('poly').textContent = root().classList.contains('kelly') ? cfg.fmt(problem).replace(/ - /g, ' \u2212 ') : cfg.fmt(problem);
 
     slotEls.forEach((b, i) => {
       b.innerHTML = slots[i] === null ? '' : numGem(slots[i]);
@@ -366,4 +401,5 @@ const VertexGame = createGraphTable({
   yintMiss: '. Plug x = 0 into the equation.',
   statWins: 'vertexWins',
   statLosses: 'vertexLosses',
+  lesson: 'vertex',                 // the mini lesson in js/lessons.js: a "How to play" card on the level screen
 });
