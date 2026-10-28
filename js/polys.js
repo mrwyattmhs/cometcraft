@@ -18,7 +18,7 @@
    Add/Subtract levels:    Easy   add two polynomials, each a binomial or a trinomial
                            Medium subtract them: the minus sign has to be distributed first */
 const Polys = (() => {
-  const BUILD = 36; // bump together with the ?v= numbers in index.html
+  const BUILD = 38; // bump together with the ?v= numbers in index.html
   const VARS = ['x', 'y', 'z', 'a', 'n', 't'];
   const MINUS = '\u2212';
   const SUP = { 2: '\u00b2', 3: '\u00b3', 4: '\u2074', 5: '\u2075', 6: '\u2076' };

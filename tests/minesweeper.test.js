@@ -224,8 +224,8 @@ console.log('ok  perfect and random players');
 }
 
 /* ---------- where things are: squares, the plot, and aiming ---------- */
-assert.deepStrictEqual(M.PLOT_AT, { x0: 33.2, z0: -14.6 }); assert.strictEqual(M.PLOT, 18);
-assert.ok(M.insidePlot(42, -4) && !M.insidePlot(30, -4) && M.insidePlot(32.8, -4, 0.6) && !M.insidePlot(32.4, -4, 0.6) && M.insidePlot(51.19, 3.39) && !M.insidePlot(51.21, 3.39) && !M.insidePlot(51.19, 3.41));
+assert.deepStrictEqual(M.PLOT_AT, { x0: 30.8, z0: 25.0 }); assert.strictEqual(M.PLOT, 18);        // behind the dorm, with a wide lawn between: x 30.8 to 48.8, z 25.0 to 43.0
+assert.ok(M.insidePlot(40, 34) && !M.insidePlot(28, 34) && M.insidePlot(30.3, 34, 0.6) && !M.insidePlot(30.1, 34, 0.6) && M.insidePlot(48.79, 42.99) && !M.insidePlot(48.81, 42.99) && !M.insidePlot(48.79, 43.01));
 for (const L of M.LEVELS) {
   for (let i = 0; i < L.size * L.size; i++) {
     const c = M.tileCenter(L.level, i);

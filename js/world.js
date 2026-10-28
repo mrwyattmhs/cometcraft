@@ -885,9 +885,9 @@ const World = (() => {
     solid(zone, sx, sz, 0.5, 0.5);
   }
 
-  /* ---------- the minefield, just north of the sandbox ---------- */
+  /* ---------- the minefield, behind the dorm ---------- */
   /** A low log frame round the 18 x 18 plot (you step over it, as with the sandbox), a signpost on the west side with a flag over it, and the game itself (Minefield.create).
-      Walking over the field is allowed; digging and flagging only work while you stand on it. Villagers never wander this far east. */
+      Walking over the field is allowed; digging and flagging only work while you stand on it. Villagers' wandering area stops short of it (see `wander` in buildHub). */
   function buildMinefield(zone, actions) {
     const g = zone.group, P = Minesweeper.PLOT, { x0, z0 } = Minesweeper.PLOT_AT;
     const cx = x0 + P / 2, cz = z0 + P / 2, t = 0.5, fh = 0.45;
@@ -901,7 +901,7 @@ const World = (() => {
     zone.mines = Minefield.create(zone);
 
     // the signpost, facing west (the way you come from), with the flag turning up above it
-    const sx = 31.9, sz = -2.0;
+    const sx = x0 - 1.3, sz = z0 + 3.0;                              // on the strip between the dorm's back wall and the field
     box(g, 'log', 0.3, 2.6, 0.3, sx, 1.3, sz);
     const sign = makeSign({ w: 3.6, h: 1.0, title: 'MINESWEEPER', sub: "dig it. flag it. don't boom.", fg: '#ffffff', bg: '#16401a', border: '#6cc84a', subColor: '#e6f4de' });
     sign.position.set(sx - 0.17, 2.2, sz); sign.rotation.y = -Math.PI / 2;
@@ -1196,9 +1196,9 @@ const World = (() => {
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
       spawn: { x: 0, z: DORM.zc, yaw: 0 },                              // the dorm is directly on your right
-      bounds: { minX: -34, maxX: 52, minZ: -33, maxZ: 52 },
+      bounds: { minX: -34, maxX: 58, minZ: -33, maxZ: 52 },                // (the east edge is 6 blocks further out than it was, to give the sandbox and the minefield room)
       sky: 0x8fc8f0, fog: [0x8fc8f0, 45, 120],
-      wander: { minX: -30, maxX: 30, minZ: -17, maxZ: 44 },
+      wander: { minX: -30, maxX: 22.5, minZ: -17, maxZ: 44 },                // (stops well short of the minefield behind the dorm, which starts at x 30.3)
     });
     const g = zone.group;
 
@@ -1225,7 +1225,7 @@ const World = (() => {
     buildSchoolFront(zone, actions);   // across the road from the shops
     buildSandboxArea(zone);            // behind the school
     buildSandboxPath(zone);            // and a paved way round to it
-    buildMinefield(zone, actions);     // and Minesweeper, on the lawn just north of the sandbox
+    buildMinefield(zone, actions);     // and Minesweeper, on the lawn behind the dorm
     buildDormFront(zone, actions);     // Wilson Hall, directly on your right at the start
     buildPark(zone, actions);          // and a little park with the great tree, across the road from it
 
@@ -1242,7 +1242,7 @@ const World = (() => {
 
     // trees on either side, then the fence and the clouds
     [[-27, -14], [-27, -3], [-27, 10], [-27, 21], [-26, 25], [-30, -12],
-     [31, 2], [31, 28], [26, 27], [29, 44], [47, 20], [34, 38]]
+     [31, 2], [47, 20], [54, 28], [53, 38], [54, 46], [30, 48]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
     const b = zone.bounds;

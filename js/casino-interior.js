@@ -4,13 +4,13 @@
    under a glass sculpture in the style of Chihuly's Fiori di Como, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
 
      Factoring wing (west, left):   Practice table, Radical table, Trinomial table, and in a second row the Cubes table (sums and differences of cubes)
-     Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form), and in a second row the Polynomial Coaster table
-     Polynomials wing (north):      Multiply table and Add/Sub table, through an archway in the hall's north wall
+     Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form)
+     Polynomials wing (north):      Multiply table, Add/Sub table and the Polynomial Coaster table (graphing a polynomial), through an archway in the hall's north wall
 
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 36; // bump together with the ?v= numbers in index.html
+  const BUILD = 38; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -27,9 +27,8 @@ const CasinoInterior = (() => {
   const TABLES = {
     practice: { x: -24, z: -5 }, radical: { x: -31.5, z: -5 }, trinomial: { x: -39, z: -5 },
     lines: { x: 24, z: -5 }, parabola: { x: 31.5, z: -5 }, vertex: { x: 39, z: -5 },
-    coaster: { x: 39, z: 5.2 },                       // the Polynomial Coaster table: a second row, on the south side of the Graphing wing, facing north
-    cubes: { x: -39, z: 5.2 },                        // the Cubes table: a second row on the south side of the Factoring wing, facing north (the mirror of the coaster table)
-    polymul: { x: -6, z: -30.5 }, polyadd: { x: 6, z: -30.5 },   // the Polynomials wing: a row of two along the north end wall, six blocks in front of it (as the other wings' first rows are)
+    cubes: { x: -39, z: 5.2 },                        // the Cubes table: a second row on the south side of the Factoring wing, facing north, behind the Trinomial table
+    polymul: { x: -7.5, z: -30.5 }, polyadd: { x: 0, z: -30.5 }, coaster: { x: 7.5, z: -30.5 },   // the Polynomials wing: a row of three along the north end wall, six blocks in front of it (as the other wings' first rows are), spaced like the first rows of the other wings. The Polynomial Coaster (graphing a polynomial) lives here too.
   };
   const SPAWN = { x: 0, z: 10.5, yaw: 0 };
   /** A little wedding chapel in the middle of the Graphing wing's south wall: ivory doors under a gilded arch with a sign over them, a red rope hung
@@ -312,7 +311,7 @@ const CasinoInterior = (() => {
     });
 
     // the wing's sign over the north archway, facing the hall (the side wings' signs are above)
-    { const sign = makeSign({ w: 9, h: 2.2, title: NORTH_WING.name, sub: 'multiply. add. subtract.', fg: '#f3d27a', bg: '#0d2a1e', border: '#d4a843', subColor: '#f3e8c9' }); sign.position.set(0, 9.9, HALL.minZ + 0.05); g.add(sign); }
+    { const sign = makeSign({ w: 9, h: 2.2, title: NORTH_WING.name, sub: 'multiply. add. subtract. graph.', fg: '#f3d27a', bg: '#0d2a1e', border: '#d4a843', subColor: '#f3e8c9' }); sign.position.set(0, 9.9, HALL.minZ + 0.05); g.add(sign); }
 
     // the way out
     [-1, 1].forEach(s => box(g, 'wood', 1.7, 6.4, 0.2, s * 0.9, 3.2, HALL.maxZ - 0.1));
@@ -391,7 +390,7 @@ const CasinoInterior = (() => {
     buildTable(zone, T_.parabola.x, T_.parabola.z, 'feltPurple', 'PARABOLA TABLE', 'axis. vertex. sketch it.', '#d58bff', () => actions.openTable('parabola'), { prop: 'parabola', accent: 0xd58bff });
     buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347, lesson: 'vertex' });
 
-    buildTable(zone, T_.coaster.x, T_.coaster.z, 'feltIron', 'COASTER TABLE', 'ends. zeros. ride it.', '#ff9a3d', () => actions.openTable('coaster'), { prop: 'coaster', accent: 0xff8a3d, facing: -1 });
+    buildTable(zone, T_.coaster.x, T_.coaster.z, 'feltIron', 'COASTER TABLE', 'ends. zeros. ride it.', '#ff9a3d', () => actions.openTable('coaster'), { prop: 'coaster', accent: 0xff8a3d });
     buildTable(zone, T_.cubes.x, T_.cubes.z, 'feltPurple', 'CUBES TABLE', 'sum and difference of cubes', '#c78bff', () => actions.openTable('cubes'), { prop: 'cube', accent: 0xc78bff, facing: -1 });
     buildTable(zone, T_.polymul.x, T_.polymul.z, 'feltGold', 'MULTIPLY TABLE', 'expand it. combine like terms.', '#ffd166', () => actions.openTable('polymul'), { prop: 'times', accent: 0xffd166 });
     buildTable(zone, T_.polyadd.x, T_.polyadd.z, 'feltTeal', 'ADD/SUB TABLE', 'add. subtract. combine.', '#4fe0c0', () => actions.openTable('polyadd'), { prop: 'plus', accent: 0x4fe0c0 });
@@ -401,11 +400,9 @@ const CasinoInterior = (() => {
       [T_.lines, artLines], [T_.parabola, artGraph('STANDARD FORM', 'y = x\u00b2 \u2212 4x + 3', x => x * x - 4 * x + 3, [-1, 5], [-2, 5], [[2, -1, true], [1, 0], [3, 0], [0, 3]])],
       [T_.vertex, artGraph('VERTEX FORM', 'y = \u2212(x + 1)\u00b2 + 4', x => -((x + 1) ** 2) + 4, [-4, 2], [-3, 5], [[-1, 4, true], [-3, 0], [1, 0]])]];
     art.forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, -10.95); g.add(p); });
-    // the coaster table is on the south side, so its picture hangs on the south wall behind it (over the sofa), facing north
-    { const p = textPlane(5.8, 3.6, artCoaster, 72); p.rotation.y = Math.PI; p.position.set(T_.coaster.x + 0.25, 6.4, 10.95); g.add(p); }
     { const p = textPlane(5.8, 3.6, artCubes, 72); p.rotation.y = Math.PI; p.position.set(T_.cubes.x + 0.25, 6.4, 10.95); g.add(p); }
     // the Polynomials tables are along the north end wall of their wing, so their pictures hang on it, facing south
-    [[T_.polymul, artPolyMul], [T_.polyadd, artPolyAdd]].forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, NORTH_WING.minZ + 0.05); g.add(p); });          // and the cubes table's, on the south wall of the Factoring wing
+    [[T_.polymul, artPolyMul], [T_.polyadd, artPolyAdd], [T_.coaster, artCoaster]].forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, NORTH_WING.minZ + 0.05); g.add(p); });          // and the cubes table's, on the south wall of the Factoring wing
 
     // the prompts that are not tables come after the tables in the list: the way out
     interact(zone, 0, 12.4, 1.8, 'Leave the Casino', actions.leaveCasino);

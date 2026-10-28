@@ -2,7 +2,7 @@
    No DOM and no THREE here, so it is unit tested in Node (tests/library.test.js). The pages themselves come from books-data.js,
    which tools/build-books.js makes from the Project Gutenberg texts in books/. The screen is reader-game.js. */
 const Library = (() => {
-  const BUILD = 36; // bump together with the ?v= numbers in index.html
+  const BUILD = 38; // bump together with the ?v= numbers in index.html
   const DATA = typeof BOOKS_DATA !== 'undefined' ? BOOKS_DATA : require('./books-data.js');
 
   /** Text sizes in pixels, smallest to largest. The middle one is the starting size. */

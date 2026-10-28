@@ -1,4 +1,4 @@
-/* Minesweeper: the rules, and the geometry of the minefield behind the school. No DOM and no 3D here, so all of it is unit tested in Node (tests/minesweeper.test.js).
+/* Minesweeper: the rules, and the geometry of the minefield behind the dorm (Wilson Hall). No DOM and no 3D here, so all of it is unit tested in Node (tests/minesweeper.test.js).
    The field in the village (js/minefield.js) draws a game; this decides what happens in it.
 
    The rules, as the game states them:
@@ -10,9 +10,10 @@
 const Minesweeper = (() => {
   /** The plot is always 18 x 18 blocks, whatever the level. The bigger the grid, the smaller its squares, so the fence and the sign never move. */
   const PLOT = 18;
-  /** The north-west corner of the plot: just north of the sandbox, east of the park pool (x 33.2 to 51.2, z -14.6 to 3.4). Its south log frame ends at z 3.9, clear of the
-      blueprint board's north post (z 4.2 to 4.8) and of the sandbox's own frame (from z 5.4). */
-  const PLOT_AT = { x0: 33.2, z0: -14.6 };
+  /** The north-west corner of the plot: on the lawn behind the dorm, which faces the road and ends at x 21.7 (its back wall, chimneys included), and spans z 24.8 to 42.2. The plot
+      runs x 30.8 to 48.8 and z 25.0 to 43.0, level with the dorm. Its north log frame (z 24.5) is clear of the paved path to the sandbox (z 21.3 to 23.7), and it is 9 blocks
+      east of the dorm: a wide lawn between them, and the sign (on the west side) is well away from the path's street lamp at (22, 24.4). */
+  const PLOT_AT = { x0: 30.8, z0: 25.0 };
   const REACH = 8;           // how far you can dig or flag, along your line of sight
   const GRASS_TOP = 0.34, DIRT_TOP = 0.14;   // the height of an undug and a dug square
 

@@ -12,7 +12,7 @@
      VertexGame    vertex form,    y = a(x - h)² + k  (overlay #vtx)
 
    The math lives in parabolas.js; this file is only the interface. */
-const BUILD_GRAPH_TABLES = 36; // must match Parabolas.BUILD
+const BUILD_GRAPH_TABLES = 38; // must match Parabolas.BUILD
 
 function createGraphTable(cfg) {
   const P = cfg.prefix;

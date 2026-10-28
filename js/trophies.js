@@ -5,7 +5,7 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 36; // bump together with the ?v= numbers in index.html
+  const BUILD = 38; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 9; // trophies on one shelf; the tenth starts a second shelf below it (two shelves hold 18)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
@@ -25,7 +25,7 @@ const Trophies = (() => {
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },
     { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Vertex Table in the casino's Graphing wing." },
-    { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared', how: "Clear 100 rides at the Polynomial Coaster table in the casino's Graphing wing. A ride you give up on doesn't count." },
+    { id: 'coaster', name: 'Polynomial Coaster', symbol: 'coaster', color: 0xff8a3d, goal: 100, noun: 'rides cleared', how: "Clear 100 rides at the Polynomial Coaster table in the casino's Polynomials wing. A ride you give up on doesn't count." },
     { id: 'map', name: 'State Map', symbol: 'map', color: 0x6fcf7a, goal: 100, noun: 'states found', how: "Click 100 states correctly in the Find the State game, on the wall map in the Arithmetic Academy." },
     { id: 'blueprint', name: 'Sandbox', symbol: 'blocks', color: 0xe8b868, goal: 25, noun: 'blueprints solved', how: "Solve 25 blueprints in the Sandbox behind the school." },
     { id: 'mines', name: 'Minesweeper', symbol: 'flag', color: 0xff6b5a, goal: 25, noun: 'games won', how: "Win 25 games of Minesweeper in the minefield next to the Sandbox behind the school: dig every safe square and flag every bomb." },

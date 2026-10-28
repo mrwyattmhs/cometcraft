@@ -196,7 +196,7 @@
     if (mk !== mapKey) { mapKey = mk; sandbox.drawMap($('sandbox-map'), Player); }
   }
 
-  /* ---------- Minesweeper: the field north of the sandbox ---------- */
+  /* ---------- Minesweeper: the field behind the dorm ---------- */
   const mines = hub.mines;
   const minesMenu = MinesMenu.create(mines);
   const minesHere = () => zone === hub && mines.contains(Player.x, Player.z, 0.6);

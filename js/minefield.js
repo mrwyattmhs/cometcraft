@@ -1,4 +1,4 @@
-/* The minefield next to the sandbox: a game of Minesweeper you play by walking onto it, digging and flagging in first person.
+/* The minefield behind the dorm (Wilson Hall): a game of Minesweeper you play by walking onto it, digging and flagging in first person.
    The rules live in js/minesweeper.js (pure, tested). This file draws a game in 3D, works out which square the crosshair is on, and pays out when you win.
 
    Everything is made of voxel blocks: green grass squares you dig to find dirt, numbers lying on the dirt, a flag on a pole, black bombs, and an explosion of flying cubes.
