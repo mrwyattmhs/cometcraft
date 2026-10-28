@@ -34,7 +34,7 @@ Object.values(WINGS).forEach(w => {
 });
 assert.ok(2 * ARCH.halfWidth >= 8, 'a wide, grand archway');
 
-// the seven tables: three in Factoring (practice nearest the hall) and three in Graphing (lines nearest, then parabola, then vertex) in a row, and the coaster in a second row
+// the eight tables: three in Factoring (practice nearest the hall) and three in Graphing (lines nearest, then parabola, then vertex) in a row, and a second-row table on the south side of each wing (the coaster in Graphing, the cubes in Factoring)
 const inWing = (t, w) => t.x - TABLE.w / 2 > w.minX && t.x + TABLE.w / 2 < w.maxX && t.z - TABLE.d / 2 > w.minZ && t.z + TABLE.d / 2 < w.maxZ;
 ['practice', 'radical', 'trinomial'].forEach(k => assert.ok(inWing(TABLES[k], WINGS.factoring), `${k} fits in the Factoring wing`));
 ['lines', 'parabola', 'vertex'].forEach(k => assert.ok(inWing(TABLES[k], WINGS.graphing), `${k} fits in the Graphing wing`));
@@ -45,7 +45,7 @@ assert.deepStrictEqual(new Set(ROW.map(k => TABLES[k].z)).size, 1, 'the first si
 const row = ks => ks.map(k => TABLES[k].x).sort((a, b) => a - b);
 [row(['practice', 'radical', 'trinomial']), row(['lines', 'parabola', 'vertex'])].forEach(xs => xs.forEach((x, i) => { if (i) assert.ok(x - xs[i - 1] - TABLE.w >= 2 * PLAYER + 0.7, 'room to walk between neighbouring tables'); }));
 ROW.map(k => TABLES[k]).forEach(t => assert.ok(t.z + TABLE.d / 2 + 2.8 < WING.depth / 2, 'and room in front of each (the seat is 2.8 south of the middle)'));
-assert.strictEqual(Object.keys(TABLES).length, 7);
+assert.strictEqual(Object.keys(TABLES).length, 10, 'ten tables: the six in the first rows, a second-row table on the south side of each side wing, and the two in the Polynomials wing');
 assert.deepStrictEqual(ROW.map(k => TABLES[k].x), [-24, -31.5, -39, 24, 31.5, 39], 'the Graphing wing is laid out like the Factoring wing, mirrored');
 
 // the fountain sits in the middle of the hall with room to walk all round it
@@ -58,18 +58,19 @@ assert.ok(12 - 1 - F.radius >= 4, 'and at least 4 between the fountain and the c
 assert.deepStrictEqual(SPAWN, { x: 0, z: 10.5, yaw: 0 });
 assert.ok(SPAWN.z > F.z + F.radius + 3 && SPAWN.z < HALL.maxZ - 2, 'near the door, well clear of the fountain');
 
-// the north wing: the same size as the others, straight north of the hall, and nothing built in it
+// the north wing (the Polynomials wing): the same size as the others, straight north of the hall
 assert.strictEqual(N.maxX - N.minX, WING.length); assert.strictEqual(N.maxZ - N.minZ, WING.depth);
 assert.strictEqual(N.maxZ, HALL.minZ - WALL, 'it starts one wall thickness north of the hall');
 assert.strictEqual((N.minX + N.maxX) / 2, 0, 'centered on the hall');
-assert.ok(N.door.x - N.door.width / 2 >= N.minX && N.door.x + N.door.width / 2 <= N.maxX, 'its doors open onto it');
+assert.ok(N.door.x - N.door.width / 2 >= N.minX && N.door.x + N.door.width / 2 <= N.maxX, 'its archway opens onto it');
+assert.deepStrictEqual([N.door.width, N.door.height], [2 * ARCH.halfWidth, ARCH.height], 'the archway is the same size as the side ones'); assert.strictEqual(N.name, 'POLYNOMIALS');
 assert.strictEqual(N.door.z, HALL.minZ);
 assert.ok(N.maxZ < HALL.minZ, 'and it is entirely north of the hall');
 const overlaps = (a, b) => a.minX < b.maxX && a.maxX > b.minX && a.minZ < b.maxZ && a.maxZ > b.minZ;
-[HALL, WINGS.factoring, WINGS.graphing].forEach(r => assert.ok(!overlaps(N, r), 'the reserved space overlaps nothing that is built'));
+[HALL, WINGS.factoring, WINGS.graphing].forEach(r => assert.ok(!overlaps(N, r), 'the north wing overlaps nothing else'));
 assert.ok(!overlaps(WINGS.factoring, WINGS.graphing) && !overlaps(HALL, WINGS.factoring) && !overlaps(HALL, WINGS.graphing), 'hall and wings do not overlap');
-// nothing is placed in the reserved space: no table, and not the fountain
-Object.values(TABLES).forEach(t => assert.ok(!overlaps(N, { minX: t.x - 3, maxX: t.x + 3, minZ: t.z - 2, maxZ: t.z + 2 })));
+// the only tables in the north wing are the Polynomials ones, and the fountain is not in it
+Object.entries(TABLES).forEach(([k, t]) => assert.strictEqual(overlaps(N, { minX: t.x - 3, maxX: t.x + 3, minZ: t.z - 2, maxZ: t.z + 2 }), k === 'polymul' || k === 'polyadd', `${k}: in the north wing only if it is a Polynomials table`));
 assert.ok(F.z - F.radius > N.maxZ);
 
 /* ---------- the wedding chapel on the Graphing wing's south wall ---------- */
@@ -109,4 +110,26 @@ assert.ok(ctBox.minZ - (TABLES.vertex.z + TABLE.d / 2) >= 2 * PLAYER + 3, 'a wid
 assert.ok(sofas[1].minZ - ctBox.maxZ >= 2 * PLAYER + 0.7, 'and you can walk behind it, between it and the east sofa');
 assert.ok(CT.x + TABLE.w / 2 < WINGS.graphing.maxX - 2.5, 'clear of the topiary and the end wall');
 
+/* ---------- the Cubes table: a second row on the south side of the Factoring wing, facing north (the mirror of the coaster table) ---------- */
+const CU = TABLES.cubes, cuBox = { minX: CU.x - TABLE.w / 2, maxX: CU.x + TABLE.w / 2, minZ: CU.z - TABLE.d / 2, maxZ: CU.z + TABLE.d / 2 };
+assert.ok(inWing(CU, WINGS.factoring), 'the cubes table fits in the Factoring wing'); assert.ok(CU.z > 0, 'on the south side');
+assert.deepStrictEqual([CU.x, CU.z], [-TABLES.coaster.x, TABLES.coaster.z], 'exactly the mirror of the coaster table');
+const CUSEAT = { x: CU.x, z: CU.z - 2.8 }, triSeat = { x: TABLES.trinomial.x, z: TABLES.trinomial.z + 2.8 };
+assert.ok(Math.hypot(CUSEAT.x - triSeat.x, CUSEAT.z - triSeat.z) >= 2.2 + 2.2, 'its prompt does not overlap the Trinomial table\'s prompt (the two are never both in reach)');
+assert.ok(CUSEAT.z - 0.35 > TABLES.trinomial.z + TABLE.d / 2 + 0.7 && CUSEAT.z + 0.35 < cuBox.minZ - 0.35, 'there is floor to stand on at its seat, between the two rows');
+assert.ok(cuBox.minZ - (TABLES.trinomial.z + TABLE.d / 2) >= 2 * PLAYER + 3, 'a wide walkway between the two rows');
+const westSofas = [-1, 0, 1].map(k => -30.5 + k * 8.5).map(x => ({ minX: x - SOFA.w / 2, maxX: x + SOFA.w / 2, minZ: SOFA.z - SOFA.d / 2, maxZ: SOFA.z + SOFA.d / 2 }));
+westSofas.forEach(r => assert.ok(!overlaps(cuBox, r), 'the cubes table touches no sofa'));
+assert.ok(Math.min(...westSofas.map(r => r.minZ)) - cuBox.maxZ >= 2 * PLAYER + 0.7, 'and you can walk behind it, between it and the sofas');
+assert.ok(CU.x - TABLE.w / 2 > WINGS.factoring.minX + 2.5, 'clear of the topiary and the end wall');
+const allSeats = Object.entries(TABLES).map(([k, t]) => [k, { x: t.x, z: t.z + (t.z > 0 ? -2.8 : 2.8) }]);
+allSeats.forEach(([a, p], i) => allSeats.slice(i + 1).forEach(([b, q]) => assert.ok(Math.hypot(p.x - q.x, p.z - q.z) >= 4.4, `the prompts of the ${a} and ${b} tables never overlap`)));
+
+/* ---------- the Polynomials wing: two tables in a row along the end wall, six blocks out from it, like the first rows of the other wings ---------- */
+const PM = TABLES.polymul, PA = TABLES.polyadd, nIn = t => t.x - TABLE.w / 2 > N.minX && t.x + TABLE.w / 2 < N.maxX && t.z - TABLE.d / 2 > N.minZ && t.z + TABLE.d / 2 < N.maxZ;
+assert.ok(nIn(PM) && nIn(PA), 'both tables fit in the north wing'); assert.strictEqual(PM.z, PA.z, 'in a row'); assert.ok(PM.x < 0 && PA.x > 0 && PM.x === -PA.x, 'one either side of the middle, so the way in from the archway runs between them');
+assert.strictEqual(PM.z - N.minZ, 6, 'six blocks from the end wall, as the other wings\' first rows are from theirs');
+assert.ok(PA.x - PM.x - TABLE.w >= 2 * PLAYER + 0.7, 'room to walk between the two');
+[PM, PA].forEach(t => { const seat = { x: t.x, z: t.z + 2.8 }; assert.ok(seat.z + 0.35 < N.maxZ - 6, 'the seat is well inside the room, far from the archway'); assert.ok(seat.z - PLAYER > t.z + TABLE.d / 2, 'with room for a player to stand between the seat spot and the table'); });
+assert.ok(Math.abs(PM.x) - TABLE.w / 2 > N.door.width / 2 - 4, 'the tables do not stand in the line of the archway');
 console.log('casino plan tests passed');

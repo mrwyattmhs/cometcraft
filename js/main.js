@@ -49,6 +49,9 @@
     openLibrary: () => LittleLibrary.open(),
     openTable: m => {
       if (m === 'trinomial') TrinomialGame.open();
+      else if (m === 'cubes') CubesGame.open();
+      else if (m === 'polymul') PolyMulGame.open();
+      else if (m === 'polyadd') PolyAddGame.open();
       else if (m === 'radical') RadicalGame.open();
       else if (m === 'lines') LinesGame.open();
       else if (m === 'coaster') CoasterGame.open();
@@ -268,6 +271,9 @@
       else if (minesMenu.isOpen()) minesMenu.close();
       else if (CraftingGame.isOpen()) CraftingGame.close();
       else if (TrinomialGame.isOpen()) TrinomialGame.close();
+      else if (CubesGame.isOpen()) CubesGame.close();
+      else if (PolyMulGame.isOpen()) PolyMulGame.close();
+      else if (PolyAddGame.isOpen()) PolyAddGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
       else if (CoasterGame.isOpen()) CoasterGame.close();

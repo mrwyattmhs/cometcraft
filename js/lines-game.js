@@ -9,7 +9,7 @@
 const LinesGame = (() => {
   const $ = id => document.getElementById(`lin-${id}`);
   const root = () => document.getElementById('lin');
-  const BUILD = 32; // must match Lines.BUILD
+  const BUILD = 36; // must match Lines.BUILD
   const N = Lines.GRID, CELL = 24, PL = 30, PT = 14, PR = 14, PB = 30;
   const PW = 2 * N * CELL, W = PL + PW + PR, H = PT + PW + PB;
   const sx = x => PL + (x + N) * CELL, sy = y => PT + (N - y) * CELL;

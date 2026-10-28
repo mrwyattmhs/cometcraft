@@ -98,6 +98,14 @@ const Tex = (() => {
         px(g, 'rgba(226,200,120,.85)', pts.map(([dx, dy]) => [8 + dx, 8 + dy]));
       },
     },
+    // deep green carpet with a gold diamond, for the Polynomials wing (north)
+    carpetGreen: {
+      base: [16, 72, 50], v: 6,
+      draw: g => {
+        const pts = [[0, -3], [-1, -2], [1, -2], [-2, -1], [2, -1], [-3, 0], [3, 0], [-2, 1], [2, 1], [-1, 2], [1, 2], [0, 3]];
+        px(g, 'rgba(226,200,120,.85)', pts.map(([dx, dy]) => [8 + dx, 8 + dy]));
+      },
+    },
     // native blue limestone laid in courses, with the joints staggered row to row (Wilson Hall's walls)
     limestone: {
       base: [116, 132, 150], v: 7,

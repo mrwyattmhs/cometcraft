@@ -17,7 +17,7 @@
    Together these mean exactly one shape matches the blueprint, so a build that matches all three views IS the
    answer, however the student reached it. */
 const Blueprint = (() => {
-  const BUILD = 32; // bump together with sandbox.js and the ?v= numbers in index.html
+  const BUILD = 36; // bump together with sandbox.js and the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
 
   /** pay: chips for solving a blueprint at this level (economy.js).

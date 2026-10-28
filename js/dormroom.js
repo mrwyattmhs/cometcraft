@@ -100,12 +100,12 @@ const DormRoom = (() => {
     }
 
     /* ----- the trophy shelves on the north wall ----- */
-    // One shelf at first. When it holds eight trophies, a second shelf appears below it for the rest. Trophies sit in the order you
+    // One shelf at first. When it holds nine trophies, a second shelf appears below it for the rest. Trophies sit in the order you
     // earned them. Each carries the symbol of its table (the same shape that floats above it).
     const { buildSymbol, symbolSize } = H;
     const shelfRoot = new T.Group(), trophyRoot = new T.Group();
     zone.group.add(shelfRoot, trophyRoot);
-    const SHELF = { x0: 5.0, step: 0.65, boardY: [3.0, 2.4], z: 2.22, width: 5.6 };   // 8 slots; the brackets sit just outside the end slots
+    const SHELF = { x0: 5.0, step: 0.58, boardY: [3.0, 2.4], z: 2.22, width: 5.6 };   // 9 slots (Trophies.SHELF_CAPACITY); the brackets sit just outside the end slots
     const hex = n => '#' + n.toString(16).padStart(6, '0');
 
     function buildTrophy(def) {
@@ -113,7 +113,7 @@ const DormRoom = (() => {
       box(g, lambert(0xe9e6dc), 0.5, 0.07, 0.34, 0, 0.035, 0);                 // a marble base
       box(g, lambert(0xc9a24a), 0.36, 0.04, 0.24, 0, 0.09, 0);                 // with a gold step
       const sym = def.symbol, y0 = 0.115;
-      if (typeof sym === 'string' && symbolSize && ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola', 'linegraph', 'coaster', 'flag'].includes(sym)) {
+      if (typeof sym === 'string' && symbolSize && ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola', 'linegraph', 'coaster', 'flag', 'cube'].includes(sym)) {
         const top = buildSymbol(sym, def.color, { emissive: 0.4 }), sz = symbolSize(sym), k = Math.min(0.44 / sz.w, 0.36 / sz.h);
         top.scale.setScalar(k); top.position.set(0, y0 + sz.h * k / 2, 0); g.add(top);
       } else if (sym === 'd20') {

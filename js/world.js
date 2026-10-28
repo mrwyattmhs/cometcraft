@@ -1377,6 +1377,16 @@ const World = (() => {
     return { cells, w: 10, h: rows.length };
   };
 
+  // a cube with three faces showing (front, top, right), a one-block gap between the faces so the edges show, for the Cubes Table
+  const cubeCells = () => {
+    const on = new Set(), add = (c, r) => on.add(`${c},${r}`);                       // r counts down from the top
+    for (let r = 5; r <= 11; r++) for (let c = 0; c <= 7; c++) add(c, r);              // the front face
+    for (let r = 0; r <= 3; r++) for (let c = 4 - r; c <= 11 - r; c++) add(c, r);      // the top face, leaning back to the right
+    for (let c = 9; c <= 11; c++) for (let r = 12 - c; r <= 19 - c; r++) add(c, r);    // the right face
+    const cells = []; on.forEach(k => { const [c, r] = k.split(',').map(Number); cells.push([c, 11 - r]); });
+    return { cells, w: 12, h: 12 };
+  };
+
   // a flag on a pole with a little base, for the Minesweeper trophy and the sign over the minefield
   const flagCells = () => {
     const rows = ['..#.........', '..####......', '..#######...', '..##########', '..#######...', '..####......', '..#.........', '..#.........', '..#.........', '..#.........', '..#.........', '.####.......', '#########...'];
@@ -1394,6 +1404,7 @@ const World = (() => {
     coaster:   { shape: coasterCells,   u: 0.1,   mirrorBack: false },
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
     flag:      { shape: flagCells,     u: 0.1,   mirrorBack: false },
+    cube:      { shape: cubeCells,     u: 0.1,   mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },

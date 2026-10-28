@@ -3,13 +3,16 @@
 
    Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
 const Economy = (() => {
-  const BUILD = 32; // bump together with the ?v= numbers in index.html
+  const BUILD = 36; // bump together with the ?v= numbers in index.html
   const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
   const PAY = {
     // casino tables (chips for each correct answer, by level)
     practice: { 2: 10, 3: 25, 4: 50 },     // by the number of dice you throw: 2 is Easy, 3 Medium, 4 Hard
     radical: [10, 25, 50, 100],
     trinomial: [10, 25, 50, 100],
+    polymul: [10, 25, 50],                 // the Multiply table (Polynomials wing): Easy 10, Medium 25, Hard 50, the same steps as the other tables' first three levels
+    polyadd: [10, 25],                     // the Add/Subtract table: Easy (add) 10, Medium (subtract) 25
+    cubes: [10, 25],                       // the Cubes Table has two levels, so it pays like the first two of the other Factoring tables: Easy 10, Medium 25
     parabola: [25, 50, 100],
     vertex: [25, 50, 100],
     coaster: { easy: 10, factor: 20 },     // chips PER STAR on a Polynomial Coaster ride (3 stars for a clean ride, so up to 30 on Factored form and 60 on Factor first); a ride you give up on pays nothing

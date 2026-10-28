@@ -1,17 +1,16 @@
-/* The casino inside: a grand entrance hall, a Factoring wing on the left, a Graphing wing on the right, and room kept for a third
-   wing to the north. (The building outside is in world.js and is not touched.)
+/* The casino inside: a grand entrance hall, a Factoring wing on the left, a Graphing wing on the right, and a Polynomials wing to the north. (The building outside is in world.js and is not touched.)
 
    You come in through the south door facing north. The hall is a big tiled room with a ceiling 16 blocks up, a dancing fountain
    under a glass sculpture in the style of Chihuly's Fiori di Como, and a tall marble archway in each side wall. The tables are sorted by what kind of question they ask:
 
-     Factoring wing (west, left):   Practice table, Radical table, Trinomial table
+     Factoring wing (west, left):   Practice table, Radical table, Trinomial table, and in a second row the Cubes table (sums and differences of cubes)
      Graphing wing  (east, right):  Lines table, Parabola table (standard form), Vertex table (vertex form), and in a second row the Polynomial Coaster table
-     North wing:                    not built yet. Its doors are in the north wall and its floor space is reserved.
+     Polynomials wing (north):      Multiply table and Add/Sub table, through an archway in the hall's north wall
 
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 32; // bump together with the ?v= numbers in index.html
+  const BUILD = 36; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -22,13 +21,15 @@ const CasinoInterior = (() => {
     factoring: { side: -1, name: 'FACTORING', minX: -44.5, maxX: -16.5, minZ: -11, maxZ: 11 },
     graphing: { side: 1, name: 'GRAPHING', minX: 16.5, maxX: 44.5, minZ: -11, maxZ: 11 },
   };
-  /** Room for a third wing, the same size as the others, straight north of the hall. Nothing is built there yet, and nothing else may be. */
-  const NORTH_WING = { minX: -14, maxX: 14, minZ: -36.5, maxZ: -14.5, door: { x: 0, z: -14, width: 7, height: 9 } };
+  /** The third wing, the same size as the others, straight north of the hall: the Polynomials wing. You go in through an archway in the hall's north wall (the same size as the side arches). */
+  const NORTH_WING = { name: 'POLYNOMIALS', minX: -14, maxX: 14, minZ: -36.5, maxZ: -14.5, door: { x: 0, z: -14, width: 2 * ARCH.halfWidth, height: ARCH.height } };
   const FOUNTAIN = { x: 0, z: -1, radius: 5.4 };
   const TABLES = {
     practice: { x: -24, z: -5 }, radical: { x: -31.5, z: -5 }, trinomial: { x: -39, z: -5 },
     lines: { x: 24, z: -5 }, parabola: { x: 31.5, z: -5 }, vertex: { x: 39, z: -5 },
     coaster: { x: 39, z: 5.2 },                       // the Polynomial Coaster table: a second row, on the south side of the Graphing wing, facing north
+    cubes: { x: -39, z: 5.2 },                        // the Cubes table: a second row on the south side of the Factoring wing, facing north (the mirror of the coaster table)
+    polymul: { x: -6, z: -30.5 }, polyadd: { x: 6, z: -30.5 },   // the Polynomials wing: a row of two along the north end wall, six blocks in front of it (as the other wings' first rows are)
   };
   const SPAWN = { x: 0, z: 10.5, yaw: 0 };
   /** A little wedding chapel in the middle of the Graphing wing's south wall: ivory doors under a gilded arch with a sign over them, a red rope hung
@@ -106,6 +107,32 @@ const CasinoInterior = (() => {
     c.fillStyle = '#ff9a9a'; c.font = serif(H * 0.1); c.fillText('2 \u00d7 3 = 6   and   2 + 3 = 5', W / 2, H * 0.55);
     c.fillStyle = '#f3d27a'; c.font = serif(H * 0.15); c.fillText('(x + 2)(x + 3)', W / 2, H * 0.78);
   }
+  function artPolyMul(c, cv) {
+    frame(c, cv, 'MULTIPLY');
+    const W = cv.width, H = cv.height;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.14); c.fillText('(x + 3)(x + 5)', W / 2, H * 0.3);
+    c.fillStyle = '#d9b8ff'; c.font = serif(H * 0.1); c.fillText('x\u00b2 + 5x + 3x + 15', W / 2, H * 0.52);
+    c.fillStyle = '#f3d27a'; c.font = serif(H * 0.14); c.fillText('x\u00b2 + 8x + 15', W / 2, H * 0.74);
+    c.fillStyle = '#9fe6c9'; c.font = serif(H * 0.065); c.fillText('combine like terms', W / 2, H * 0.89);
+  }
+  function artPolyAdd(c, cv) {
+    frame(c, cv, 'ADD AND SUBTRACT');
+    const W = cv.width, H = cv.height;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.105); c.fillText('(3x\u00b2 + 2x) \u2212 (x\u00b2 \u2212 5x + 4)', W / 2, H * 0.3);
+    c.fillStyle = '#9fe6c9'; c.font = serif(H * 0.1); c.fillText('3x\u00b2 + 2x \u2212 x\u00b2 + 5x \u2212 4', W / 2, H * 0.52);
+    c.fillStyle = '#f3d27a'; c.font = serif(H * 0.14); c.fillText('2x\u00b2 + 7x \u2212 4', W / 2, H * 0.74);
+    c.fillStyle = '#d9b8ff'; c.font = serif(H * 0.065); c.fillText('distribute the minus. combine like terms', W / 2, H * 0.89);
+  }
+  function artCubes(c, cv) {
+    frame(c, cv, 'SUM OF CUBES');
+    const W = cv.width, H = cv.height;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = '#f3e8c9'; c.font = serif(H * 0.15); c.fillText('x\u00b3 + 27', W / 2, H * 0.33);
+    c.fillStyle = '#d9b8ff'; c.font = serif(H * 0.088); c.fillText('a\u00b3 + b\u00b3 = (a + b)(a\u00b2 \u2212 ab + b\u00b2)', W / 2, H * 0.55);
+    c.fillStyle = '#f3d27a'; c.font = serif(H * 0.14); c.fillText('(x + 3)(x\u00b2 \u2212 3x + 9)', W / 2, H * 0.78);
+  }
   /** The coaster table's picture: f(x) = (x + 2)(x - 1)^2 as a minecart track (iron rails on oak ties), passing through at x = -2 and bouncing at x = 1. */
   function artCoaster(c, cv) {
     frame(c, cv, 'POLYNOMIAL COASTER');
@@ -182,7 +209,7 @@ const CasinoInterior = (() => {
     const { box, flat, lambert, glow, textPlane, makeSign, solid, interact, createZone, buildTable, spawnNPCs, waterSurface } = H;
     const zone = createZone('Prime Time Casino', {
       spawn: SPAWN,
-      bounds: { minX: -45.4, maxX: 45.4, minZ: -14.9, maxZ: 14.9 },
+      bounds: { minX: -45.4, maxX: 45.4, minZ: -36.0, maxZ: 14.9 },
       sky: 0x140e1c, fog: [0x140e1c, 60, 150],
       wander: { minX: -10, maxX: 10, minZ: 6, maxZ: 12 },
     });
@@ -208,7 +235,15 @@ const CasinoInterior = (() => {
     flat(g, 'marbleCheck', hw, hd, 0, 0, 0);
     box(g, 'ceilingCream', hw + 1, 0.3, hd + 1, 0, HH + 0.15, 0);
     slab(0, HALL.maxZ + WALL / 2, hw + 1, WALL, { h: HH, lower: 'marbleDark', lowerH: 3 });   // south wall (the door out)
-    slab(0, HALL.minZ - WALL / 2, hw + 1, WALL, { h: HH, lower: 'marbleDark', lowerH: 3 });   // north wall (the doors to the wing to come)
+    {                                                                                           // north wall: an archway to the Polynomials wing, framed like the side ones
+      const nz = HALL.minZ - WALL / 2, arm = (hw + 1) / 2 - ARCH.halfWidth;
+      [-1, 1].forEach(s => slab(s * (ARCH.halfWidth + arm / 2), nz, arm, WALL, { h: HH, lower: 'marbleDark', lowerH: 3 }));
+      box(g, 'wallGild', 2 * ARCH.halfWidth, HH - ARCH.height, WALL, 0, ARCH.height + (HH - ARCH.height) / 2, nz);       // the wall above the archway
+      [-1, 1].forEach(s => box(g, gold, 0.5, ARCH.height, 0.8, s * (ARCH.halfWidth + 0.25), ARCH.height / 2, nz));
+      box(g, gold, 2 * ARCH.halfWidth + 1, 0.5, 0.8, 0, ARCH.height + 0.25, nz);
+      box(g, goldDeep, 2 * ARCH.halfWidth + 1.2, 0.2, 0.9, 0, ARCH.height + 0.62, nz);
+      decal(lambert(0xe9e0cc), 2 * ARCH.halfWidth, WALL, 0, 0.012, nz);                                                  // a marble threshold in the doorway
+    }
     const armLen = HALL.maxZ + WALL - ARCH.halfWidth;                                          // the wall either side of an archway
     [-1, 1].forEach(side => {
       const wx = side * (HALL.maxX + WALL / 2);
@@ -271,31 +306,13 @@ const CasinoInterior = (() => {
     [-8, 8].forEach(x => { box(g, gold, 0.5, 0.9, 0.16, x, 4.6, HALL.minZ + 0.08); box(g, glow(0xfff0b8), 0.26, 0.55, 0.1, x, 4.7, HALL.minZ + 0.2); });
 
     // wing signs over the archways, facing the hall
-    [['factoring', '#2a0d14', 'practice. radicals. trinomials.'], ['graphing', '#0d1d3a', 'lines and parabolas.']].forEach(([id, bg, sub]) => {
+    [['factoring', '#2a0d14', 'practice. radicals. trinomials. cubes.'], ['graphing', '#0d1d3a', 'lines and parabolas.']].forEach(([id, bg, sub]) => {
       const w = WINGS[id], sign = makeSign({ w: 9, h: 2.2, title: w.name, sub, fg: '#f3d27a', bg, border: '#d4a843', subColor: '#f3e8c9' });
       sign.rotation.y = -w.side * Math.PI / 2; sign.position.set(w.side * (HALL.maxX - 0.05), 9.9, 0); g.add(sign);
     });
 
-    // the doors to the north wing: closed, with a rope across them
-    const door = NORTH_WING.door;
-    [-1, 1].forEach(s => box(g, 'wood', door.width / 2 - 0.1, door.height, 0.2, s * (door.width / 4), door.height / 2, HALL.minZ + 0.1));
-    [-1, 1].forEach(s => box(g, gold, 0.5, door.height + 0.5, 0.4, s * (door.width / 2 + 0.25), (door.height + 0.5) / 2, HALL.minZ + 0.2));
-    box(g, gold, door.width + 1.04, 0.52, 0.44, 0, door.height + 0.26, HALL.minZ + 0.2); box(g, goldDeep, door.width + 1.4, 0.2, 0.5, 0, door.height + 0.63, HALL.minZ + 0.2);
-    box(g, gold, 0.18, 7, 0.1, 0, 4, HALL.minZ + 0.31);                                                                   // the seam between the two doors
-    // gilded panels on each door, and a handle on each
-    [-1, 1].forEach(s => {
-      const px = s * (door.width / 4 + 0.05), pw = door.width / 2 - 0.9;
-      [[2.3, 3.2], [6.1, 3.6]].forEach(([y, ph]) => {
-        box(g, goldDeep, pw, 0.1, 0.08, px, y + ph / 2, HALL.minZ + 0.24); box(g, goldDeep, pw, 0.1, 0.08, px, y - ph / 2, HALL.minZ + 0.24);
-        box(g, goldDeep, 0.1, ph, 0.08, px - pw / 2, y, HALL.minZ + 0.24); box(g, goldDeep, 0.1, ph, 0.08, px + pw / 2, y, HALL.minZ + 0.24);
-      });
-      box(g, gold, 0.16, 0.9, 0.2, s * 0.55, 4.3, HALL.minZ + 0.32);
-    });
-    const north = makeSign({ w: 8, h: 1.9, title: 'NORTH WING', sub: 'opening soon', fg: '#f3d27a', bg: '#1b1230', border: '#d4a843', subColor: '#f3e8c9' });
-    north.position.set(0, 11.6, HALL.minZ + 0.06); g.add(north);
-    solid(zone, 0, HALL.minZ + 0.5, door.width + 1.2, 0.8);                       // you stop in front of the doors, not inside their frame
-    [-1, 1].forEach(s => box(g, gold, 0.14, 1.0, 0.14, s * 3.9, 0.5, HALL.minZ + 1.6));
-    box(g, lambert(0x8a1530), 7.8, 0.1, 0.1, 0, 0.82, HALL.minZ + 1.6);
+    // the wing's sign over the north archway, facing the hall (the side wings' signs are above)
+    { const sign = makeSign({ w: 9, h: 2.2, title: NORTH_WING.name, sub: 'multiply. add. subtract.', fg: '#f3d27a', bg: '#0d2a1e', border: '#d4a843', subColor: '#f3e8c9' }); sign.position.set(0, 9.9, HALL.minZ + 0.05); g.add(sign); }
 
     // the way out
     [-1, 1].forEach(s => box(g, 'wood', 1.7, 6.4, 0.2, s * 0.9, 3.2, HALL.maxZ - 0.1));
@@ -342,6 +359,29 @@ const CasinoInterior = (() => {
       [-1, 1].forEach(s => topiary(zone, H, side * 43.2, s * 9.8));
     });
 
+    /* ===== the north wing: Polynomials (the same size as the others, 28 wide and 22 deep, laid out around the z axis) ===== */
+    {
+      const NW = NORTH_WING, WH = WING.height, ncz = (NW.minZ + NW.maxZ) / 2, wallZ0 = HALL.minZ - WALL, wallLen = wallZ0 - (NW.minZ - WALL);      // the side walls run from the OUTER face of the hall wall to the end wall
+      const wallCz = (wallZ0 + (NW.minZ - WALL)) / 2, endZ = NW.minZ - WALL / 2, sideX = NW.maxX + WALL / 2;
+      flat(g, 'carpetGreen', WING.length, WING.depth, 0, 0, ncz);
+      box(g, 'ceilingCream', 29, 0.3, wallLen + 0.5, 0, WH + 0.15, wallCz);
+      [-1, 1].forEach(s2 => slab(s2 * sideX, wallCz, WALL, wallLen, { h: WH, lower: 'wood', lowerH: 1.4 }));                    // the west and east walls
+      slab(0, endZ, 2 * sideX + WALL, WALL, { h: WH, lower: 'wood', lowerH: 1.4 });                                             // the end wall
+      // gold crown molding, and beams with lights between them
+      [-1, 1].forEach(s2 => box(g, gold, 0.14, 0.28, 22, s2 * (NW.maxX - 0.07), WH - 0.4, ncz));
+      box(g, gold, WING.length, 0.28, 0.14, 0, WH - 0.4, NW.minZ + 0.07);
+      [-22.5, -28.5, -34.5].forEach(z => box(g, goldDeep, 28, 0.5, 0.5, 0, WH - 0.25, z));
+      [-25.5, -31.5].forEach(z => [-5.5, 5.5].forEach(x => box(g, glow(0xfff0c8), 3.4, 0.06, 3.0, x, WH - 0.03, z)));
+      light(0xd8ffe4, 0.5, 30, 0, 8, -22); light(0xd8ffe4, 0.5, 30, 0, 8, -32);
+      addChandelier(zone, H, 0, -25.5, { ceilingY: WH, scale: 0.55, lights: false });
+      // the wing's name, on both side walls, facing in (the end wall is for the tables' pictures)
+      [-1, 1].forEach(s2 => {
+        const nameSign = makeSign({ w: 9, h: 2.2, title: `${NW.name} WING`, sub: 'expand it. combine it.', fg: '#f3d27a', bg: '#0d2a1e', border: '#d4a843', subColor: '#f3e8c9' });
+        nameSign.rotation.y = -s2 * Math.PI / 2; nameSign.position.set(s2 * (NW.maxX - 0.05), 6.6, -25.5); g.add(nameSign);
+      });
+      [-1, 1].forEach(s2 => { topiary(zone, H, s2 * 12.6, NW.minZ + 1.7); topiary(zone, H, s2 * 12.6, NW.maxZ - 1.7); });
+    }
+
     /* ===== the tables, sorted by the kind of question ===== */
     const T_ = TABLES;
     buildTable(zone, T_.practice.x, T_.practice.z, 'felt', 'PRACTICE TABLE', 'live product. 10 to 50 chips.', '#52f08f', () => actions.openTable('practice'));
@@ -352,6 +392,9 @@ const CasinoInterior = (() => {
     buildTable(zone, T_.vertex.x, T_.vertex.z, 'feltGold', 'VERTEX TABLE', 'vertex form. sketch it.', '#ffb347', () => actions.openTable('vertex'), { prop: 'vertexform', accent: 0xffb347, lesson: 'vertex' });
 
     buildTable(zone, T_.coaster.x, T_.coaster.z, 'feltIron', 'COASTER TABLE', 'ends. zeros. ride it.', '#ff9a3d', () => actions.openTable('coaster'), { prop: 'coaster', accent: 0xff8a3d, facing: -1 });
+    buildTable(zone, T_.cubes.x, T_.cubes.z, 'feltPurple', 'CUBES TABLE', 'sum and difference of cubes', '#c78bff', () => actions.openTable('cubes'), { prop: 'cube', accent: 0xc78bff, facing: -1 });
+    buildTable(zone, T_.polymul.x, T_.polymul.z, 'feltGold', 'MULTIPLY TABLE', 'expand it. combine like terms.', '#ffd166', () => actions.openTable('polymul'), { prop: 'times', accent: 0xffd166 });
+    buildTable(zone, T_.polyadd.x, T_.polyadd.z, 'feltTeal', 'ADD/SUB TABLE', 'add. subtract. combine.', '#4fe0c0', () => actions.openTable('polyadd'), { prop: 'plus', accent: 0x4fe0c0 });
 
     // a picture over each table that shows the kind of question it asks
     const art = [[T_.practice, artFactorTree], [T_.radical, artRadical], [T_.trinomial, artTrinomial],
@@ -360,10 +403,12 @@ const CasinoInterior = (() => {
     art.forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, -10.95); g.add(p); });
     // the coaster table is on the south side, so its picture hangs on the south wall behind it (over the sofa), facing north
     { const p = textPlane(5.8, 3.6, artCoaster, 72); p.rotation.y = Math.PI; p.position.set(T_.coaster.x + 0.25, 6.4, 10.95); g.add(p); }
+    { const p = textPlane(5.8, 3.6, artCubes, 72); p.rotation.y = Math.PI; p.position.set(T_.cubes.x + 0.25, 6.4, 10.95); g.add(p); }
+    // the Polynomials tables are along the north end wall of their wing, so their pictures hang on it, facing south
+    [[T_.polymul, artPolyMul], [T_.polyadd, artPolyAdd]].forEach(([pos, painter]) => { const p = textPlane(5.8, 3.6, painter, 72); p.position.set(pos.x, 6.4, NORTH_WING.minZ + 0.05); g.add(p); });          // and the cubes table's, on the south wall of the Factoring wing
 
-    // the prompts that are not tables come after the tables in the list: the way out, then the closed north doors
+    // the prompts that are not tables come after the tables in the list: the way out
     interact(zone, 0, 12.4, 1.8, 'Leave the Casino', actions.leaveCasino);
-    interact(zone, 0, HALL.minZ + 2.0, 2.4, 'Look at the north doors', () => UI.toast('The North Wing is still being built. Come back soon!'));
 
     spawnNPCs(zone, 3);
 

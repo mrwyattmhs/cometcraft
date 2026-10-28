@@ -8,7 +8,7 @@
    this point?" test, and the question deck live in usmap.js; this file is the screen. */
 const MapGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 32; // must match USMap.BUILD
+  const BUILD = 36; // must match USMap.BUILD
   const OCEAN = '#cfe8f5';
   const COLOR = { found: '#b9e8a8', hover: '#fff3b0', right: '#4fd068', wrong: '#ff7a7a' };
   const MAX_ZOOM = 8;

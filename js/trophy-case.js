@@ -12,7 +12,7 @@ const TrophyCase = (() => {
   const W = 280, H = 256;                                         // the picture's own size (shown at half that, so it is sharp)
   const FONT = 'Silkscreen, "Courier New", monospace';
   const hex = n => '#' + n.toString(16).padStart(6, '0');
-  const BLOCK_SYMBOLS = ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola', 'linegraph', 'coaster'];
+  const BLOCK_SYMBOLS = ['plus', 'minus', 'times', 'divide', 'sqrt', 'parabola', 'linegraph', 'coaster', 'flag', 'cube'];   // (keep in step with the list in dormroom.js: tests/trophies.test.js checks that every trophy symbol is in both)
   let wired = false, pinned = null;
 
   /** The trophy in colour: a marble base with a gold step, and the symbol of its table standing on it. */
@@ -91,7 +91,9 @@ const TrophyCase = (() => {
       const nm = document.createElement('span'); nm.className = 'tc-name'; nm.textContent = e.name;
       card.append(cv, nm); grid.append(card);
     });
-    for (let i = 0, pad = (5 - (list.length % 5)) % 5; i < pad; i++) { const f = document.createElement('div'); f.className = 'tc-card empty'; f.setAttribute('aria-hidden', 'true'); grid.append(f); }      // so every shelf board runs the full width
+    const cols = list.length > 15 ? 6 : 5;                                  // 15 trophies fill three rows of five; more than that go in rows of six
+    grid.style.setProperty('--tc-cols', cols);
+    for (let i = 0, pad = (cols - (list.length % cols)) % cols; i < pad; i++) { const f = document.createElement('div'); f.className = 'tc-card empty'; f.setAttribute('aria-hidden', 'true'); grid.append(f); }      // so every shelf board runs the full width
     $('count').textContent = `${Trophies.earnedCount(s.trophies || [])} of ${list.length} earned`;
   }
 

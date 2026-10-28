@@ -8,15 +8,22 @@ assert.deepStrictEqual(E.LEVELS, ['Easy', 'Medium', 'Hard', 'Expert']);
 assert.deepStrictEqual(E.PAY, {
   practice: { 2: 10, 3: 25, 4: 50 },
   radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], coaster: { easy: 10, factor: 20 }, lines: 25,
-  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200], mines: [100, 200, 300],
+  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200], mines: [100, 200, 300], cubes: [10, 25], polymul: [10, 25, 50], polyadd: [10, 25],
 });
 assert.deepStrictEqual([1, 2, 3, 4, 0, 9].map(l => E.levelName(l)), ['Easy', 'Medium', 'Hard', 'Expert', 'Easy', 'Expert'], 'names, kept in range');
 
 // the easiest of anything that has levels is the same small number, and each level pays more than the one before it
 [E.PAY.radical, E.PAY.trinomial].forEach(p => assert.strictEqual(p[0], 10, 'the easiest casino level pays 10'));
-Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, mines: E.PAY.mines, practice: Object.values(E.PAY.practice) })
+Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, cubes: E.PAY.cubes, polymul: E.PAY.polymul, polyadd: E.PAY.polyadd, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, mines: E.PAY.mines, practice: Object.values(E.PAY.practice) })
   .forEach(([game, pay]) => pay.forEach((v, i) => { if (i) assert.ok(v > pay[i - 1], `${game}: each level pays more than the one before`); assert.ok(Number.isInteger(v) && v > 0); }));
 assert.deepStrictEqual(E.PAY.blueprint, [50, 100, 150, 200], 'the sandbox pays the most');
+// the Cubes Table (Easy and Medium) pays exactly what the first two levels of the other Factoring tables pay: 10 and 25 chips
+assert.deepStrictEqual(E.PAY.cubes, E.PAY.radical.slice(0, 2)); assert.deepStrictEqual(E.PAY.cubes, E.PAY.trinomial.slice(0, 2), 'the same as the Radical and Trinomial tables at Easy and Medium');
+assert.strictEqual(E.PAY.cubes.length, require('../js/cubes.js').LEVELS.length, 'one payout for each Cubes level');
+// the Polynomials wing: the Multiply table scales Easy 10, Medium 25, Hard 50 (the first three levels of the other Factoring tables); the Add/Subtract table is Easy 10, Medium 25
+assert.deepStrictEqual(E.PAY.polymul, E.PAY.trinomial.slice(0, 3)); assert.deepStrictEqual(E.PAY.polyadd, E.PAY.trinomial.slice(0, 2));
+assert.ok(E.PAY.polymul.every((v, i, a) => !i || v > a[i - 1]), 'pay rises with the level');
+const PL = require('../js/polys.js'); assert.strictEqual(E.PAY.polymul.length, PL.MUL_LEVELS.length, 'one payout for each Multiply level'); assert.strictEqual(E.PAY.polyadd.length, PL.ADD_LEVELS.length, 'one payout for each Add/Subtract level');
 // Minesweeper pays per game WON: 100, 200 and 300 chips for Easy, Medium and Hard, one amount for each of the three grids
 const MS = require('../js/minesweeper.js');
 assert.deepStrictEqual(E.PAY.mines, [100, 200, 300], 'the payouts that were asked for'); assert.strictEqual(E.PAY.mines.length, MS.LEVELS.length, 'one payout for each Minesweeper level');

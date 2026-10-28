@@ -5,8 +5,8 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 32; // bump together with the ?v= numbers in index.html
-  const SHELF_CAPACITY = 8; // trophies on one shelf; the ninth starts a second shelf below it
+  const BUILD = 36; // bump together with the ?v= numbers in index.html
+  const SHELF_CAPACITY = 9; // trophies on one shelf; the tenth starts a second shelf below it (two shelves hold 18)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
       formula tables, or 'd20', 'map' and 'blocks' for the practice table, the wall map and the sandbox. how: a sentence for the trophy case saying how it is earned
@@ -19,6 +19,9 @@ const Trophies = (() => {
     { id: 'practice', name: 'Practice Table', symbol: 'd20', color: 0x52f08f, goal: 100, noun: 'solved', how: "Solve 100 rounds at the Practice Table in the casino's Factoring wing: drop prime gems in the grid until their product is the sum of the dice." },
     { id: 'radical', name: 'Radical Table', symbol: 'sqrt', color: 0x38e8ff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Radical Table in the casino's Factoring wing." },
     { id: 'trinomial', name: 'Trinomial Table', symbol: { words: ['STANDARD', 'FORM'] }, color: 0xff6a6a, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Trinomial Table in the casino's Factoring wing." },
+    { id: 'cubes', name: 'Cubes Table', symbol: 'cube', color: 0xc78bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Cubes Table in the casino's Factoring wing." },
+    { id: 'polymul', name: 'Multiply Table', symbol: { words: ['MULTIPLY', 'POLY'] }, color: 0xffd166, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Multiply Table in the casino's Polynomials wing." },
+    { id: 'polyadd', name: 'Add/Sub Table', symbol: { words: ['ADD/SUB', 'POLY'] }, color: 0x4fe0c0, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Add/Sub Table in the casino's Polynomials wing." },
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },
     { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Vertex Table in the casino's Graphing wing." },
