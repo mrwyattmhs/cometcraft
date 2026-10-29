@@ -7,7 +7,7 @@
    The pages, and the rules for them, live in library.js and books-data.js. Everything on the page is drawn as plain text, never as HTML. */
 const LittleLibrary = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 38; // must match Library.BUILD
+  const BUILD = 39; // must match Library.BUILD
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
 
   let wired = false, book = null, page = 1, fontIdx = Library.DEFAULT_FONT;
@@ -24,6 +24,10 @@ const LittleLibrary = (() => {
       const card = el('div', 'lib-book'); card.dataset.book = b.id;
       const cover = el('div', 'lib-cover'); cover.style.background = b.color;
       cover.append(el('span', 'lib-cover-title', b.short || b.title), el('span', 'lib-cover-author', b.author));
+      {                                                                // the lettering is dark on a light cover and white on a dark one (so it can always be read)
+        const hex = /^#([0-9a-f]{6})$/i.exec(b.color || ''), ch = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+        if (hex) { const n = parseInt(hex[1], 16), lum = 0.2126 * ch((n >> 16) & 255) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255); if (lum > 0.18) cover.classList.add('light'); }
+      }
       const info = el('div', 'lib-info');
       info.append(el('h3', '', b.title));
       if (b.subtitle) info.append(el('div', 'lib-sub', b.subtitle));
@@ -34,11 +38,11 @@ const LittleLibrary = (() => {
       info.append(meta);
       if (has) { const bar = el('div', 'lib-bar'), fill = el('i'); fill.style.width = `${Library.percent(b, at)}%`; bar.append(fill); info.append(bar); }
       const actions = el('div', 'lib-actions');
-      const open = el('button', 'lib-btn lib-open', has ? `Continue at page ${at}` : 'Read'); open.type = 'button';
+      const open = el('button', 'btn small primary lib-open', has ? `Continue at page ${at}` : 'Read'); open.type = 'button';
       open.addEventListener('click', () => openBook(b.id));
       actions.append(open);
       if (has && at > 1) {
-        const again = el('button', 'lib-btn quiet lib-restart', 'Start over'); again.type = 'button';
+        const again = el('button', 'btn small lib-restart', 'Start over'); again.type = 'button';
         again.addEventListener('click', () => openBook(b.id, { fresh: true }));
         actions.append(again);
       }

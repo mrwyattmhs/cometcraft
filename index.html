@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=VT323&family=Patrick+Hand&family=Great+Vibes&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=38">
+  <link rel="stylesheet" href="css/style.css?v=39">
 </head>
 <body>
   <canvas id="view"></canvas>
@@ -24,22 +24,25 @@
   <div id="trophy-banner" class="hidden" role="status" aria-live="polite"></div>
   </div>
 
-  <div id="start-screen">
+  <div id="start-screen" class="kelly">
     <div class="start-card mc-panel">
       <h1>Prime Time</h1>
       <p id="start-msg">Walk to the casino. Throw the dice. Factor the sum.</p>
       <button id="play" class="btn primary" type="button">Play</button>
       <p class="fine">Click the world to capture the mouse. Press Esc to release it.</p>
-      <p class="fine build">Build 38</p>
+      <p class="fine build">Build 39</p>
     </div>
   </div>
 
-  <div id="dialog" class="overlay hidden"></div>
+  <div id="dialog" class="overlay hidden kelly"></div>
 
-  <div id="craft" class="overlay hidden" data-state="idle" data-mode="practice">
+  <div id="craft" class="overlay hidden kelly" data-state="idle" data-mode="practice">
     <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="craft-title">
       <header class="craft-head">
-        <h2 id="craft-title">Practice Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Factoring wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="craft-title">Practice Table</h2><span class="k-formula">prime factors</span></div>
+        </div>
         <div class="craft-meta">
           <label class="dice-pick">Dice
             <select id="dice-count">
@@ -99,10 +102,13 @@
     </div>
   </div>
 
-  <div id="tri" class="overlay hidden" data-state="idle">
+  <div id="tri" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="tri-title">
       <header class="craft-head">
-        <h2 id="tri-title">Trinomial Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Factoring wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="tri-title">Trinomial Table</h2><span class="k-formula">ax² + bx + c</span></div>
+        </div>
         <div class="craft-meta">
           <span id="tri-wallet" class="wallet-chip">0 chips</span>
           <button id="tri-close" class="btn small" type="button">Leave table</button>
@@ -141,10 +147,13 @@
     </div>
   </div>
 
-  <div id="shop" class="overlay shop-overlay hidden">
+  <div id="shop" class="overlay shop-overlay hidden kelly">
     <aside class="mc-panel shop-panel" role="dialog" aria-modal="true" aria-labelledby="shop-title">
       <header class="craft-head">
-        <h2 id="shop-title">Shop</h2>
+        <div class="k-title">
+          <span class="k-wing">Village</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="shop-title">Shop</h2></div>
+        </div>
         <div class="craft-meta">
           <span id="shop-wallet" class="wallet-chip">0 chips</span>
           <button id="shop-close" class="btn small" type="button">Close</button>
@@ -161,10 +170,13 @@
     </aside>
   </div>
 
-  <div id="rad" class="overlay hidden" data-state="idle">
+  <div id="rad" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel" role="dialog" aria-modal="true" aria-labelledby="rad-title">
       <header class="craft-head">
-        <h2 id="rad-title">Radical Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Factoring wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="rad-title">Radical Table</h2><span class="k-formula">√n</span></div>
+        </div>
         <div class="craft-meta">
           <span id="rad-wallet" class="wallet-chip">0 chips</span>
           <button id="rad-close" class="btn small" type="button">Leave table</button>
@@ -227,10 +239,13 @@
     </div>
   </div>
 
-  <div id="par" class="overlay hidden" data-state="idle">
+  <div id="par" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel par-panel" role="dialog" aria-modal="true" aria-labelledby="par-title">
       <header class="craft-head">
-        <h2 id="par-title">Parabola Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Graphing wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="par-title">Parabola Table</h2><span class="k-formula">y = ax² + bx + c</span></div>
+        </div>
         <div class="craft-meta">
           <span id="par-wallet" class="wallet-chip">0 chips</span>
           <button id="par-close" class="btn small" type="button">Leave table</button>
@@ -356,10 +371,13 @@
     </div>
   </div>
 
-  <div id="lin" class="overlay hidden" data-state="idle">
+  <div id="lin" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel lin-panel" role="dialog" aria-modal="true" aria-labelledby="lin-title">
       <header class="craft-head">
-        <h2 id="lin-title">Lines Table</h2>
+        <div class="k-title">
+          <span class="k-wing">Graphing wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="lin-title">Lines Table</h2><span class="k-formula">y = mx + b</span></div>
+        </div>
         <div class="craft-meta">
           <span id="lin-pay" class="pay-chip"></span>
           <span id="lin-wallet" class="wallet-chip">0 chips</span>
@@ -392,10 +410,13 @@
     </div>
   </div>
 
-  <div id="cst" class="overlay hidden" data-state="idle">
+  <div id="cst" class="overlay hidden kelly" data-state="idle">
     <div class="mc-panel craft-panel cst-panel" role="dialog" aria-modal="true" aria-labelledby="cst-title">
       <header class="craft-head">
-        <h2 id="cst-title">Polynomial Coaster</h2>
+        <div class="k-title">
+          <span class="k-wing">Polynomials wing</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="cst-title">Polynomial Coaster</h2><span class="k-formula">f(x)</span></div>
+        </div>
         <div class="craft-meta">
           <span id="cst-pay" class="pay-chip"></span>
           <span id="cst-wallet" class="wallet-chip">0 chips</span>
@@ -406,10 +427,13 @@
     </div>
   </div>
 
-  <div id="tcase" class="overlay hidden">
+  <div id="tcase" class="overlay hidden kelly">
     <div class="mc-panel craft-panel tcase-panel" role="dialog" aria-modal="true" aria-labelledby="tcase-title">
       <header class="craft-head">
-        <h2 id="tcase-title">Trophy Case</h2>
+        <div class="k-title">
+          <span class="k-wing">Wilson Hall</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="tcase-title">Trophy Case</h2></div>
+        </div>
         <div class="craft-meta">
           <span id="tcase-count" class="pay-chip"></span>
           <button id="tcase-close" class="btn small" type="button">Close</button>
@@ -421,21 +445,22 @@
     </div>
   </div>
 
-  <div id="lib" class="overlay hidden">
-    <div class="lib-box" role="dialog" aria-modal="true" aria-labelledby="lib-title">
-      <header class="lib-head">
-        <div>
-          <h2 id="lib-title">Little Library</h2>
-          <p class="lib-tag">Take a book. Read a book. Your place is saved.</p>
+  <div id="lib" class="overlay hidden kelly">
+    <div class="mc-panel craft-panel lib-panel" role="dialog" aria-modal="true" aria-labelledby="lib-title">
+      <header class="craft-head">
+        <div class="k-title">
+          <span class="k-wing">Park</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="lib-title">Little Library</h2><span class="k-formula">free books</span></div>
         </div>
-        <button id="lib-close" class="lib-btn" type="button">Close</button>
+        <div class="craft-meta"><button id="lib-close" class="btn small" type="button">Close</button></div>
       </header>
+      <p class="lib-tag">Take a book. Read a book. Your place is saved.</p>
       <div id="lib-books" class="lib-books"></div>
       <p class="lib-note">Free to read, from Project Gutenberg. Pictures are left out.</p>
     </div>
   </div>
 
-  <div id="reader" class="hidden" role="dialog" aria-modal="true" aria-labelledby="reader-title">
+  <div id="reader" class="hidden kelly" role="dialog" aria-modal="true" aria-labelledby="reader-title">
     <header class="reader-head">
       <button id="reader-back" class="reader-btn" type="button">Back to shelf</button>
       <div class="reader-titles">
@@ -464,13 +489,16 @@
     </footer>
   </div>
 
-  <div id="usmap" class="overlay hidden">
-    <div class="chalk-board map-board" role="dialog" aria-modal="true" aria-labelledby="usmap-title">
-      <header class="chalk-head">
-        <h2 id="usmap-title">Find the state</h2>
-        <div class="chalk-meta">
-          <span id="usmap-wallet" class="chalk-chip">0 chips</span>
-          <button id="usmap-close" class="chalk-btn small" type="button">Leave map</button>
+  <div id="usmap" class="overlay hidden kelly">
+    <div class="mc-panel craft-panel map-board" role="dialog" aria-modal="true" aria-labelledby="usmap-title">
+      <header class="craft-head">
+        <div class="k-title">
+          <span class="k-wing">Arithmetic Academy</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="usmap-title">Find the state</h2><span class="k-formula">50 states</span></div>
+        </div>
+        <div class="craft-meta">
+          <span id="usmap-wallet" class="wallet-chip">0 chips</span>
+          <button id="usmap-close" class="btn small" type="button">Leave map</button>
         </div>
       </header>
       <div class="map-ask">
@@ -480,30 +508,33 @@
       <div class="map-stage">
         <canvas id="usmap-canvas" aria-label="Map of the United States. Click the state you are asked for."></canvas>
         <div class="map-zoom" role="group" aria-label="Zoom the map">
-          <button id="usmap-zoom-in" class="chalk-btn small" type="button" aria-label="Zoom in">+</button>
-          <button id="usmap-zoom-out" class="chalk-btn small" type="button" aria-label="Zoom out">&minus;</button>
-          <button id="usmap-zoom-reset" class="chalk-btn small" type="button">Whole map</button>
+          <button id="usmap-zoom-in" class="btn small" type="button" aria-label="Zoom in">+</button>
+          <button id="usmap-zoom-out" class="btn small" type="button" aria-label="Zoom out">&minus;</button>
+          <button id="usmap-zoom-reset" class="btn small" type="button">Whole map</button>
         </div>
       </div>
       <div class="map-foot">
         <div id="usmap-feedback" class="chalk-feedback" role="status" aria-live="polite"></div>
-        <button id="usmap-next" class="chalk-btn small hidden" type="button">Next state</button>
+        <button id="usmap-next" class="btn primary small hidden" type="button">Next state</button>
       </div>
     </div>
   </div>
 
-  <div id="dorm" class="overlay hidden">
-    <div class="plan-board" role="dialog" aria-modal="true" aria-labelledby="dorm-title">
-      <header class="plan-head">
-        <h2 id="dorm-title">Arrange your room</h2>
-        <div class="plan-meta"><span id="dorm-count" class="plan-chip"></span><button id="dorm-clear" class="plan-btn" type="button">Clear room</button><button id="dorm-done" class="plan-btn primary" type="button">Done</button></div>
+  <div id="dorm" class="overlay hidden kelly">
+    <div class="mc-panel craft-panel plan-panel" role="dialog" aria-modal="true" aria-labelledby="dorm-title">
+      <header class="craft-head">
+        <div class="k-title">
+          <span class="k-wing">Wilson Hall</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="dorm-title">Arrange your room</h2><span class="k-formula">top-down plan</span></div>
+        </div>
+        <div class="craft-meta"><span id="dorm-count" class="pay-chip"></span><button id="dorm-clear" class="btn small" type="button">Clear room</button><button id="dorm-done" class="btn small primary" type="button">Done</button></div>
       </header>
       <div class="plan-body">
         <div class="plan-side">
           <div id="dorm-palette" class="plan-palette" role="group" aria-label="Furniture"></div>
           <div class="plan-tools">
-            <button id="dorm-rotate" class="plan-btn" type="button">Turn (R)</button>
-            <button id="dorm-remove" class="plan-btn" type="button">Take away</button>
+            <button id="dorm-rotate" class="btn small" type="button">Turn (R)</button>
+            <button id="dorm-remove" class="btn small" type="button">Take away</button>
           </div>
         </div>
         <div class="plan-stage"><canvas id="dorm-canvas" aria-label="Top-down plan of your room. Pick a piece, then click a square."></canvas></div>
@@ -512,13 +543,16 @@
     </div>
   </div>
 
-  <div id="arith" class="overlay hidden" data-stage="rules">
-    <div class="chalk-board" role="dialog" aria-modal="true" aria-labelledby="arith-title">
-      <header class="chalk-head">
-        <h2 id="arith-title">Addition</h2>
-        <div class="chalk-meta">
-          <span id="arith-wallet" class="chalk-chip">0 chips</span>
-          <button id="arith-close" class="chalk-btn small" type="button">Leave table</button>
+  <div id="arith" class="overlay hidden kelly" data-stage="rules">
+    <div class="mc-panel craft-panel arith-panel" role="dialog" aria-modal="true" aria-labelledby="arith-title">
+      <header class="craft-head">
+        <div class="k-title">
+          <span class="k-wing">Arithmetic Academy</span>
+          <div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="arith-title">Addition</h2><span class="k-formula">timed practice</span></div>
+        </div>
+        <div class="craft-meta">
+          <span id="arith-wallet" class="wallet-chip">0 chips</span>
+          <button id="arith-close" class="btn small" type="button">Leave table</button>
         </div>
       </header>
 
@@ -526,7 +560,7 @@
         <h3>How it works</h3>
         <ol id="arith-rule-list" class="chalk-rules"></ol>
         <p id="arith-best" class="chalk-note"></p>
-        <div class="chalk-center"><button id="arith-start" class="chalk-btn big" type="button">Start</button></div>
+        <div class="chalk-center"><button id="arith-start" class="btn primary big" type="button">Start</button></div>
       </section>
 
       <section id="arith-play" class="chalk-page hidden">
@@ -559,8 +593,8 @@
           <ul id="arith-missed"></ul>
         </div>
         <div class="chalk-center">
-          <button id="arith-again" class="chalk-btn" type="button">Play again</button>
-          <button id="arith-leave" class="chalk-btn" type="button">Leave table</button>
+          <button id="arith-again" class="btn primary" type="button">Play again</button>
+          <button id="arith-leave" class="btn" type="button">Leave table</button>
         </div>
       </section>
     </div>
@@ -642,56 +676,56 @@
     </div>
   </div>
 
-  <script src="js/economy.js?v=38"></script>
-  <script src="js/factoring.js?v=38"></script>
-  <script src="js/catalog.js?v=38"></script>
-  <script src="js/store.js?v=38"></script>
-  <script src="js/trophies.js?v=38"></script>
-  <script src="js/books-data.js?v=38"></script>
-  <script src="js/library.js?v=38"></script>
-  <script src="js/content.js?v=38"></script>
-  <script src="js/textures.js?v=38"></script>
-  <script src="js/avatar.js?v=38"></script>
-  <script src="js/pets.js?v=38"></script>
-  <script src="js/dorm.js?v=38"></script>
-  <script src="js/dormroom.js?v=38"></script>
-  <script src="js/trophy-case.js?v=38"></script>
-  <script src="js/usmap-data.js?v=38"></script>
-  <script src="js/usmap.js?v=38"></script>
-  <script src="js/flag.js?v=38"></script>
-  <script src="js/blueprint.js?v=38"></script>
-  <script src="js/sandbox.js?v=38"></script>
-  <script src="js/casino-interior.js?v=38"></script>
-  <script src="js/world.js?v=38"></script>
-  <script src="js/showcase.js?v=38"></script>
-  <script src="js/player.js?v=38"></script>
-  <script src="js/ui.js?v=38"></script>
-  <script src="js/shop.js?v=38"></script>
-  <script src="js/crafting.js?v=38"></script>
-  <script src="js/trinomials.js?v=38"></script>
-  <script src="js/trinomial-game.js?v=38"></script>
-  <script src="js/radicals.js?v=38"></script>
-  <script src="js/radical-game.js?v=38"></script>
-  <script src="js/parabolas.js?v=38"></script>
-  <script src="js/lines.js?v=38"></script>
-  <script src="js/coaster.js?v=38"></script>
-  <script src="js/lessons.js?v=38"></script>
-  <script src="js/minesweeper.js?v=38"></script>
-  <script src="js/minefield.js?v=38"></script>
-  <script src="js/mines-menu.js?v=38"></script>
-  <script src="js/cubes.js?v=38"></script>
-  <script src="js/cubes-game.js?v=38"></script>
-  <script src="js/polys.js?v=38"></script>
-  <script src="js/poly-game.js?v=38"></script>
-  <script src="js/lesson-panel.js?v=38"></script>
-  <script src="js/parabola-game.js?v=38"></script>
-  <script src="js/lines-game.js?v=38"></script>
-  <script src="js/coaster-game.js?v=38"></script>
-  <script src="js/arithmetic.js?v=38"></script>
-  <script src="js/arithmetic-game.js?v=38"></script>
-  <script src="js/map-game.js?v=38"></script>
-  <script src="js/reader-game.js?v=38"></script>
-  <script src="js/dorm-planner.js?v=38"></script>
-  <script src="js/main.js?v=38"></script>
+  <script src="js/economy.js?v=39"></script>
+  <script src="js/factoring.js?v=39"></script>
+  <script src="js/catalog.js?v=39"></script>
+  <script src="js/store.js?v=39"></script>
+  <script src="js/trophies.js?v=39"></script>
+  <script src="js/books-data.js?v=39"></script>
+  <script src="js/library.js?v=39"></script>
+  <script src="js/content.js?v=39"></script>
+  <script src="js/textures.js?v=39"></script>
+  <script src="js/avatar.js?v=39"></script>
+  <script src="js/pets.js?v=39"></script>
+  <script src="js/dorm.js?v=39"></script>
+  <script src="js/dormroom.js?v=39"></script>
+  <script src="js/trophy-case.js?v=39"></script>
+  <script src="js/usmap-data.js?v=39"></script>
+  <script src="js/usmap.js?v=39"></script>
+  <script src="js/flag.js?v=39"></script>
+  <script src="js/blueprint.js?v=39"></script>
+  <script src="js/sandbox.js?v=39"></script>
+  <script src="js/casino-interior.js?v=39"></script>
+  <script src="js/world.js?v=39"></script>
+  <script src="js/showcase.js?v=39"></script>
+  <script src="js/player.js?v=39"></script>
+  <script src="js/ui.js?v=39"></script>
+  <script src="js/shop.js?v=39"></script>
+  <script src="js/crafting.js?v=39"></script>
+  <script src="js/trinomials.js?v=39"></script>
+  <script src="js/trinomial-game.js?v=39"></script>
+  <script src="js/radicals.js?v=39"></script>
+  <script src="js/radical-game.js?v=39"></script>
+  <script src="js/parabolas.js?v=39"></script>
+  <script src="js/lines.js?v=39"></script>
+  <script src="js/coaster.js?v=39"></script>
+  <script src="js/lessons.js?v=39"></script>
+  <script src="js/minesweeper.js?v=39"></script>
+  <script src="js/minefield.js?v=39"></script>
+  <script src="js/mines-menu.js?v=39"></script>
+  <script src="js/cubes.js?v=39"></script>
+  <script src="js/cubes-game.js?v=39"></script>
+  <script src="js/polys.js?v=39"></script>
+  <script src="js/poly-game.js?v=39"></script>
+  <script src="js/lesson-panel.js?v=39"></script>
+  <script src="js/parabola-game.js?v=39"></script>
+  <script src="js/lines-game.js?v=39"></script>
+  <script src="js/coaster-game.js?v=39"></script>
+  <script src="js/arithmetic.js?v=39"></script>
+  <script src="js/arithmetic-game.js?v=39"></script>
+  <script src="js/map-game.js?v=39"></script>
+  <script src="js/reader-game.js?v=39"></script>
+  <script src="js/dorm-planner.js?v=39"></script>
+  <script src="js/main.js?v=39"></script>
 </body>
 </html>

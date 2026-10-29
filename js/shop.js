@@ -117,6 +117,12 @@ const Shop = (() => {
     const sw = el('span', 'swatch', item.glyph || '');
     sw.style.setProperty('--sw', item.none ? '#8b8b8b' : '#' + item.color.toString(16).padStart(6, '0'));
     sw.setAttribute('aria-hidden', 'true');
+    {                                                                  // the letter on the swatch is dark or white, whichever reads better on that colour
+      const c = item.none ? 0x8b8b8b : item.color, ch = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      const lum = 0.2126 * ch((c >> 16) & 255) + 0.7152 * ch((c >> 8) & 255) + 0.0722 * ch(c & 255);
+      const onDark = 1.05 / (lum + 0.05), onLight = (lum + 0.05) / 0.065;                  // contrast of white lettering and of dark lettering on this colour: use the better one
+      if (onLight > onDark) { sw.style.color = '#10260b'; sw.style.textShadow = '1px 1px 0 rgba(255, 255, 255, .35)'; }
+    }
 
     const name = el('span', 'item-name', item.name);
     const note = el('small');

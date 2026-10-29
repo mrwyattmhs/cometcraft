@@ -1,0 +1,10 @@
+{
+  "name": "prime-time-test-tools",
+  "private": true,
+  "description": "Test tools for Prime Time. Run from the project folder:  node tools/test/run.js   (see tools/test/README.md)",
+  "dependencies": {
+    "jsdom": "25.0.1",
+    "puppeteer-core": "23.10.4",
+    "three": "0.128.0"
+  }
+}

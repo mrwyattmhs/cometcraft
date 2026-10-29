@@ -8,7 +8,7 @@
    The answer always has the shape   g (v s1 a)(v^2 s2 b v + c)   where g is the GCF (1 on Easy, so it is not asked for), s1 and s2 are signs, and a, b, c are whole
    numbers. For these problems that form is the only one that works, so a problem has exactly one correct answer. */
 const Cubes = (() => {
-  const BUILD = 38; // bump together with the ?v= numbers in index.html
+  const BUILD = 39; // bump together with the ?v= numbers in index.html
   const LEVELS = [
     { level: 1, name: 'Easy', c: [1, 2, 3, 4, 5, 6, 7, 8], g: [1], sample: 'x\u00b3 + 27', desc: 'A sum or a difference of cubes, like x\u00b3 + 27' },
     { level: 2, name: 'Medium', c: [1, 2, 3, 4, 5, 6], g: [2, 3, 4, 5, 6], sample: '2x\u00b3 + 16', desc: 'Take out the GCF first, then factor, like 2x\u00b3 + 16' },

@@ -133,7 +133,8 @@ console.log('trophy tests passed');
   T.GAMES.forEach(g => { assert.ok(!/\bbet|wager|gambl/i.test(g.how), `${g.id}: no talk of betting`); });
   const C = require('../js/casino-interior.js');
   Object.entries(C.TABLES).forEach(([id, t]) => {
-    const wing = t.x < 0 ? 'Factoring wing' : 'Graphing wing';
+    const N = C.NORTH_WING, north = t.x > N.minX && t.x < N.maxX && t.z > N.minZ && t.z < N.maxZ;       // the wing comes from the plan: the north wing, else west (left) is Factoring and east (right) is Graphing
+    const wing = north ? 'Polynomials wing' : t.x < 0 ? 'Factoring wing' : 'Graphing wing';
     assert.ok(T.byId[id].how.includes(`casino's ${wing}`), `${id}: its table is in the ${wing} (x = ${t.x}), and the sentence says so`);
     assert.ok(T.byId[id].how.includes(T.byId[id].name) || T.byId[id].how.includes(T.byId[id].name.replace(' Table', ' table')), `${id}: and names the table`);
   });

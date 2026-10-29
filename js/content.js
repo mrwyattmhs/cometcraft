@@ -21,7 +21,7 @@ const CONTENT = {
   board: {
     title: 'How to play',
     html: `
-      <p>Follow the road straight ahead to the <b>Casino</b>. The shops are on your left and the fountain is on your right. Five tables are inside.</p>
+      <p>Follow the road straight ahead to the <b>Casino</b>. The shops are on your left and the fountain is on your right. Ten tables are inside, in three wings: Factoring on the left, Graphing on the right, and Polynomials straight ahead.</p>
       <p><b>Practice table:</b> break each dice roll into prime factors. A miss costs nothing. Easier rolls (2 dice) earn <b>10 chips</b>, and harder ones earn more, up to <b>50</b>.</p>
       <p><b>Radicals, trinomials, and the two parabola tables</b> let you pick a level, Easy up to Expert. Harder levels pay more, and a wrong answer never costs you chips.</p>
       <p><b>The Lines table</b> (in the Graphing wing) has you graph a line by clicking points, in slope-intercept, point-slope, or standard form. Each line pays <b>25 chips</b>.</p>

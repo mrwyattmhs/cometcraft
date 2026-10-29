@@ -907,3 +907,94 @@ div.pair-box { cursor: default; }
   .kelly .poly-arch { font-size: clamp(15px, 4.4vw, 22px); padding: 56px 4px; }
   .kelly .poly { font-size: clamp(22px, 7.2vw, 40px); white-space: normal; overflow-wrap: anywhere; }      /* the problem line itself may be long, like (-2a\u00b2 - a - 2)\u00b2: smaller type, and it may wrap */
 }
+
+/* ---------- modernizing the older windows: the green template everywhere ---------- */
+.kelly .bet-grid:has(> .bet-card:nth-child(4)) { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }      /* four levels sit in one row */
+.kelly .bet-card:not(:has(.k-ico)) { min-height: 0; }                                                                /* text-only cards are as tall as their text */
+.kelly .pay-chip { display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border: 2px dashed var(--k-edge); border-radius: 6px; font-family: var(--k-body); font-size: 15px; font-weight: 700; color: var(--k-soft); opacity: 1; white-space: nowrap; }
+
+/* Practice table: the factor tree panel */
+.kelly .tree-side { background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); }
+.kelly .tree-side h3 { font-family: var(--px); font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: var(--k-text); text-shadow: var(--k-pop); }
+.kelly .tree-note { color: var(--k-muted); }
+
+/* Lines table: the coach's steps */
+.kelly .lin-steps li { margin: 0 0 8px; padding: 10px 14px; background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-muted); font-family: var(--k-body); }
+.kelly .lin-steps li b { color: var(--k-text); font-family: var(--px); font-weight: 400; letter-spacing: .05em; text-transform: uppercase; }
+.kelly .lin-steps li.active { background: #1e6314; border-color: var(--k-gold); color: var(--k-text); }
+.kelly .lin-steps li.active b { color: var(--k-gold); }
+.kelly .lin-steps li.done { opacity: .85; }
+
+/* Polynomial Coaster */
+.kelly .cst-sub { color: var(--k-soft); font-family: var(--k-body); font-weight: 700; }
+.kelly .cst-how { background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); font-family: var(--k-body); font-size: 19px; }
+.kelly .cst-how h3 { color: var(--k-text); font-family: var(--px); font-weight: 400; letter-spacing: .06em; text-transform: uppercase; }
+.kelly .bet-card:disabled, .kelly .bet-card.locked { opacity: .8; cursor: not-allowed; }
+.kelly .bet-card:disabled .bet-win, .kelly .bet-card.locked .bet-win { color: var(--k-muted); }
+
+/* the shops */
+.kelly .item { background: var(--k-card); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); }
+.kelly .item small { color: var(--k-muted); font-family: var(--k-body); }
+.kelly .item.equipped { background: #1e6314; border-color: var(--k-gold); }
+
+/* the trophy case */
+.kelly .tcase-hint { color: var(--k-soft); font-family: var(--k-body); font-weight: 700; }
+.kelly .tcase-grid { background-color: #221a2b; border: 2px solid var(--k-edge); border-radius: 8px; }
+.kelly .tc-name { color: #d4d8ea; }
+
+/* the map, library, planner, title screen and book reader in the green template */
+.kelly .map-zoom .btn { background: var(--k-deep); }
+.kelly .lib-cover.light .lib-cover-title, .kelly .lib-cover.light .lib-cover-author { color: #10260b; text-shadow: none; }
+.kelly #reader-pageno { color: #2b2118; }
+.kelly .plan-item { color: var(--k-text); background: var(--k-card); border: 2px solid var(--k-edge); border-radius: 6px; font-family: var(--k-body); font-weight: 700; }
+.kelly .plan-item:hover { background: #1e6314; }
+.kelly .plan-item.on { background: var(--k-gold); color: var(--k-ink); border-color: #fff0c0; }
+.kelly .plan-item.placed { border-color: #8be86a; }
+.kelly .plan-hint { color: var(--k-soft); font-family: var(--k-body); font-weight: 700; }
+.kelly .fine { color: var(--k-muted); }
+
+/* the notice-board dialog never grows taller than the screen: its text scrolls and its buttons stay in reach */
+.kelly .dialog-panel { max-height: calc(100vh - 24px); display: flex; flex-direction: column; font-family: var(--k-body); }
+.kelly .dialog-panel h2 { margin: 0 0 8px; font-family: var(--px); font-weight: 400; font-size: 20px; letter-spacing: .04em; color: var(--k-text); text-shadow: var(--k-pop); }
+.kelly .dialog-panel .dlg-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; font-size: 20px; line-height: 1.35; font-weight: 600; color: var(--k-text); padding-right: 6px; }
+.kelly .dialog-panel .dlg-body b { font-weight: 800; }
+.kelly .dialog-panel .dlg-actions { flex: 0 0 auto; }
+
+/* the title screen */
+.kelly .start-card h1 { color: var(--k-gold); text-shadow: var(--k-pop); }
+.kelly .start-card p { font-family: var(--k-body); font-weight: 700; color: var(--k-text); }
+
+/* the library's shelf and the book reader's bars, in the green template (the page you read stays paper) */
+.kelly .lib-book { background: var(--k-card); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); }
+.kelly .lib-tag { color: var(--k-soft); font-family: var(--k-body); font-weight: 700; opacity: 1; }
+.kelly .lib-note { color: var(--k-muted); font-family: var(--k-body); opacity: 1; }
+.kelly .reader-head, .kelly .reader-foot { background: var(--k-ground); color: var(--k-text); font-family: var(--k-body); }
+.kelly .reader-head { border-bottom: 3px solid var(--k-edge); }
+.kelly .reader-foot { border-top: 3px solid var(--k-edge); }
+.kelly .reader-titles h2 { font-family: var(--px); font-weight: 400; font-size: 20px; color: var(--k-text); text-shadow: var(--k-pop); }
+.kelly .reader-btn { font-family: var(--k-body); font-size: 17px; font-weight: 800; padding: 8px 14px; min-height: 44px; background: var(--k-card); color: var(--k-text); border: 2px solid var(--k-text); border-radius: 6px; }
+.kelly .reader-btn:hover:not(:disabled) { background: #1e6314; }
+.kelly .reader-btn:disabled { opacity: .55; cursor: default; }
+.kelly #reader-contents { font-family: var(--k-body); font-weight: 700; font-size: 16px; background: var(--k-deep); color: var(--k-text); border: 2px solid var(--k-edge); border-radius: 6px; padding: 8px; min-height: 44px; }
+.kelly .reader-goto { font-family: var(--k-body); font-weight: 700; }
+
+/* the trophy tooltip, the hint shop's rows, the dice dropdown and two small notes */
+.kelly .tcase-tip { background: var(--k-deep); border: 2px solid var(--k-gold); border-radius: 8px; color: var(--k-text); font-family: var(--k-body); font-weight: 700; box-shadow: 0 6px 0 rgba(0, 0, 0, .35); }
+.kelly .tcase-tip.got { border-color: #8be86a; }
+.kelly .tcase-tip .prog { color: var(--k-gold); }
+.kelly .tcase-tip.got .prog { color: #8be86a; }
+.kelly .ware { background: var(--k-card); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); }
+.kelly .ware-name small { color: var(--k-muted); }
+.kelly select { background: var(--k-deep); color: var(--k-text); border: 2px solid var(--k-edge); border-radius: 6px; font-family: var(--k-body); font-weight: 700; }
+.kelly .tree-misfits { color: #ffb3a6; }
+.kelly .bet-low { color: var(--k-muted); font-family: var(--k-body); }
+
+/* the Polynomial Coaster's ride result: a dark card with a green edge when you rode well */
+.kelly .cst-fb { background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); font-family: var(--k-body); font-weight: 600; }
+.kelly .cst-fb.good { background: #14500f; border-color: #8be86a; }
+.kelly .cst-fb h3 { font-family: var(--px); font-weight: 400; letter-spacing: .04em; color: var(--k-text); }
+.kelly .cst-fb b { font-weight: 800; }
+.kelly .swatch { font-size: 19px; font-weight: 800; }
+.kelly .cst-hint { background: #1e6314; border: 2px solid var(--k-gold); border-radius: 8px; color: var(--k-text); font-family: var(--k-body); font-weight: 600; }
+.kelly .cst-hint b { color: var(--k-gold); font-weight: 800; }
+.kelly .slot.match, .kelly .slot.output.match { background: #1f7a14; border-color: #8be86a; color: var(--k-text); }
