@@ -24,17 +24,32 @@ Object.entries(C.FREE).forEach(([slot, id]) => {
 });
 assert.ok(C.find('hat-none').none && C.find('pet-none').none, 'you can wear no hat and have no pet');
 
-// prices: basic items 400, graphing calculators 600, the M tee 1000, only free starters are 0
+// prices: basic items 400, graphing calculators 600, the M tee 1000, the gold-outline Kelly Green set 5000 a piece, only free starters are 0
 C.ITEMS.forEach(i => {
   const free = Object.values(C.FREE).includes(i.id);
   if (free) assert.strictEqual(i.price, 0);
   else if (i.id === 'shirt-kelly-m') assert.strictEqual(i.price, 1000);
+  else if (i.outline) assert.strictEqual(i.price, 5000, `${i.id} is part of the gold-outline set`);
   else if (i.kind === 'calculator') assert.strictEqual(i.price, 600, `${i.id} is a graphing calculator`);
   else assert.strictEqual(i.price, 400, `${i.id} is a basic item`);
 });
 assert.strictEqual(C.BASIC, 400);
 assert.strictEqual(C.GRAPHING, 600);
 assert.strictEqual(C.SPECIAL, 1000);
+assert.strictEqual(C.PREMIUM, 5000);
+
+/* ---------- the Kelly Green set with gold outlines: one piece for each thing you wear, 5,000 chips each ---------- */
+const kelly = C.ITEMS.filter(i => i.outline);
+assert.deepStrictEqual(kelly.map(i => i.id), ['shirt-kelly-gold', 'pants-kelly-gold', 'hat-kelly-gold', 'shoes-kelly-gold'], 'a shirt, pants, a cap and sneakers (nothing else gets an outline)');
+assert.deepStrictEqual(kelly.map(i => i.slot), ['shirt', 'pants', 'hat', 'shoes'], 'one for each thing you wear');
+kelly.forEach(i => { assert.strictEqual(i.color, 0x4cbb17, `${i.id} is kelly green`); assert.strictEqual(i.outline, 'gold'); assert.strictEqual(i.price, 5000, `${i.id} costs 5,000`); assert.ok(/^Kelly Green .+, gold outline$/.test(i.name), `${i.id} says what it is: ${i.name}`); assert.ok(!i.none && !C.FREE[i.slot].includes('kelly'), 'not a free starter'); });
+assert.strictEqual(C.find('hat-kelly-gold').type, 'cap', 'the hat is a cap'); assert.strictEqual(C.find('shirt-kelly-m').price, 1000, 'the M tee is still there, at its own price'); assert.ok(!C.find('shirt-kelly-m').outline, 'and has no outline');
+kelly.forEach(i => assert.strictEqual(C.forSlot(i.slot).slice(-1)[0].id, i.id, `${i.id} is the last thing in its shelf in the shop`));
+assert.strictEqual(new Set(C.ITEMS.map(i => i.name)).size, C.ITEMS.length, 'no two items share a name');
+{ const o = C.outfitFor({ ...C.FREE, shirt: 'shirt-kelly-gold', pants: 'pants-kelly-gold', hat: 'hat-kelly-gold', shoes: 'shoes-kelly-gold' });
+  assert.deepStrictEqual([o.shirt.outline, o.pants.outline, o.shoes.outline, o.hat.outline], ['gold', 'gold', 'gold', 'gold'], 'the outfit says every piece has a gold outline');
+  assert.deepStrictEqual([o.shirt.color, o.pants.color, o.shoes.color, o.hat.color], [0x4cbb17, 0x4cbb17, 0x4cbb17, 0x4cbb17]);
+  const mixed = C.outfitFor({ ...C.FREE, shirt: 'shirt-kelly-gold' }); assert.deepStrictEqual([mixed.shirt.outline, mixed.pants.outline, mixed.shoes.outline, mixed.hat], ['gold', null, null, null], 'a single piece outlines only itself'); }
 
 // graphing calculators: several colors, all 600, nobody gets one free, and no two look alike
 const calcs = C.forSlot('accessory', { kind: 'calculator' });
@@ -74,7 +89,7 @@ C.forSlot('pet').forEach(p => {
 C.forSlot('hat').forEach(h => assert.ok(['cap', 'beanie'].includes(h.type), `${h.id} has a model`));
 // no two items in a slot look the same
 ['shirt', 'pants', 'hat', 'shoes'].forEach(slot => {
-  const keys = C.forSlot(slot, { includeNone: false }).map(i => `${i.type || ''}${i.color}`);
+  const keys = C.forSlot(slot, { includeNone: false }).map(i => `${i.type || ''}${i.color}${i.emblem || ''}${i.outline || ''}`);        // a look is its shape, colour, emblem and outline
   assert.strictEqual(new Set(keys).size, keys.length, `no duplicate looks among ${slot}`);
 });
 ['pencil', 'calculator'].forEach(kind => {
@@ -87,12 +102,12 @@ assert.ok(!C.forSlot('hat').some(h => h.none) && C.forSlot('hat', { includeNone:
 /* ---------- outfits ---------- */
 const starter = C.outfitFor({ ...C.FREE });
 assert.deepStrictEqual(starter, {
-  shirt: { color: 0x2f6fdb, emblem: null }, pants: { color: 0x2b3a67 }, shoes: { color: 0x2a2a2a },
+  shirt: { color: 0x2f6fdb, emblem: null, outline: null }, pants: { color: 0x2b3a67, outline: null }, shoes: { color: 0x2a2a2a, outline: null },
   hat: null, accessory: { kind: 'pencil', color: 0xf2c230 }, pet: null,
 }, 'the starter outfit matches the original avatar');
 const fancy = C.outfitFor({ ...C.FREE, shirt: 'shirt-kelly-m', hat: 'hat-cap-red', pet: 'pet-cat-orange', accessory: 'pencil-pink' });
-assert.deepStrictEqual(fancy.shirt, { color: 0x4cbb17, emblem: 'M' });
-assert.deepStrictEqual(fancy.hat, { type: 'cap', color: 0xd94a4a });
+assert.deepStrictEqual(fancy.shirt, { color: 0x4cbb17, emblem: 'M', outline: null });
+assert.deepStrictEqual(fancy.hat, { type: 'cap', color: 0xd94a4a, outline: null });
 assert.deepStrictEqual(fancy.pet, { kind: 'cat', variant: 'orange' });
 assert.deepStrictEqual(fancy.accessory, { kind: 'pencil', color: 0xf06fb0 });
 assert.deepStrictEqual(C.outfitFor({ ...C.FREE, accessory: 'calculator-teal' }).accessory, { kind: 'calculator', color: 0x2fb5b0 }, 'a calculator is the one accessory');
