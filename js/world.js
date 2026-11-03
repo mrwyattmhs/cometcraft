@@ -174,6 +174,14 @@ const World = (() => {
   }
 
   /* ---------- hub: the village ---------- */
+  /** The street of shops: it runs from the road's west sidewalk (x -6.4) west to x -33, 6 wide, its middle at z 13.5, so its north edge (z 10.5) meets the south half of the
+      crosswalk (z 8.5 to 11.5). It is set south, toward the park's great tree, to leave a wide lawn between it and the House of Algebra. */
+  const STREET = { x0: -33, x1: -6.4, z: 13.5 };
+  /** Two shops on each side, each facing the path: the north side faces south, the south side faces north. A shop is 6 deep and 7 wide, and its front is 0.5 back from the paving's edge. */
+  const SHOP_SPOTS = [
+    { id: 'hints', x: -14, z: 7, face: 'S' }, { id: 'pets', x: -25, z: 7, face: 'S' },
+    { id: 'accessories', x: -14, z: 20, face: 'N' }, { id: 'style', x: -25, z: 20, face: 'N' },
+  ];
   function addTree(zone, x, z) {
     const g = zone.group;
     box(g, 'log', 1, 3, 1, x, 1.5, z);
@@ -444,6 +452,19 @@ const World = (() => {
 
     solid(zone, s.x, s.z, 6.2, 7.2);
     interact(zone, s.x + f * 4.6, s.z, 2.4, `Browse the ${def.title}`, onUse);
+  }
+
+  /** A shop that faces any way ('E', 'S', 'W' or 'N'). Every shop is drawn facing +x; here it is drawn in a frame of its own at the origin, and the frame is turned to face the right way.
+      The solid parts and the walk-up prompt are worked out in that frame and then turned and moved into the village's own coordinates. */
+  function buildShopFacing(zone, s, def, onUse) {
+    const turn = { E: 0, S: -Math.PI / 2, W: Math.PI, N: Math.PI / 2 }[s.face], pivot = new T.Group();
+    pivot.position.set(s.x, 0, s.z); pivot.rotation.y = turn;
+    const local = Object.create(zone); local.group = pivot; local.colliders = []; local.interactables = [];
+    buildShop(local, { id: s.id, x: 0, z: 0, facing: 1 }, def, onUse);
+    zone.group.add(pivot);
+    const c = Math.cos(turn), sn = Math.sin(turn), at = (x, z) => ({ x: s.x + x * c + z * sn, z: s.z - x * sn + z * c }), sideways = Math.abs(sn) > 0.5;
+    local.colliders.forEach(b => { const p = at((b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2), w = b.maxX - b.minX, d = b.maxZ - b.minZ; solid(zone, p.x, p.z, sideways ? d : w, sideways ? w : d); });
+    local.interactables.forEach(i => { const p = at(i.x, i.z); zone.interactables.push({ ...i, x: p.x, z: p.z }); });
   }
 
   /* ---------- village pieces ---------- */
@@ -1210,15 +1231,12 @@ const World = (() => {
     flat(g, 'grass', 160, 160, 0, 0, 0);
     buildRoad(zone);
 
-    // all four shops are on the west side, set well back from the road behind a wide paved plaza, and face it
-    flat(g, 'paving', 9.6, 41, -11.2, 0.04, 3.5);                 // 2 cm above the casino apron it overlaps at the north end (the depth buffer cannot tell closer surfaces apart at a distance)
-    const spots = [
-      { id: 'style', x: -19, z: 16, facing: 1 },
-      { id: 'accessories', x: -19, z: 7, facing: 1 },
-      { id: 'pets', x: -19, z: -2, facing: 1 },
-      { id: 'hints', x: -19, z: -11, facing: 1 },
-    ];
-    spots.forEach(s => buildShop(zone, s, CONTENT.shops[s.id], () => actions.openShop(s.id)));
+    // the street of shops runs east to west off the road's west sidewalk, level with the crosswalk (z 10), with a path down the middle and a shop on each side of it at each end
+    flat(g, 'paving', STREET.x1 - STREET.x0, 6, (STREET.x0 + STREET.x1) / 2, 0.04, STREET.z);        // the street, from the sidewalk to its end
+    flat(g, 'flagstone', STREET.x1 - STREET.x0, 1.6, (STREET.x0 + STREET.x1) / 2, 0.06, STREET.z);   // and a path of flagstones down the middle of it
+    SHOP_SPOTS.forEach(s => buildShopFacing(zone, s, CONTENT.shops[s.id], () => actions.openShop(s.id)));
+    [[-19.5, -2.6], [-19.5, 2.6], [-31.6, -2.6], [-31.6, 2.6]].forEach(([x, dz]) => addLamp(zone, x, STREET.z + dz));      // lamps between the pairs of shops and at the far end, on the path's edges
+    addBenchFacing(zone, -32.4, STREET.z, 'E');                                                          // a bench at the end of the street, looking back up it
 
     buildCasinoFront(zone, actions);   // straight ahead at the end of the road
     buildFountain(zone);               // off to the right
@@ -1227,6 +1245,7 @@ const World = (() => {
     buildSandboxPath(zone);            // and a paved way round to it
     buildMinefield(zone, actions);     // and Minesweeper, on the lawn behind the dorm
     buildDormFront(zone, actions);     // Wilson Hall, directly on your right at the start
+    if (typeof House !== 'undefined') House.buildFront(zone, actions);    // the House of Algebra, a blues venue at the north end of the shops (js/house.js)
     buildPark(zone, actions);          // and a little park with the great tree, across the road from it
 
     // notice board on the left-hand sidewalk near the spawn, facing the starting point
@@ -1241,7 +1260,7 @@ const World = (() => {
     interact(zone, -7.5, nz + 1.6, 2.0, 'Read the notice board', actions.readBoard);
 
     // trees on either side, then the fence and the clouds
-    [[-27, -14], [-27, -3], [-27, 10], [-27, 21], [-26, 25], [-30, -12],
+    [[-33, -9], [-33, -3], [-33, 2], [-32, 19], [-26, 26], [-31, 29],
      [31, 2], [47, 20], [54, 28], [53, 38], [54, 46], [30, 48]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
@@ -1387,6 +1406,15 @@ const World = (() => {
     return { cells, w: 12, h: 12 };
   };
 
+  // a hollow square: the box in [ ] + 5 = 7, floating over the Missing Number booth
+  const boxCells = () => { const cells = []; for (let c = 0; c < 12; c++) for (let r = 0; r < 12; r++) if (c < 2 || c > 9 || r < 2 || r > 9) cells.push([c, r]); return { cells, w: 12, h: 12 }; };
+  // a guitar standing on its end: headstock, neck, a narrow waist between the two curves of the body, and a sound hole
+  const guitarCells = () => {
+    const rows = [[5, 8], [5, 8], [5, 8], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [6, 7], [3, 10], [3, 10], [3, 10], [3, 10], [3, 10], [4, 9], [4, 9], [2, 11], [1, 12], [1, 12], [1, 12], [1, 12], [1, 12], [2, 11], [3, 10]], cells = [];
+    rows.forEach(([a, b], r) => { for (let c = a; c <= b; c++) if (!(r >= 22 && r <= 24 && c >= 5 && c <= 8)) cells.push([c, rows.length - 1 - r]); });
+    return { cells, w: 14, h: rows.length };
+  };
+
   // a flag on a pole with a little base, for the Minesweeper trophy and the sign over the minefield
   const flagCells = () => {
     const rows = ['..#.........', '..####......', '..#######...', '..##########', '..#######...', '..####......', '..#.........', '..#.........', '..#.........', '..#.........', '..#.........', '.####.......', '#########...'];
@@ -1405,6 +1433,8 @@ const World = (() => {
     vertexform: { shape: vertexFormCells, u: 0.08, mirrorBack: false },
     flag:      { shape: flagCells,     u: 0.1,   mirrorBack: false },
     cube:      { shape: cubeCells,     u: 0.1,   mirrorBack: false },
+    box:       { shape: boxCells,      u: 0.1,   mirrorBack: false },
+    guitar:    { shape: guitarCells,   u: 0.1,   mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },
@@ -1742,5 +1772,5 @@ const World = (() => {
     return zone;
   }
 
-  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, PARK, CASINO_FRONT, casinoFrontZ, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, symbolCells, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
+  return { buildHub, buildCasino, buildSchool, buildDorm, SCHOOL_EXIT, DORM_EXIT, DORM, STREET, SHOP_SPOTS, PARK, CASINO_FRONT, casinoFrontZ, helpers: { box, flat, lambert, glow, textPlane, makeSign, solid, interact, buildDoor, PX_FONT, createZone, buildSymbol, symbolSize, symbolCells, buildTable, spawnNPCs, waterSurface }, updateNPCs, Collide, symbolCells: { sqrt: radicalCells, quadratic: quadraticCells, parabola: parabolaCells, vertexform: vertexFormCells, plus: plusCells, minus: minusCells, times: timesCells, divide: divideCells, question: questionCells } };
 })();

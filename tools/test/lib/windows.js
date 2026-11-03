@@ -14,6 +14,7 @@ const WINDOWS = {
   trophies:  { open: `TrophyCase.open()`, root: '#tcase', wing: true },               arith:     { open: `ArithmeticGame.open('add')`, root: '#arith', wing: true },
   usmap:     { open: `MapGame.open()`, root: '#usmap', wing: true },                  library:   { open: `LittleLibrary.open()`, root: '#lib', wing: true },
   dorm:      { open: `DormPlanner.open(__primeTime.dorm.dormRoom)`, root: '#dorm', wing: true },
+  missing:   { open: `EquationGame.open()`, root: '#eqn', wing: true },     muldiv:    { open: `MulDivGame.open()`, root: '#eqm', wing: true },
   mines:     { open: `__primeTime.minesMenu.open()`, root: '#mines' },               lesson:    { open: `(typeof LessonPanel !== 'undefined') && LessonPanel.open()`, root: '#lesson' },
 };
 /** Extra states: [name, async (page, g) => put the window in that state]. Each is scanned for readable text. */
@@ -27,6 +28,8 @@ const STATES = [
   ['coaster:menu', open(WINDOWS.coaster.open)], ['coaster:play', seq(open(WINDOWS.coaster.open), click('#cst .bet-card, #cst .bet, #cst button[data-level]'))],
   ['cubes:menu', open(WINDOWS.cubes.open)], ['cubes:play', seq(open(WINDOWS.cubes.open), click('#cub .bet'))],
   ['multiply:menu', open(WINDOWS.multiply.open)], ['multiply:play', seq(open(WINDOWS.multiply.open), click('#pmul .bet'))],
+  ['missing:menu', open(WINDOWS.missing.open)], ['missing:play', seq(open(WINDOWS.missing.open), click('#eqn-levels .bet'))],
+  ['muldiv:menu', open(WINDOWS.muldiv.open)], ['muldiv:play', seq(open(WINDOWS.muldiv.open), click('#eqm-levels .bet'))],
   ['addsub:menu', open(WINDOWS.addsub.open)], ['addsub:play', seq(open(WINDOWS.addsub.open), click('#padd-levels .bet:nth-child(2)'))],
   ['shop:open', open(WINDOWS.shop.open)], ['hints:open', open(WINDOWS.hints.open)], ['trophies:open', open(WINDOWS.trophies.open)],
   ['arith:rules', open(WINDOWS.arith.open)], ['arith:play', seq(open(WINDOWS.arith.open), click('#arith-start'))],

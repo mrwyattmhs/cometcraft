@@ -5,8 +5,8 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 39; // bump together with the ?v= numbers in index.html
-  const SHELF_CAPACITY = 9; // trophies on one shelf; the tenth starts a second shelf below it (two shelves hold 18)
+  const BUILD = 42; // bump together with the ?v= numbers in index.html
+  const SHELF_CAPACITY = 10; // trophies on one shelf; the eleventh starts a second shelf below it (two shelves hold 20)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
       formula tables, or 'd20', 'map' and 'blocks' for the practice table, the wall map and the sandbox. how: a sentence for the trophy case saying how it is earned
@@ -22,6 +22,8 @@ const Trophies = (() => {
     { id: 'cubes', name: 'Cubes Table', symbol: 'cube', color: 0xc78bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Cubes Table in the casino's Factoring wing." },
     { id: 'polymul', name: 'Multiply Table', symbol: { words: ['MULTIPLY', 'POLY'] }, color: 0xffd166, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Multiply Table in the casino's Polynomials wing." },
     { id: 'polyadd', name: 'Add/Sub Table', symbol: { words: ['ADD/SUB', 'POLY'] }, color: 0x4fe0c0, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Add/Sub Table in the casino's Polynomials wing." },
+    { id: 'missing', name: 'Missing Number', symbol: { words: ['MISSING', 'NUMBER'] }, color: 0x4aa3ff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Missing Number booth in the House of Algebra." },
+    { id: 'muldiv', name: 'Multiply & Divide', symbol: { words: ['MULTIPLY', 'DIVIDE'] }, color: 0xff9f4a, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Multiply & Divide booth in the House of Algebra." },
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },
     { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Vertex Table in the casino's Graphing wing." },

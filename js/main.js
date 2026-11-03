@@ -38,6 +38,8 @@
     enterSchool: () => setZone(school, school.spawn),
     leaveSchool: () => setZone(hub, World.SCHOOL_EXIT),
     enterDorm: () => setZone(dorm, dorm.spawn),
+    enterHouse: () => setZone(house, house.spawn),
+    leaveHouse: () => setZone(hub, House.EXIT),
     leaveDorm: () => setZone(hub, World.DORM_EXIT),
     openPlanner: () => DormPlanner.open(dorm.dormRoom),
     openShop: id => (id === 'hints' ? UI.shop(id) : Shop.open(id)),
@@ -52,6 +54,8 @@
       else if (m === 'cubes') CubesGame.open();
       else if (m === 'polymul') PolyMulGame.open();
       else if (m === 'polyadd') PolyAddGame.open();
+      else if (m === 'missing') EquationGame.open();
+      else if (m === 'muldiv') MulDivGame.open();
       else if (m === 'radical') RadicalGame.open();
       else if (m === 'lines') LinesGame.open();
       else if (m === 'coaster') CoasterGame.open();
@@ -64,7 +68,8 @@
   const casino = World.buildCasino(actions);
   const school = World.buildSchool(actions);
   const dorm = World.buildDorm(actions);
-  scene.add(hub.group, casino.group, school.group, dorm.group);
+  const house = House.build(actions);                                    // the House of Algebra's room (its front is part of the village)
+  scene.add(hub.group, casino.group, school.group, dorm.group, house.group);
 
   let zone = hub;
   function setZone(next, spawn) {
@@ -80,6 +85,7 @@
   casino.group.visible = false;
   school.group.visible = false;
   dorm.group.visible = false;
+  house.group.visible = false;
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
   Player.teleport(hub.spawn.x, hub.spawn.z, hub.spawn.yaw);
@@ -274,6 +280,8 @@
       else if (CubesGame.isOpen()) CubesGame.close();
       else if (PolyMulGame.isOpen()) PolyMulGame.close();
       else if (PolyAddGame.isOpen()) PolyAddGame.close();
+      else if (EquationGame.isOpen()) EquationGame.close();
+      else if (MulDivGame.isOpen()) MulDivGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
       else if (CoasterGame.isOpen()) CoasterGame.close();
@@ -377,5 +385,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

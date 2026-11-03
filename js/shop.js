@@ -98,14 +98,16 @@ const Shop = (() => {
   function buy(item) {
     if (confirmId !== item.id) { confirmId = item.id; render(); return; }
     confirmId = null;
-    if (!Store.spend(item.price)) { setMsg(`You need ${item.price - Store.get().chips} more chips.`, 'bad'); render(); return; }
+    if (!Store.spend(item.price)) { setMsg(`You need ${money(item.price - Store.get().chips)} more chips.`, 'bad'); render(); return; }
     Store.own(item.id);
     Store.equip(item.slot, item.id);
     delete previews[item.slot];
-    setMsg(`Bought the ${item.name} for ${item.price} chips. It's equipped.`, 'good');
+    setMsg(`Bought the ${item.name} for ${money(item.price)} chips. It's equipped.`, 'good');
     render();
     emit();
   }
+
+  const money = n => n.toLocaleString('en-US');               // 5000 reads 5,000
 
   /* ---------- rendering ---------- */
   function card(item, chips) {
@@ -117,6 +119,7 @@ const Shop = (() => {
     const sw = el('span', 'swatch', item.glyph || '');
     sw.style.setProperty('--sw', item.none ? '#8b8b8b' : '#' + item.color.toString(16).padStart(6, '0'));
     sw.setAttribute('aria-hidden', 'true');
+    if (item.outline) sw.classList.add('outlined');                  // the Kelly Green set: a gold edge on the swatch, like the gold outline on the clothes
     {                                                                  // the letter on the swatch is dark or white, whichever reads better on that colour
       const c = item.none ? 0x8b8b8b : item.color, ch = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
       const lum = 0.2126 * ch((c >> 16) & 255) + 0.7152 * ch((c >> 8) & 255) + 0.0722 * ch(c & 255);
@@ -127,7 +130,7 @@ const Shop = (() => {
     const name = el('span', 'item-name', item.name);
     const note = el('small');
     if (owned) note.textContent = worn ? 'Equipped' : 'Owned';
-    else note.textContent = Catalog.canAfford(chips, item) ? `${item.price} chips` : `Need ${item.price - chips} more chips`;
+    else note.textContent = Catalog.canAfford(chips, item) ? `${money(item.price)} chips` : `Need ${money(item.price - chips)} more chips`;
     name.append(note);
 
     const actions = el('span', 'item-actions');
@@ -136,7 +139,7 @@ const Shop = (() => {
     } else {
       actions.append(
         button(trying ? 'Stop' : 'Try on', 'btn small', () => tryOn(item)),
-        button(confirmId === item.id ? `Confirm ${item.price}` : `Buy ${item.price}`, 'btn small primary', () => buy(item), !Catalog.canAfford(chips, item))
+        button(confirmId === item.id ? `Confirm ${money(item.price)}` : `Buy ${money(item.price)}`, 'btn small primary', () => buy(item), !Catalog.canAfford(chips, item))
       );
     }
     li.append(sw, name, actions);

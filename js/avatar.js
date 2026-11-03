@@ -218,6 +218,33 @@ const Avatar = (() => {
     setCalculator(root, calc ? { color: acc.color } : null);
   }
 
+  /* ---------- gold outlines: the Kelly Green set ---------- */
+  const GOLD = 0xffc933;
+  let goldMat = null;
+  /** A gold outline for a w x h x d box centred at the origin: its twelve edges as thin bars, a hair outside the box so they never sink into it and flicker. Add it to the box's own mesh
+      (or to a group at the same place) and it moves with it, so outlines on a swinging arm swing with it. */
+  function edgeFrame(w, h, d, t = 0.024) {
+    goldMat = goldMat || new THREE.MeshBasicMaterial({ color: GOLD });                      // unlit, so it glows the same in every light
+    const g = new THREE.Group(), e = 0.004, W = w + 2 * e, H = h + 2 * e, D = d + 2 * e;
+    const bar = (bw, bh, bd, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), goldMat); m.position.set(x, y, z); g.add(m); };
+    [-1, 1].forEach(a => [-1, 1].forEach(b => {
+      bar(W + t, t, t, 0, a * H / 2, b * D / 2);                                            // four along x
+      bar(t, H + t, t, a * W / 2, 0, b * D / 2);                                            // four along y
+      bar(t, t, D + t, a * W / 2, b * H / 2, 0);                                            // four along z
+    }));
+    g.userData.outline = true;
+    return g;
+  }
+  /** Gold edges on the shirt (torso and both sleeves), the pants (both legs) and the shoes, for the pieces of the outfit that have an outline. (The hat does its own in setHat.) */
+  function setOutlines(root, outfit) {
+    (root.userData.outlines || []).forEach(({ parent, frame }) => parent.remove(frame));
+    const list = root.userData.outlines = [], p = root.userData.parts;
+    const put = (parent, w, h, d) => { const f = edgeFrame(w, h, d); parent.add(f); list.push({ parent, frame: f }); };
+    if (outfit.shirt.outline) { put(p.torso, 0.45, 0.675, 0.225); [p.armL, p.armR].forEach(a => put(a.children[0], 0.225, 0.675, 0.225)); }   // children[0] of a limb is its box (the pivot swings, the box hangs from it)
+    if (outfit.pants.outline) [p.legL, p.legR].forEach(l => put(l.children[0], 0.225, 0.675, 0.225));
+    if (outfit.shoes.outline) [p.legL, p.legR].forEach(l => put(l.children[1], 0.235, 0.1, 0.28));
+  }
+
   /* ---------- dressing: shirt emblem, hats, and the whole outfit ---------- */
   const M_GLYPH = ['#...#', '##.##', '#.#.#', '#...#', '#...#']; // a block M, 13 blocks
 
@@ -251,6 +278,7 @@ const Avatar = (() => {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
       mesh.position.set(x, y, z);
       g.add(mesh);
+      if (hat.outline) { const f = edgeFrame(w, h, d); f.position.set(x, y, z); g.add(f); }       // a gold outline round each piece of the hat
     };
     if (hat.type === 'cap') {
       piece(0.48, 0.13, 0.48, mat, 0, 0.27, 0);                       // crown
@@ -270,6 +298,7 @@ const Avatar = (() => {
     m.pants.color.setHex(outfit.pants.color);
     m.shoe.color.setHex(outfit.shoes.color);
     setEmblem(root, outfit.shirt.emblem);
+    setOutlines(root, outfit);
     setHat(root, outfit.hat);
     setAccessory(root, outfit.accessory);
   }
@@ -285,5 +314,5 @@ const Avatar = (() => {
     p.body.position.y = Math.abs(Math.sin(t * 9)) * 0.035 * moving;
   }
 
-  return { make, animate, makePencil, setPencilColor, makeCalculator, setCalculator, setAccessory, dress, setEmblem, setHat, randomLook, defaultLook: { skin: 0xf1c9a5, hair: 0x5a3a1a, shirt: 0x2f6fdb, pants: 0x2b3a67, pack: 0xd94a4a } };
+  return { make, animate, makePencil, setPencilColor, makeCalculator, setCalculator, setAccessory, dress, setEmblem, setHat, edgeFrame, GOLD, randomLook, defaultLook: { skin: 0xf1c9a5, hair: 0x5a3a1a, shirt: 0x2f6fdb, pants: 0x2b3a67, pack: 0xd94a4a } };
 })();

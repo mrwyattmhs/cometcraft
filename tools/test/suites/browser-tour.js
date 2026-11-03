@@ -40,6 +40,14 @@ module.exports = { name: 'browser:tour', tier: 'browser', covers: ['index.html',
   }
   await page.setViewport({ width: 1280, height: 800 });
 
+  /* ---------- the trophy case with EVERY trophy earned must still fit a short (720 high) screen: it is the tallest window, and it grows with the trophies ---------- */
+  await closeAll(); await page.setViewport({ width: 1280, height: 720 });
+  await page.evaluate(() => { Store.set({ trophies: Trophies.IDS.slice(), solved: Object.fromEntries(Trophies.IDS.map(i => [i, 100])) }); TrophyCase.open(); }); await g.sleep(500);
+  const tall = await page.evaluate(() => { const o = document.getElementById('tcase'), p = o.querySelector('.mc-panel').getBoundingClientRect(); return { rows: Math.ceil(document.querySelectorAll('#tcase .tc-card').length / getComputedStyle(document.querySelector('.tcase-grid')).gridTemplateColumns.split(' ').length), bottom: Math.round(p.bottom), vh: innerHeight, scrolls: o.scrollHeight > o.clientHeight + 1, n: Trophies.IDS.length }; });
+  assert.ok(!tall.scrolls && tall.bottom <= tall.vh, `the trophy case with all ${tall.n} trophies fits a 720-high screen without scrolling (${tall.rows} rows, bottom at ${tall.bottom} of ${tall.vh})`);
+  await page.evaluate(() => Store.reset()); await closeAll(); await page.setViewport({ width: 1280, height: 800 });
+  ctx.log(`the trophy case with all ${tall.n} trophies fits a 720-high screen (${tall.rows} rows)`);
+
   /* ---------- 4. clicking around ---------- */
   let screens = 0; const misses = [];
   for (const [name, w] of Object.entries(WINDOWS)) {

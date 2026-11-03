@@ -3,7 +3,7 @@
 const assert = require('assert');
 const { plain } = require('../lib/util');
 const { WINDOWS } = require('../lib/windows');
-const PAY = { '#tri': 'trinomial', '#rad': 'radical', '#par': 'parabola', '#vtx': 'vertex', '#cub': 'cubes', '#pmul': 'polymul', '#padd': 'polyadd' };
+const PAY = { '#tri': 'trinomial', '#rad': 'radical', '#par': 'parabola', '#vtx': 'vertex', '#cub': 'cubes', '#pmul': 'polymul', '#padd': 'polyadd', '#eqn': 'missing', '#eqm': 'muldiv' };
 
 module.exports = { name: 'sim:windows', tier: 'sim', covers: ['index.html', 'js/*.js'], run: async ctx => {
   const s = ctx.sim(), { doc, w, T, $ } = s; s.start(); await s.frames(3);

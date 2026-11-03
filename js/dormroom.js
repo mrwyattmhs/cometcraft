@@ -100,12 +100,12 @@ const DormRoom = (() => {
     }
 
     /* ----- the trophy shelves on the north wall ----- */
-    // One shelf at first. When it holds nine trophies, a second shelf appears below it for the rest. Trophies sit in the order you
+    // One shelf at first. When it holds ten trophies, a second shelf appears below it for the rest. Trophies sit in the order you
     // earned them. Each carries the symbol of its table (the same shape that floats above it).
     const { buildSymbol, symbolSize } = H;
     const shelfRoot = new T.Group(), trophyRoot = new T.Group();
     zone.group.add(shelfRoot, trophyRoot);
-    const SHELF = { x0: 5.0, step: 0.58, boardY: [3.0, 2.4], z: 2.22, width: 5.6 };   // 9 slots (Trophies.SHELF_CAPACITY); the brackets sit just outside the end slots
+    const SHELF = { x0: 4.6, step: 0.567, boardY: [3.0, 2.4], z: 2.22, width: 6.0 };   // 10 slots (Trophies.SHELF_CAPACITY), centred where the 9-slot board was; the brackets sit just outside the end slots
     const hex = n => '#' + n.toString(16).padStart(6, '0');
 
     function buildTrophy(def) {

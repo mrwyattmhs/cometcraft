@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const { JSDOM } = require('jsdom');
 const { ROOT, TEST, read, sleep } = require('./util');
-const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
+const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Equations', 'EquationsMD', 'EquationGame', 'MulDivGame', 'House', 'Avatar', 'Catalog', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
   'TrinomialGame', 'RadicalGame', 'ParabolaGame', 'VertexGame', 'LinesGame', 'CoasterGame', 'Shop', 'TrophyCase', 'MapGame', 'ArithmeticGame', 'LittleLibrary', 'DormPlanner', 'Factoring', 'Trinomials', 'Radicals'];
 
 function create() {

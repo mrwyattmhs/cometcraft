@@ -5,11 +5,14 @@
    either a pencil or a graphing calculator (an item's `kind`), so equipping a calculator
    replaces the pencil. The FREE item in each slot is the free starter, so nobody is ever
    stuck without a look. Basic items cost 400 chips, graphing calculators 600, and special
-   items more. Add fancy items later by adding rows here. */
+   items more. The top of the range is the KELLY GREEN set with gold outlines (a shirt, pants, a cap and sneakers), 5,000 chips each.
+   Add fancy items later by adding rows here. */
 const Catalog = (() => {
   const BASIC = 400;
   const GRAPHING = 600;  // a graphing calculator
   const SPECIAL = 1000;
+  const PREMIUM = 5000;   // each piece of the Kelly Green set with gold outlines
+  const KELLY = 0x4cbb17; // kelly green
 
   const SLOTS = ['shirt', 'pants', 'hat', 'shoes', 'accessory', 'pet'];
   const SLOT_LABEL = { shirt: 'Shirts', pants: 'Pants', hat: 'Hats', shoes: 'Shoes', accessory: 'Accessories', pet: 'Pets' };
@@ -47,12 +50,14 @@ const Catalog = (() => {
     ['orange', 'Orange Tee', 0xe8742a], ['black', 'Black Tee', 0x2b2b30], ['white', 'White Tee', 0xececec],
   ]);
   add('shirt', 'kelly-m', 'Kelly Green M Tee', { color: 0x4cbb17, emblem: 'M', glyph: 'M', price: SPECIAL });
+  add('shirt', 'kelly-gold', 'Kelly Green Tee, gold outline', { color: KELLY, outline: 'gold', price: PREMIUM });
 
   colored('pants', [
     ['navy', 'Navy Pants', 0x2b3a67], ['black', 'Black Pants', 0x2a2a2e], ['khaki', 'Khaki Pants', 0xb59a64],
     ['gray', 'Gray Pants', 0x777b82], ['red', 'Red Pants', 0xb53a3a], ['green', 'Green Pants', 0x3a7a4a],
     ['purple', 'Purple Pants', 0x6a4a9a], ['jeans', 'Blue Jeans', 0x4a78b8],
   ]);
+  add('pants', 'kelly-gold', 'Kelly Green Pants, gold outline', { color: KELLY, outline: 'gold', price: PREMIUM });
 
   add('hat', 'none', 'No hat', { none: true });
   colored('hat', [
@@ -63,12 +68,14 @@ const Catalog = (() => {
     ['beanie-orange', 'Orange Beanie', 0xe8742a], ['beanie-gray', 'Gray Beanie', 0x8b9098],
     ['beanie-purple', 'Purple Beanie', 0x8a4fd0],
   ], { type: 'beanie', glyph: 'B' });
+  add('hat', 'kelly-gold', 'Kelly Green Cap, gold outline', { color: KELLY, type: 'cap', glyph: 'C', outline: 'gold', price: PREMIUM });
 
   colored('shoes', [
     ['dark', 'Dark Sneakers', 0x2a2a2a], ['white', 'White Sneakers', 0xf2f2f2], ['red', 'Red Sneakers', 0xc83a3a],
     ['blue', 'Blue Sneakers', 0x2f6fdb], ['green', 'Green Sneakers', 0x3fae5a], ['yellow', 'Yellow Sneakers', 0xe8c030],
     ['pink', 'Pink Sneakers', 0xf06fb0],
   ]);
+  add('shoes', 'kelly-gold', 'Kelly Green Sneakers, gold outline', { color: KELLY, outline: 'gold', price: PREMIUM });
 
   colored('accessory', [
     ['yellow', 'Yellow Pencil', 0xf2c230], ['red', 'Red Pencil', 0xd94a4a], ['blue', 'Blue Pencil', 0x2f6fdb],
@@ -105,10 +112,10 @@ const Catalog = (() => {
     const shirt = pick('shirt'), pants = pick('pants'), hat = pick('hat');
     const shoes = pick('shoes'), accessory = pick('accessory'), pet = pick('pet');
     return {
-      shirt: { color: shirt.color, emblem: shirt.emblem || null },
-      pants: { color: pants.color },
-      shoes: { color: shoes.color },
-      hat: hat.none ? null : { type: hat.type, color: hat.color },
+      shirt: { color: shirt.color, emblem: shirt.emblem || null, outline: shirt.outline || null },     // outline: 'gold' draws gold edges round the piece
+      pants: { color: pants.color, outline: pants.outline || null },
+      shoes: { color: shoes.color, outline: shoes.outline || null },
+      hat: hat.none ? null : { type: hat.type, color: hat.color, outline: hat.outline || null },
       accessory: { kind: accessory.kind, color: accessory.color },   // what is in your hand: a pencil or a calculator
       pet: pet.none ? null : { kind: pet.kind, variant: pet.variant },
     };
@@ -116,7 +123,7 @@ const Catalog = (() => {
 
   const canAfford = (chips, item) => chips >= item.price;
 
-  return { BASIC, GRAPHING, SPECIAL, SLOTS, SLOT_LABEL, FREE, PET_KINDS, ITEMS: items, find, forSlot, outfitFor, canAfford };
+  return { BASIC, GRAPHING, SPECIAL, PREMIUM, SLOTS, SLOT_LABEL, FREE, PET_KINDS, ITEMS: items, find, forSlot, outfitFor, canAfford };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Catalog;

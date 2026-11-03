@@ -28,8 +28,8 @@ play-cubes 17 s, play-mines 7-15 s, walk 45-55 s, plus about 25 s once to start 
 | Tier | What it is | Suites |
 |---|---|---|
 | unit | plain Node, the rules and the data | `tests/*.test.js` (22: payouts, trophies, every game's maths, the casino plan, the green palette's contrast ...) |
-| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the layout, measured, with a flood fill from the start), `sim:polynomials`, `sim:cubes` |
-| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-mines` (real typing and clicking, and the arches measured on screen), `browser:walk` (a real keyboard walk through the archway to the tables) |
+| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the village and casino layout, measured, with a flood fill from the start), `sim:house` (the room inside the House of Algebra), `sim:polynomials`, `sim:cubes`, `sim:equations` |
+| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-equations`, `browser:play-mines` (real typing and clicking, and the arches measured on screen), `browser:walk` (a real keyboard walk through the casino archway to the tables), `browser:walk-house` (in through the House's doors, to its booth, out, and along the street of shops) |
 | deep | long checks, only with `--full` or `--tier deep` | none yet |
 
 **Not rebuilt yet** (the old versions were lost when the work machine reset): the casino exterior flicker check, the chapel, the dorm's 3D pixels, and real-input flows for Lines, Coaster,
