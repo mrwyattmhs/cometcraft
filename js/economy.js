@@ -3,7 +3,7 @@
 
    Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
 const Economy = (() => {
-  const BUILD = 42; // bump together with the ?v= numbers in index.html
+  const BUILD = 45; // bump together with the ?v= numbers in index.html
   const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
   const PAY = {
     // casino tables (chips for each correct answer, by level)
@@ -13,7 +13,8 @@ const Economy = (() => {
     polymul: [10, 25, 50],                 // the Multiply table (Polynomials wing): Easy 10, Medium 25, Hard 50, the same steps as the other tables' first three levels
     polyadd: [10, 25],                     // the Add/Subtract table: Easy (add) 10, Medium (subtract) 25
     missing: [10, 25, 50],
-    muldiv: [10, 25, 50],                  // the House of Algebra's second table (multiply and divide), the same scale as the first                 // the House of Algebra's first table (the missing number): Easy 10, Medium 25, Hard 50, like the other three-level tables
+    muldiv: [10, 25, 50],
+    numbers: [10, 25, 50],                 // the Numbers Game (two numbers with a given product and sum)                  // the House of Algebra's second table (multiply and divide), the same scale as the first                 // the House of Algebra's first table (the missing number): Easy 10, Medium 25, Hard 50, like the other three-level tables
     cubes: [10, 25],                       // the Cubes Table has two levels, so it pays like the first two of the other Factoring tables: Easy 10, Medium 25
     parabola: [25, 50, 100],
     vertex: [25, 50, 100],

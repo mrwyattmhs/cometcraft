@@ -4,7 +4,7 @@ const assert = require('assert');
 const { plain, text } = require('../lib/util');
 
 module.exports = { name: 'sim:polynomials', tier: 'sim', covers: ['js/polys.js', 'js/poly-game.js', 'js/economy.js', 'js/store.js', 'js/trophies.js', 'js/ui.js', 'js/main.js', 'index.html'], run: async ctx => {
-  const s = ctx.sim(), { T, doc, $, click, w } = s, { Polys, PolyMulGame: MUL, PolyAddGame: ADD, Store, Economy, Trophies } = T, M = Polys.MINUS; s.start(); await s.frames(2);
+  const s = ctx.sim(), { T, doc, $, click, w } = s, { Polys, PolyMulGame: MUL, PolyAddGame: ADD, Store } = T, M = Polys.MINUS; s.start(); await s.frames(2);
   const type = (b, v) => { b.value = String(v); b.dispatchEvent(new w.Event('input', { bubbles: true })); };
   const enter = (g, first, second) => { const b = g.boxes; first.forEach((v, i) => type(b.first[i], v)); second.forEach((v, i) => type(b.second[i], v)); };
   const rightFor = (p, k = 0) => (p.kind === 'mul' ? (a => [a.products, a.combined])(Polys.stageAnswer(Polys.mulStages(p)[k])) : (a => [a.distributed, a.combined])(Polys.addAnswer(p)));

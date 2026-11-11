@@ -1,8 +1,8 @@
 /* The HOUSE OF ALGEBRA: a blues-rock venue at the north end of the village's street of shops. You go in through the big double doors on its east face and find a room with a stage at the
    back (guitars on stands, a drum kit, amps, a mic stand, stage lights), a red-carpet aisle down the middle from the door to the stage, and booths along the side walls that look like the
-   merch stalls at a gig. Each booth is a table of algebra problems, one unit each, and a booth is only built once its table exists: so far two, facing each other across the aisle next to the
-   stage: Unit 1, the Missing Number (one-step equations with adding and taking away) on the west wall, and Unit 2, Multiply and Divide, on the east wall. The rest of the wall space is
-   left open for the next units: add a booth to BOOTHS, with its table.
+   merch stalls at a gig. Each booth is a table of algebra problems, one unit each, and a booth is only built once its table exists. So far three: Unit 1, the Missing Number (one-step
+   equations with adding and taking away), nearest the stage on the west wall; Unit 2, Multiply and Divide, facing it across the aisle on the east wall; and Unit 3, the Numbers Game (two
+   numbers with a given product and sum: splitting the middle term), next to Unit 1. The rest of the wall space is left open for the next units: add a booth to BOOTHS, with its table.
 
    Built with the same helpers as the casino's interior (World.helpers). It is two pieces:
      House.buildFront(zone, actions)  the venue's front, added to the village (world.js calls it)
@@ -19,6 +19,7 @@ const House = (() => {
   const BOOTHS = [
     { id: 'missing', unit: 1, x: -13.3, z: -2.5, face: 'E', title: 'MISSING NUMBER', sub: 'UNIT 1: ONE-STEP EQUATIONS', label: 'Visit the Missing Number booth', symbols: ['box'], color: 0x4aa3ff, fg: '#7fd7ff' },
     { id: 'muldiv', unit: 2, x: 13.3, z: -2.5, face: 'W', title: 'MULTIPLY & DIVIDE', sub: 'UNIT 2: ONE-STEP EQUATIONS', label: 'Visit the Multiply & Divide booth', symbols: ['times', 'divide'], color: 0xff9f4a, fg: '#ffc47a' },
+    { id: 'numbers', unit: 3, x: -13.3, z: 3, face: 'E', title: 'NUMBERS GAME', sub: 'UNIT 3: SPLIT THE MIDDLE', label: 'Visit the Numbers Game booth', symbols: ['times', 'plus'], color: 0xb48cff, fg: '#d9c2ff' },
   ];
 
   const cyl = (g, mat, rt, rb, h, x, y, z, seg = 14) => { const m = new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg), mat); m.position.set(x, y, z); g.add(m); return m; };
@@ -176,7 +177,7 @@ const House = (() => {
     [-1.5, 5, 10.5].forEach(z => { for (let x = -14.4; x <= 14.4; x += 1.2) { const sag = 0.55 * (1 - (x / 14.4) ** 2), col = Math.round(x / 1.2 + z) % 3 === 0 ? 0xff7a59 : Math.round(x / 1.2 + z) % 3 === 1 ? 0xffd166 : 0x7fd7ff; box(g, glow(col), 0.14, 0.14, 0.14, x, 6.2 - sag, z); } });
 
     // gig posters on the side walls above the booths
-    [-1, 1].forEach((side, k) => [-2.5, 3, 8.5].forEach((z, i) => { const p = textPlane(1.8, 2.5, POSTERS[(i + k * 2) % 4], 60); p.position.set(side < 0 ? ROOM.minX + 0.04 : ROOM.maxX - 0.04, 5.2, z); p.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; g.add(p); }));
+    [-1, 1].forEach((side, k) => [-2.5, 3, 8.5].forEach((z, i) => { const p = textPlane(1.8, 2.5, POSTERS[(i + k * 2) % 4], 60); p.position.set(side < 0 ? ROOM.minX + 0.04 : ROOM.maxX - 0.04, 5.75, z); p.rotation.y = side < 0 ? Math.PI / 2 : -Math.PI / 2; g.add(p); }));
 
     // the stage, at the back: a platform with a glowing edge and steps, a curtain, the sign, amps, instruments, lights
     const stageD = ROOM.stageFront - ROOM.minZ, sc = (ROOM.stageFront + ROOM.minZ) / 2;

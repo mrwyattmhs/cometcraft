@@ -96,7 +96,7 @@ const Minesweeper = (() => {
     const first = g.state === 'ready';
     if (first) { placeMines(g, i); g.state = 'playing'; }
     if (g.mine[i]) { g.state = 'lost'; g.exploded = i; return { ok: true, revealed: [], exploded: true, won: false, first }; }
-    const out = [{ i, depth: 0 }], depth = [0];
+    const out = [{ i, depth: 0 }];
     g.revealed[i] = 1; g.revealedCount++;
     for (let head = 0; head < out.length; head++) {
       const c = out[head].i, d = out[head].depth;

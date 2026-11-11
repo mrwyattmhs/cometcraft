@@ -2,14 +2,14 @@
 
        [ ] x 4 = 20       put a 5 in the box.
 
-   No DOM here, so it is all unit tested in Node (tests/equations-md.test.js); equation-game.js is the window, and it is the same window as the first table's. It has the same shape as
+   No DOM here, so it is all unit tested in Node (tests/equations-md.test.js); booth-game.js is the window, and it is the same window as the first table's. It has the same shape as
    equations.js (LEVELS, problem, count, pieces, text, answerOf, holds, isCorrect, steps), so one window can run both. Every number and answer is a whole number of at least 2.
    Easy    the box first, multiplied:                [ ] x 4 = 20
    Medium  the box first, divided:                   [ ] / 3 = 6          or the number first, multiplied:   3 x [ ] = 21
    Hard    all four shapes, up to 12, the box divided into (24 / [ ] = 4), and sometimes the equation turned round:  20 = [ ] x 4
    (x is the multiplication sign and / the division sign, drawn as the real symbols.) */
 const EquationsMD = (() => {
-  const BUILD = 42; // bump together with the ?v= numbers in index.html
+  const BUILD = 45; // bump together with the ?v= numbers in index.html
   const TIMES = '\u00d7', DIVIDE = '\u00f7';
   const LEVELS = [
     { level: 1, name: 'Easy', sample: `[ ] ${TIMES} 4 = 20`, desc: `Find the number that was multiplied, like [ ] ${TIMES} 4 = 20`, forms: ['mul1'] },
@@ -53,6 +53,8 @@ const EquationsMD = (() => {
   /** The equation as text, with [ ] for the box: "[ ] x 4 = 20". */
   const text = p => pieces(p).map(x => (x.box ? '[ ]' : x.op ? x.op : x.eq ? '=' : String(x.num))).join(' ');
   const answerOf = p => p.x;
+  /** The finished statement: the equation with its answer in the box. */
+  const done = p => text(p).replace('[ ]', String(p.x));
   /** The box holds n if the equation is true with n in it. (Whole numbers only.) */
   function holds(p, n) {
     if (typeof n !== 'number' || !Number.isInteger(n)) return false;
@@ -62,7 +64,7 @@ const EquationsMD = (() => {
 
   /** The worked solution, a line at a time. */
   function steps(p) {
-    const eq = text(p), x = p.x, out = [], round = p.flip ? ' (The equation is turned round, and it means the same: both sides are equal.)' : '';
+    const eq = text(p), x = p.x, out = [], round = p.flip ? ' (Turned round: it means the same.)' : '';
     if (p.form === 'mul1' || p.form === 'mul2') {
       out.push(`${eq}: the box was multiplied by ${p.a} to make ${p.b}.${round}`);
       out.push(`To find the box, divide ${p.b} by ${p.a}: ${p.b} ${DIVIDE} ${p.a} = ${x}.`);
@@ -79,7 +81,7 @@ const EquationsMD = (() => {
     return out;
   }
 
-  return { BUILD, LEVELS, TIMES, DIVIDE, levelOf, problem, count, pieces, text, answerOf, holds, isCorrect, steps };
+  return { BUILD, LEVELS, TIMES, DIVIDE, levelOf, problem, count, pieces, text, answerOf, holds, isCorrect, steps, done };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = EquationsMD;

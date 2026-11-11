@@ -14,6 +14,7 @@ const Store = (() => {
     polymulWins: 0, polymulLosses: 0, polyaddWins: 0, polyaddLosses: 0,        // the Polynomials wing: the Multiply table and the Add/Subtract table
     missingWins: 0, missingLosses: 0,                                           // the House of Algebra: the Missing Number booth
     muldivWins: 0, muldivLosses: 0,                                             // and the Multiply and Divide booth
+    numbersWins: 0, numbersLosses: 0,                                           // and the Numbers Game booth
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0, linesWins: 0, linesLosses: 0, coasterWins: 0, coasterDerails: 0,
     minesWins: 0, minesLosses: 0,                    // Minesweeper games won and lost (a win pays chips and counts toward the trophy)
     arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
@@ -25,6 +26,7 @@ const Store = (() => {
     reading: {},             // your place in each Little Library book: { bookId: pageNumber }, saved every time you turn a page
     readerFont: 2,           // the reader's text size, 0 (smallest) to 4
     remyPets: 0,             // how many times Remy has been petted, over the whole life of the save. The player is never shown this.
+    remyQuest: { step: 'none', answers: 0 },   // Remy's Eye, the quest the tenth pet starts (js/remy-quest.js cleans and reads it)
     dorm: [],                // the furniture in your dorm room: { type, x, z, rot } (Dorm.sanitize makes sure it fits)
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
@@ -50,9 +52,11 @@ const Store = (() => {
     state.cubesWins = whole(state.cubesWins); state.cubesLosses = whole(state.cubesLosses);
     state.missingWins = whole(state.missingWins); state.missingLosses = whole(state.missingLosses);
     state.muldivWins = whole(state.muldivWins); state.muldivLosses = whole(state.muldivLosses);
+    state.numbersWins = whole(state.numbersWins); state.numbersLosses = whole(state.numbersLosses);
     state.polymulWins = whole(state.polymulWins); state.polymulLosses = whole(state.polymulLosses); state.polyaddWins = whole(state.polyaddWins); state.polyaddLosses = whole(state.polyaddLosses);
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
+    state.remyQuest = state.remyQuest && typeof state.remyQuest === 'object' && typeof state.remyQuest.step === 'string' ? { step: state.remyQuest.step, answers: whole(state.remyQuest.answers) } : { step: 'none', answers: 0 };
     state.reading = state.reading && typeof state.reading === 'object' && !Array.isArray(state.reading)
       ? Object.fromEntries(Object.entries(state.reading).filter(([k, v]) => /^[a-z]{2,12}$/.test(k) && whole(v) >= 1).map(([k, v]) => [k, Math.min(9999, whole(v))])) : {};
     state.readerFont = Math.min(4, Math.max(0, Number.isInteger(state.readerFont) ? state.readerFont : 2));
@@ -138,8 +142,8 @@ const Store = (() => {
     return true;
   }
 
-  /** Remy was petted. Counted at most once every two seconds, so tapping the key cannot run the number up. This count is for the
-      story to come: nothing on screen ever shows it. */
+  /** Remy was petted. Counted at most once every two seconds, so tapping the key cannot run the number up. This count is what starts
+      the quest Remy's Eye, on the tenth pet (js/remy-quest.js): nothing on screen ever shows the number. */
   const REMY_COOLDOWN_MS = 2000;
   let lastRemyPet = -Infinity;
   function countRemyPet(nowMs = Date.now()) {

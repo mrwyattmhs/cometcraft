@@ -15,6 +15,7 @@ const WINDOWS = {
   usmap:     { open: `MapGame.open()`, root: '#usmap', wing: true },                  library:   { open: `LittleLibrary.open()`, root: '#lib', wing: true },
   dorm:      { open: `DormPlanner.open(__primeTime.dorm.dormRoom)`, root: '#dorm', wing: true },
   missing:   { open: `EquationGame.open()`, root: '#eqn', wing: true },     muldiv:    { open: `MulDivGame.open()`, root: '#eqm', wing: true },
+  numbers:   { open: `NumbersGame.open()`, root: '#nbg', wing: true },
   mines:     { open: `__primeTime.minesMenu.open()`, root: '#mines' },               lesson:    { open: `(typeof LessonPanel !== 'undefined') && LessonPanel.open()`, root: '#lesson' },
 };
 /** Extra states: [name, async (page, g) => put the window in that state]. Each is scanned for readable text. */
@@ -30,6 +31,7 @@ const STATES = [
   ['multiply:menu', open(WINDOWS.multiply.open)], ['multiply:play', seq(open(WINDOWS.multiply.open), click('#pmul .bet'))],
   ['missing:menu', open(WINDOWS.missing.open)], ['missing:play', seq(open(WINDOWS.missing.open), click('#eqn-levels .bet'))],
   ['muldiv:menu', open(WINDOWS.muldiv.open)], ['muldiv:play', seq(open(WINDOWS.muldiv.open), click('#eqm-levels .bet'))],
+  ['numbers:menu', open(WINDOWS.numbers.open)], ['numbers:play', seq(open(WINDOWS.numbers.open), click('#nbg-levels .bet:nth-child(3)'))],
   ['addsub:menu', open(WINDOWS.addsub.open)], ['addsub:play', seq(open(WINDOWS.addsub.open), click('#padd-levels .bet:nth-child(2)'))],
   ['shop:open', open(WINDOWS.shop.open)], ['hints:open', open(WINDOWS.hints.open)], ['trophies:open', open(WINDOWS.trophies.open)],
   ['arith:rules', open(WINDOWS.arith.open)], ['arith:play', seq(open(WINDOWS.arith.open), click('#arith-start'))],

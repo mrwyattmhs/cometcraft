@@ -2,12 +2,12 @@
 
        [ ] + 5 = 7        put a 2 in the box.
 
-   No DOM here, so it is all unit tested in Node (tests/equations.test.js); equation-game.js is the window. Every number is a whole number of at least 1, and so is the answer.
+   No DOM here, so it is all unit tested in Node (tests/equations.test.js); booth-game.js is the window. Every number is a whole number of at least 1, and so is the answer.
    Easy    the box first, added to:       [ ] + 5 = 7
    Medium  the box first, taken from:     [ ] - 4 = 9         or the number first:   3 + [ ] = 11
    Hard    all four shapes, bigger numbers, the box taken away (15 - [ ] = 6), and sometimes the equation turned round:  7 = [ ] + 5 */
 const Equations = (() => {
-  const BUILD = 42; // bump together with the ?v= numbers in index.html
+  const BUILD = 45; // bump together with the ?v= numbers in index.html
   const MINUS = '\u2212';
   const LEVELS = [
     { level: 1, name: 'Easy', sample: '[ ] + 5 = 7', desc: 'Find the number that was added on, like [ ] + 5 = 7', forms: ['add1'] },
@@ -51,6 +51,8 @@ const Equations = (() => {
   /** The equation as text, with [ ] for the box: "[ ] + 5 = 7". */
   const text = p => pieces(p).map(x => (x.box ? '[ ]' : x.op ? x.op : x.eq ? '=' : String(x.num))).join(' ');
   const answerOf = p => p.x;
+  /** The finished statement: the equation with its answer in the box. */
+  const done = p => text(p).replace('[ ]', String(p.x));
   /** The box holds n if the equation is true with n in it. (Whole numbers only.) */
   function holds(p, n) {
     if (typeof n !== 'number' || !Number.isInteger(n)) return false;
@@ -61,7 +63,7 @@ const Equations = (() => {
   /** The worked solution, a line at a time. */
   function steps(p) {
     const eq = text(p), x = p.x, out = [];
-    const round = p.flip ? ' (The equation is turned round, and it means the same: both sides are equal.)' : '';
+    const round = p.flip ? ' (Turned round: it means the same.)' : '';
     if (p.form === 'add1' || p.form === 'add2') {
       out.push(`${eq}: the box and ${p.a} are added to make ${p.b}.${round}`);
       out.push(`To find the box, take ${p.a} away from ${p.b}: ${p.b} ${MINUS} ${p.a} = ${x}.`);
@@ -78,7 +80,7 @@ const Equations = (() => {
     return out;
   }
 
-  return { BUILD, LEVELS, MINUS, levelOf, problem, count, pieces, text, answerOf, holds, isCorrect, steps };
+  return { BUILD, LEVELS, MINUS, levelOf, problem, count, pieces, text, answerOf, holds, isCorrect, steps, done };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Equations;

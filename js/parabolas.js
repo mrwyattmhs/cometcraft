@@ -12,7 +12,7 @@
    The same problems are shown two ways: standard form (parabola table) and vertex form
    (vertex table). Only the display, the vertex check, and the worked steps differ. */
 const Parabolas = (() => {
-  const BUILD = 42; // bump together with parabola-game.js and the ?v= numbers in index.html
+  const BUILD = 45; // bump together with parabola-game.js and the ?v= numbers in index.html
   const E = typeof Economy !== 'undefined' ? Economy : require('./economy.js');
   const T = typeof Trinomials !== 'undefined' ? Trinomials : require('./trinomials.js');
 
@@ -29,8 +29,6 @@ const Parabolas = (() => {
   const payout = (level, game = 'parabola') => E.PAY[game][tierFor(level).level - 1];
 
   /* ---------- problems ---------- */
-  const H_RANGE = 4;   // axis is -4..4, never 0 (so b is never 0)
-  const K_RANGE = 9;   // vertex height is -9..9
   const C_MAX = 15;    // keeps the y-intercept inside the number palette
 
   const fOf = (p, x) => p.a * x * x + p.b * x + p.c;
@@ -49,7 +47,6 @@ const Parabolas = (() => {
     });
     return out;
   }
-  const ALL = candidates();
 
   function generate(level = TIERS.length, rng = Math.random) {
     const list = candidates(level);

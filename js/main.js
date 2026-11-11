@@ -42,8 +42,8 @@
     leaveHouse: () => setZone(hub, House.EXIT),
     leaveDorm: () => setZone(hub, World.DORM_EXIT),
     openPlanner: () => DormPlanner.open(dorm.dormRoom),
-    openShop: id => (id === 'hints' ? UI.shop(id) : Shop.open(id)),
-    petRemy: () => { UI.toast('Remy purrs.'); Store.countRemyPet(); },   // the count is saved but never shown
+    openShop: id => { if (id === 'pets' && quest.vet()) return; if (id === 'hints') UI.shop(id); else Shop.open(id); },   // (during Remy's Eye the Pet Corner has something to say first)
+    petRemy: () => quest.pet(),                                          // counts the pet (the tenth starts the quest Remy's Eye)
     readBoard: () => UI.dialog({ title: CONTENT.board.title, html: CONTENT.board.html }),
     openArithmetic: op => ArithmeticGame.open(op),
     openMap: () => MapGame.open(),
@@ -56,6 +56,7 @@
       else if (m === 'polyadd') PolyAddGame.open();
       else if (m === 'missing') EquationGame.open();
       else if (m === 'muldiv') MulDivGame.open();
+      else if (m === 'numbers') NumbersGame.open();
       else if (m === 'radical') RadicalGame.open();
       else if (m === 'lines') LinesGame.open();
       else if (m === 'coaster') CoasterGame.open();
@@ -86,6 +87,7 @@
   school.group.visible = false;
   dorm.group.visible = false;
   house.group.visible = false;
+  const quest = RemyQuest.attach({ hub, dorm, dormRoom: dorm.dormRoom, getZone: () => zone });   // Remy's Eye: the eye patch, the tracker, the reminders, the cat on the bed
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
   Player.teleport(hub.spawn.x, hub.spawn.z, hub.spawn.yaw);
@@ -282,6 +284,7 @@
       else if (PolyAddGame.isOpen()) PolyAddGame.close();
       else if (EquationGame.isOpen()) EquationGame.close();
       else if (MulDivGame.isOpen()) MulDivGame.close();
+      else if (NumbersGame.isOpen()) NumbersGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
       else if (CoasterGame.isOpen()) CoasterGame.close();
@@ -385,5 +388,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, quest, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

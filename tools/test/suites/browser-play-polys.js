@@ -4,7 +4,6 @@
 const assert = require('assert');
 const P = require('../../../js/polys.js');
 const { FITS } = require('../lib/scan');
-const ARC_RGB = ['rgb(255, 196, 92)', 'rgb(127, 227, 255)', 'rgb(255, 154, 213)'];
 
 module.exports = { name: 'browser:play-polys', tier: 'browser', covers: ['js/polys.js', 'js/poly-game.js', 'css/style.css', 'js/economy.js', 'js/store.js', 'js/trophies.js', 'js/ui.js', 'index.html'], timeout: 900000, run: async ctx => {
   const g = await ctx.browser(), { page } = g;

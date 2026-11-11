@@ -115,8 +115,6 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 
 .target { font-size: 28px; margin: 4px 0 10px; }
 .target strong { font-family: var(--px); font-size: 30px; margin-left: 6px; background: var(--dark); color: #fff; padding: 2px 12px; }
-
-.craft-body { display: flex; gap: 28px; align-items: flex-start; }
 .grid-wrap { display: flex; align-items: center; gap: 14px; flex: none; }
 .grid { display: grid; grid-template-columns: repeat(3, 64px); gap: 0; }
 .slot {
@@ -193,7 +191,6 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 @media (max-width: 980px) { .craft-toolbar { flex-wrap: wrap; } .tree-side { flex: 1 1 280px; } #craft .inv-wrap { flex: 1 1 100%; } #craft .craft-top { flex-wrap: wrap; } }
 @media (max-width: 640px) { #craft .grid-wrap { flex-wrap: wrap; } #craft .grid-col .craft-actions { flex-wrap: wrap; } }
 
-
 /* ---------- trinomial table ---------- */
 .poly { font-family: var(--px); font-size: 34px; color: #fff; text-shadow: 3px 3px 0 rgba(0, 0, 0, .45); padding: 6px 0; }
 .tri-body { display: flex; flex-direction: column; gap: 14px; }
@@ -213,7 +210,6 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 .work { margin: 0; padding-left: 26px; display: grid; gap: 4px; font-family: var(--px); font-size: 15px; }
 .work small { display: block; font-family: var(--body); font-size: 20px; color: #555; }
 
-
 /* stage bet = wager only, 1 = split only, 2 = rewrite + step 2, done = the answer */
 #tri[data-stage="bet"] .felt, #tri[data-stage="bet"] .tri-body, #tri[data-stage="bet"] #tri-wager,
 #tri[data-stage="bet"] #tri-clear, #tri[data-stage="bet"] #tri-craft { display: none; }
@@ -226,7 +222,6 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 .bet-desc { font-family: var(--body); font-size: 22px; line-height: 1; color: #222; }
 .bet-win { font-size: 12px; color: #1c4d12; }
 .bet-card:disabled .bet-win { color: #333; }
-.bet-low { margin: 12px 0 0; font-size: 22px; color: #444; }
 .start-card .fine.build { margin-top: 4px; font-size: 16px; }
 
 /* staged reveal: stage 1 = split only, stage 2 = rewrite + step 2, done = the answer */
@@ -254,7 +249,6 @@ select { font-family: var(--px); font-size: 12px; padding: 4px 6px; background: 
 .worked summary { font-family: var(--px); font-size: 12px; cursor: pointer; padding: 6px 0; }
 .worked summary:focus-visible { outline: 3px solid #2a6df0; outline-offset: 2px; }
 
-
 /* ---------- radical table ---------- */
 .rad { display: inline-flex; align-items: stretch; vertical-align: middle; color: inherit; }
 .rad-sign { width: 24px; min-height: 44px; flex: none; align-self: stretch; overflow: visible; }
@@ -276,7 +270,6 @@ div.pair-box { cursor: default; }
 #rad .step { margin-bottom: 4px; }
 #rad .craft-actions { margin-top: 12px; }
 
-
 /* ---------- parabola table ---------- */
 .par-panel { width: min(1000px, 100%); }
 .par-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 430px); gap: 18px; align-items: start; }
@@ -290,7 +283,6 @@ div.pair-box { cursor: default; }
 .final.stack .final-expr { font-size: clamp(20px, 3.4vw, 30px); }
 #par .bench, #vtx .bench { margin-bottom: 12px; }
 @media (max-width: 760px) { .par-main { grid-template-columns: 1fr; } }
-
 
 /* ---------- shops and the closet ---------- */
 .shop-overlay { place-items: stretch end; padding: 0; background: rgba(10, 6, 20, .12); }
@@ -315,7 +307,6 @@ div.pair-box { cursor: default; }
 
 @media (max-width: 760px) {
   #controls-hint { display: none; }
-  .craft-body { flex-direction: column; align-items: stretch; }
   .grid-wrap { justify-content: center; }
   .inv-wrap { width: 100%; }
 }
@@ -324,33 +315,6 @@ div.pair-box { cursor: default; }
   .die.rolling, .grid.shake, #toast.show { animation: none; }
   #toast.show { opacity: 1; }
 }
-
-/* ---------- the chalkboard practice: white chalk on green ---------- */
-.chalk-board {
-  --chalk: #f4f1e6;
-  width: min(800px, 100%); padding: 18px 28px 26px; color: var(--chalk);
-  font-family: 'Patrick Hand', 'Chalkboard SE', 'Comic Sans MS', cursive; font-size: 26px; line-height: 1.2;
-  background:
-    radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, .08), transparent 45%),
-    radial-gradient(ellipse at 82% 88%, rgba(255, 255, 255, .06), transparent 40%),
-    #2c5b40;
-  border: 16px solid #8a6234; border-radius: 6px;
-  box-shadow: inset 0 0 0 3px #6b4a26, inset 0 0 44px rgba(0, 0, 0, .35), 0 10px 0 rgba(0, 0, 0, .4);
-  text-shadow: 0 0 1px rgba(255, 255, 255, .7), 0 0 6px rgba(255, 255, 255, .16);
-}
-.chalk-board h2 { margin: 0; font-size: 42px; font-weight: 400; }
-.chalk-board h3 { margin: 4px 0 6px; font-size: 32px; font-weight: 400; text-decoration: underline wavy rgba(244, 241, 230, .5); text-underline-offset: 6px; }
-.chalk-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
-.chalk-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.chalk-chip { padding: 2px 14px; border: 2px dashed var(--chalk); border-radius: 18px; font-size: 24px; }
-.chalk-btn {
-  font: inherit; font-size: 30px; color: var(--chalk); text-shadow: inherit; background: transparent; cursor: pointer;
-  border: 3px solid var(--chalk); border-radius: 10px; padding: 4px 22px;
-}
-.chalk-btn:hover { background: rgba(255, 255, 255, .14); }
-.chalk-btn.big { font-size: 46px; padding: 8px 54px; }
-.chalk-btn.small { font-size: 22px; padding: 1px 14px; }
-.chalk-board :is(.chalk-btn, .chalk-key):focus-visible { outline: 3px dotted #f7e98e; outline-offset: 3px; }
 .chalk-center { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
 .chalk-rules { margin: 8px 0 8px 30px; padding: 0; font-size: 29px; line-height: 1.28; }
 .chalk-rules li { margin-bottom: 6px; }
@@ -386,7 +350,6 @@ div.pair-box { cursor: default; }
 
 @keyframes chalk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 @media (max-width: 760px) {
-  .chalk-board { padding: 12px 14px 18px; border-width: 10px; font-size: 22px; }
   .chalk-play { grid-template-columns: 1fr; }
   .chalk-pad { justify-content: center; }
   .chalk-top { flex-wrap: wrap; }
@@ -415,28 +378,12 @@ div.pair-box { cursor: default; }
 #usmap-canvas { display: block; width: 100%; height: auto; cursor: pointer; touch-action: none; }
 #usmap-canvas.dragging { cursor: grabbing; }
 .map-zoom { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; line-height: 1.2; }
-.map-zoom .chalk-btn { background: rgba(44, 91, 64, .92); }
-.map-zoom .chalk-btn:hover { background: #3a7452; }
 .map-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 42px; margin-top: 8px; }
 .map-board .chalk-feedback { font-size: 28px; min-height: 0; }
 .map-board .chalk-feedback.good { color: #b9f0b0; }
 .map-board .chalk-feedback.bad { color: #f6b0c8; }
 .map-board .chalk-feedback.tip { font-size: 21px; opacity: .72; }
-
-/* ---------- the dorm room planner: a blueprint ---------- */
-.plan-board {
-  --ink: #eaf4ff; width: min(1120px, 100%); padding: 12px 20px 14px; color: var(--ink); font-size: 20px; line-height: 1.25;
-  background: linear-gradient(160deg, #20456f, #173555); border: 12px solid #0f2540; border-radius: 6px; box-shadow: 0 10px 0 rgba(0, 0, 0, .4);
-}
-.plan-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.plan-head h2 { margin: 0; font-size: 34px; font-weight: 400; }
-.plan-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.plan-chip { padding: 2px 12px; border: 2px dashed var(--ink); border-radius: 16px; font-size: 20px; }
-.plan-btn { font: inherit; font-size: 20px; color: var(--ink); background: rgba(255, 255, 255, .08); border: 3px solid var(--ink); border-radius: 8px; padding: 3px 14px; cursor: pointer; }
-.plan-btn:hover { background: rgba(255, 255, 255, .2); }
-.plan-btn.primary { background: #2f8f4a; border-color: #bff0c8; }
-.plan-btn.on { background: #c0392b; border-color: #ffd0cc; }
-.plan-btn:focus-visible, .plan-item:focus-visible { outline: 3px dotted #f7e98e; outline-offset: 3px; }
+.plan-item:focus-visible { outline: 3px dotted #f7e98e; outline-offset: 3px; }
 .plan-body { display: flex; gap: 14px; align-items: flex-start; }
 .plan-side { flex: 0 0 208px; display: flex; flex-direction: column; gap: 10px; }
 .plan-palette { display: flex; flex-direction: column; gap: 8px; }
@@ -462,10 +409,7 @@ div.pair-box { cursor: default; }
 @keyframes trophy-in { from { transform: translate(-50%, -140%); } to { transform: translate(-50%, 0); } }
 @media (prefers-reduced-motion: reduce) { #trophy-banner.show { animation: none; } }
 
-/* ---------- the Little Library: the shelf, and the full-screen reader ---------- */
-.lib-box { width: min(940px, 100%); background: #3b2a1d; color: #f6ecd6; border: 4px solid #f6ecd6; box-shadow: 0 8px 0 rgba(0, 0, 0, .45); padding: 16px 18px 12px; }
-.lib-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
-.lib-box h2 { margin: 0; font-size: 42px; font-weight: 400; }
+/* ---------- the Little Library: the shelf { width: min(940px, 100%); background: #3b2a1d; color: #f6ecd6; border: 4px solid #f6ecd6; box-shadow: 0 8px 0 rgba(0, 0, 0, .45); padding: 16px 18px 12px; }
 .lib-tag { margin: 2px 0 0; font-size: 22px; opacity: .85; }
 .lib-books { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; margin: 14px 0 8px; }
 .lib-book { display: flex; gap: 12px; background: #4a3626; border: 3px solid #6b4f36; padding: 10px; }
@@ -479,11 +423,9 @@ div.pair-box { cursor: default; }
 .lib-bar { height: 9px; background: #2a1d13; border: 2px solid #6b4f36; }
 .lib-bar i { display: block; height: 100%; background: #f2c230; }
 .lib-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 4px; }
-.lib-btn, .reader-btn { font: inherit; font-size: 21px; padding: 3px 14px; background: #f6ecd6; color: #3b2a1d; border: 3px solid #1d130a; cursor: pointer; }
-.lib-btn:hover, .reader-btn:hover { background: #fff3c4; }
-.lib-btn:disabled, .reader-btn:disabled { opacity: .4; cursor: default; background: #f6ecd6; }
-.lib-btn.quiet { background: transparent; color: #f6ecd6; border-color: #f6ecd6; }
-.lib-btn.quiet:hover { background: rgba(246, 236, 214, .15); }
+.reader-btn { font: inherit; font-size: 21px; padding: 3px 14px; background: #f6ecd6; color: #3b2a1d; border: 3px solid #1d130a; cursor: pointer; }
+.reader-btn:hover { background: #fff3c4; }
+.reader-btn:disabled { opacity: .4; cursor: default; background: #f6ecd6; }
 .lib-note { margin: 8px 0 0; font-size: 17px; opacity: .7; }
 
 #reader { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; background: #f4ead2; color: #2b2118; }
@@ -552,7 +494,6 @@ div.pair-box { cursor: default; }
 .lin-result ul { margin: 6px 0 0; padding-left: 20px; }
 .lin-result .factor-line { font-family: var(--body); font-size: 30px; }
 @media (max-width: 900px) { .lin-play { flex-wrap: wrap; } .lin-board { flex: 1 1 100%; } }
-
 
 /* ---------- the polynomial coaster: build a minecart track from an equation (a Minecraft look: iron rails on oak ties, block buttons, TNT) ---------- */
 #cst { grid-template-columns: minmax(0, 1fr); }   /* the window is never wider than the screen: a long line must fit INSIDE it (without this the grid column grows to fit the line and the window with it) */
@@ -644,7 +585,6 @@ div.pair-box { cursor: default; }
 .tcase-tip.got { background: #e4f6d6; border-color: #4b9a3a; }
 .tcase-tip.got .prog { color: #1c5d12; }
 @media (max-width: 760px) { .tcase-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-
 
 /* ---------- the kelly-green look: the new default for menus (the vertex table and the lesson window first) ----------
    A middle ground between the blocky inventory style and a clean one. Kept from the blocky look: the pixel heading font, square block icons, the gold accent and a
@@ -872,10 +812,6 @@ div.pair-box { cursor: default; }
 .kelly .poly-steps { display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
 .kelly .poly-step { padding: 12px 14px; background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; }
 .kelly .poly-step h3 { margin: 0 0 10px; font-family: var(--px); font-size: 13px; font-weight: 400; letter-spacing: .06em; text-transform: uppercase; color: #fff; text-shadow: var(--k-pop); }
-.kelly .poly-grid { display: flex; flex-wrap: wrap; gap: 8px 14px; }
-.kelly .poly-prod { display: inline-flex; align-items: center; gap: 8px; }
-.kelly .poly-cap { font-size: 20px; font-weight: 700; color: #fff; white-space: nowrap; }
-.kelly .poly-eq { font-size: 22px; font-weight: 800; color: #fff; }
 .kelly .poly-pow { min-width: 1ch; font-size: 28px; font-weight: 800; color: #fff; text-shadow: var(--k-pop); }
 .kelly .poly-combine, .kelly .poly-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .kelly .poly-plus { font-size: 28px; font-weight: 800; color: #fff; text-shadow: var(--k-pop); }
@@ -886,15 +822,13 @@ div.pair-box { cursor: default; }
 .kelly .poly-num.miss { border-color: #ff9a8a; background: #4a1d1d; }
 @media (max-width: 760px) {
   .poly-panel { padding: 16px 14px 20px; }
-  .kelly .poly-step { padding: 10px 10px; }
-  .kelly .poly-prod { flex-wrap: wrap; max-width: 100%; }                                   /* a long caption like (-3x\u00b2) \u00b7 (-3x\u00b2) may put its box on the next line instead of overflowing */
+  .kelly .poly-step { padding: 10px 10px; }                                   /* a long caption like (-3x\u00b2) \u00b7 (-3x\u00b2) may put its box on the next line instead of overflowing */
   .kelly .poly-num { width: 64px; height: 48px; font-size: 22px; }
-  .kelly .poly-cap { font-size: 17px; white-space: normal; overflow-wrap: anywhere; }
 }
 
 /* the distributive-property arches: each term of the first polynomial gets a colour, and an arch of that colour runs to each term of the second */
 .kelly .poly-stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.kelly .poly-step, .kelly .poly-grid, .kelly .poly-steps { min-width: 0; max-width: 100%; }
+.kelly .poly-step, .kelly .poly-steps { min-width: 0; max-width: 100%; }
 .kelly .poly-round { margin: 6px 0 0; font-family: var(--px); font-size: 14px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; color: #fff; text-shadow: var(--k-pop); }
 .kelly .poly-arch { position: relative; display: block; box-sizing: border-box; min-width: 0; max-width: 100%; margin: 2px 0 10px; padding: 68px 12px; text-align: center; overflow-x: auto; white-space: nowrap; font-size: 38px; font-weight: 800; line-height: 1.2; color: #fff; text-shadow: var(--k-pop); }
 .kelly .poly-term { display: inline-block; padding: 0 3px; margin: 0 1px; border-bottom: 4px solid transparent; }
@@ -987,7 +921,6 @@ div.pair-box { cursor: default; }
 .kelly .ware-name small { color: var(--k-muted); }
 .kelly select { background: var(--k-deep); color: var(--k-text); border: 2px solid var(--k-edge); border-radius: 6px; font-family: var(--k-body); font-weight: 700; }
 .kelly .tree-misfits { color: #ffb3a6; }
-.kelly .bet-low { color: var(--k-muted); font-family: var(--k-body); }
 
 /* the Polynomial Coaster's ride result: a dark card with a green edge when you rode well */
 .kelly .cst-fb { background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; color: var(--k-text); font-family: var(--k-body); font-weight: 600; }
@@ -999,16 +932,151 @@ div.pair-box { cursor: default; }
 .kelly .cst-hint b { color: var(--k-gold); font-weight: 800; }
 .kelly .slot.match, .kelly .slot.output.match { background: #1f7a14; border-color: #8be86a; color: var(--k-text); }
 
-/* ---------- the House of Algebra: the Missing Number booth ---------- */
-.eqn-panel { width: min(900px, 100%); padding: 24px 28px 28px; }
-.eqn-panel .craft-head { margin-bottom: 14px; }
-.kelly .eqn-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 18px; padding: 18px 8px; font-size: 64px; font-weight: 800; line-height: 1.1; color: #fff; text-shadow: var(--k-pop); }
-.kelly .eqn-box { box-sizing: border-box; width: 132px; height: 92px; padding: 0 8px; text-align: center; font-family: var(--k-body); font-size: 58px; font-weight: 800; color: #fff; background: var(--k-ground); border: 5px solid var(--k-gold); border-radius: 10px; text-shadow: none; }
+/* ---------- the House of Algebra: the equation booths (compact, no scrolling: the equation and a number pad side by side, the answer card in the pad's place) ---------- */
+.eqn-panel { width: min(860px, 100%); padding: 16px 24px 20px; }
+.eqn-panel .craft-head { margin-bottom: 6px; }
+/* the level picker */
+.kelly .eqn-panel .bet-prompt { margin: 2px 0 6px; font-size: 17px; }
+.kelly .eqn-panel .bet-grid { gap: 10px; margin-top: 4px; }
+.kelly .eqn-panel .bet-card { padding: 10px 12px; gap: 5px; min-height: 0; }
+.kelly .eqn-panel .k-ico { height: 54px; }
+.kelly .eqn-panel .bet-desc { font-size: 15px; line-height: 1.25; }
+.kelly .eqn-panel .cub-ref { margin-top: 10px; padding: 8px 12px; gap: 2px; }
+.kelly .eqn-panel .cub-ref p { font-size: 16px; line-height: 1.3; }
+/* playing: the equation on the left, the number pad (or, once you have answered, the worked solution) on the right */
+.eqn-play { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 4px 22px; align-items: start; }
+.eqn-main { min-width: 0; }
+.kelly .eqn-panel .wager-line { margin: 6px 0 0; }
+.kelly .eqn-panel .felt { margin: 8px 0 6px; }
+.kelly .eqn-panel .hint { margin: 2px 0; font-size: 15px; }
+.kelly .eqn-panel .msg { margin: 4px 0 0; }
+.kelly .eqn-line { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; padding: 14px 6px; font-size: 54px; font-weight: 800; line-height: 1.1; color: #fff; text-shadow: var(--k-pop); }
+.kelly .eqn-box { box-sizing: border-box; width: 120px; height: 80px; padding: 0 8px; text-align: center; font-family: var(--k-body); font-size: 50px; font-weight: 800; color: #fff; background: var(--k-ground); border: 5px solid var(--k-gold); border-radius: 10px; text-shadow: none; }
 .kelly .eqn-box:focus { outline: 4px solid #fff; outline-offset: 3px; }
 .kelly .eqn-box:disabled { color: #fff; -webkit-text-fill-color: #fff; opacity: 1; }
 .kelly .eqn-box.ok { border-color: #8be86a; }
 .kelly .eqn-box.miss { border-color: #ff9a8a; background: #4a1d1d; }
-@media (max-width: 760px) { .eqn-panel { padding: 16px 14px 20px; } .kelly .eqn-line { font-size: 44px; gap: 8px 12px; } .kelly .eqn-box { width: 96px; height: 70px; font-size: 42px; } }
+.eqn-pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.kelly .eqn-key { min-height: 58px; padding: 0; font: 800 28px var(--k-body); }
+.kelly .eqn-keycheck { font-size: 18px; }
+.eqn-after { margin-top: 8px; }
+.kelly .eqn-after .result { margin: 0; padding-top: 8px; }
+.kelly .eqn-after .final { margin: 0 0 6px; padding: 6px 10px; }
+.kelly .eqn-after .final-expr { font-size: 30px; line-height: 1.15; }
+.kelly .eqn-after .final-expr + .final-expr { margin-top: 2px; }
+#nbg .eqn-after .final-expr { font-size: 23px; white-space: nowrap; }       /* two lines, each a whole equation */
+.kelly .eqn-after .worked summary { font-size: 14px; }
+.kelly .eqn-after .work { margin: 4px 0 0; padding-left: 20px; }
+.kelly .eqn-after .work li { font-size: 15px; line-height: 1.3; }
+.eqn-after .cub-actions { margin-top: 8px; flex-wrap: nowrap; }
+.eqn-after .cub-actions .btn { flex: 1 1 0; min-width: 0; padding: 10px 6px; }
+/* once you have answered, the problem has done its job: the hint goes, and the Numbers Game's diamond shrinks, so the answer and its steps have the room */
+.eqn-play.answered .hint { display: none; }
+.kelly .eqn-play.answered .eqn-line.nbg { padding: 6px; gap: 2px 8px; }
+.kelly .eqn-play.answered .nbg-num { font-size: 32px; }
+.kelly .eqn-play.answered .nbg .eqn-box { width: 96px; height: 56px; font-size: 34px; }
+.kelly .eqn-play.answered .nbg-x { width: 56px; height: 36px; }
+#nbg .eqn-after .work li { font-size: 14px; line-height: 1.25; }
+#nbg .eqn-after .final { padding: 5px 8px; }
+/* a booth with negative answers: a fourth column for backspace, plus-or-minus and 0, and Check as a wide key underneath (so the pad is no taller) */
+.eqn-pad4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.eqn-pad4 .eqn-keycheck { grid-column: 1 / -1; min-height: 48px; }
+.kelly .eqn-key:disabled { opacity: .4; cursor: not-allowed; }
+/* the Numbers Game: the product above, the two boxes either side of a cross, the sum below */
+.kelly .eqn-line.nbg { display: grid; grid-template-columns: auto auto auto; justify-content: center; align-items: center; gap: 4px 10px; padding: 10px 6px; }
+.nbg-top, .nbg-bot { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; line-height: 1.05; }
+.kelly .nbg-cap { font-size: 14px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--k-gold); text-shadow: none; }
+.kelly .nbg-num { font-size: 46px; }
+.nbg-x { width: 76px; height: 54px; background:
+  linear-gradient(to top right, transparent calc(50% - 2px), var(--k-gold) calc(50% - 2px), var(--k-gold) calc(50% + 2px), transparent calc(50% + 2px)),
+  linear-gradient(to bottom right, transparent calc(50% - 2px), var(--k-gold) calc(50% - 2px), var(--k-gold) calc(50% + 2px), transparent calc(50% + 2px)); }
+@media (max-width: 760px) {
+  .eqn-panel { padding: 10px 10px 12px; }
+  .eqn-panel .k-formula { display: none; }
+  .eqn-play { grid-template-columns: minmax(0, 1fr); }
+  .eqn-side { width: 100%; max-width: 340px; margin: 0 auto; }
+  .kelly .eqn-line { font-size: 38px; padding: 8px 4px; gap: 6px 10px; }
+  .kelly .eqn-box { width: 84px; height: 58px; font-size: 36px; border-width: 4px; }
+  .kelly .eqn-key { min-height: 48px; font-size: 24px; }
+  .kelly .eqn-line.nbg { padding: 6px 4px; gap: 2px 8px; }
+  .kelly .nbg-num { font-size: 34px; }
+  .kelly .nbg-cap { font-size: 12px; }
+  .nbg-x { width: 56px; height: 40px; }
+  .eqn-pad4 .eqn-keycheck { min-height: 44px; }
+  .kelly .eqn-play.answered .wager-line { display: none; }
+  .kelly .eqn-play.answered .felt { margin: 4px 0 2px; }
+  .kelly .eqn-play.answered .eqn-line.nbg { padding: 3px; gap: 0 6px; }
+  .kelly .eqn-play.answered .nbg-num { font-size: 22px; }
+  .kelly .eqn-play.answered .nbg-cap { font-size: 10px; }
+  .kelly .eqn-play.answered .nbg .eqn-box { width: 64px; height: 38px; font-size: 22px; border-width: 3px; }
+  .kelly .eqn-play.answered .nbg-x { width: 36px; height: 22px; }
+  #nbg .eqn-after .work li { font-size: 13px; line-height: 1.22; }
+  .kelly .eqn-panel .wager-line { margin-top: 4px; padding: 4px 10px; font-size: 15px; }
+  .kelly .eqn-panel .hint { display: none; }
+  .kelly .eqn-after .final-expr { font-size: 26px; }
+  #nbg .eqn-after .final-expr { font-size: 21px; }
+  .kelly .eqn-panel .bet-prompt { font-size: 15px; margin: 0 0 4px; }
+  .kelly .eqn-panel .bet-grid { grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 2px; }
+  .kelly .eqn-panel .bet-card { display: grid; grid-template-columns: 128px minmax(0, 1fr); grid-template-areas: "ico amt" "ico win"; align-items: center; column-gap: 12px; row-gap: 2px; padding: 8px 10px; text-align: left; }
+  .kelly .eqn-panel .k-ico { grid-area: ico; height: 46px; }
+  .kelly .eqn-panel .bet-amt { grid-area: amt; }
+  .kelly .eqn-panel .bet-win { grid-area: win; }
+  .kelly .eqn-panel .bet-desc { display: none; }
+  .kelly .eqn-panel .cub-ref { margin-top: 8px; padding: 6px 10px; }
+  .kelly .eqn-panel .cub-ref p { font-size: 14px; }
+  .kelly .eqn-panel .cub-ref p + p { display: none; }
+  .eqn-panel .craft-head { gap: 4px; }
+  .kelly .eqn-panel .craft-meta { flex-wrap: wrap; gap: 6px; width: 100%; justify-content: space-between; }       /* one row on any normal phone; wraps rather than overlaps on a tiny one */
+  .kelly .eqn-panel .craft-meta > * { flex: 0 0 auto; font-size: 12px; line-height: 1.2; padding: 5px 6px; letter-spacing: 0; white-space: nowrap; }
+  .kelly .eqn-panel .k-titlerow h2 { font-size: 19px; color: #fff3cf; }       /* small text needs 4.5:1, and gold on this green is only 3.7 (the big title on a desktop only needs 3), so it is a paler gold here */
+  .kelly .eqn-panel .poly-sample { font-size: 18px; white-space: nowrap; }
+  .kelly .eqn-panel .msg { font-size: 16px; padding: 4px 8px; margin-top: 2px; }
+}
 
 /* the Kelly Green set: a gold edge on the swatch, like the gold outline on the clothes */
 .swatch.outlined { border-color: #ffc933; box-shadow: inset 0 0 0 2px #1a1100, 0 0 0 1px #ffc933; }
+
+/* short phones (about 700 px tall or less, like an iPhone SE or a small Android): smaller keys and tighter spacing, so the window still fits without scrolling */
+@media (max-width: 760px) and (max-height: 700px) {
+  .eqn-panel { padding: 8px 8px 10px; }
+  .eqn-panel .k-wing { display: none; }
+  .kelly .eqn-panel .k-titlerow h2 { font-size: 17px; }
+  .eqn-panel .craft-head { margin-bottom: 4px; }
+  .kelly .eqn-panel .wager-line { margin-top: 2px; padding: 3px 8px; font-size: 13px; }
+  .kelly .eqn-panel .felt { margin: 6px 0 4px; }
+  .kelly .eqn-line { font-size: 32px; padding: 6px 4px; }
+  .kelly .eqn-box { width: 72px; height: 50px; font-size: 30px; border-width: 3px; }
+  .eqn-pad { gap: 6px; margin-top: 4px; }
+  .kelly .eqn-key { min-height: 44px; font-size: 22px; }
+  .kelly .eqn-keycheck { font-size: 16px; }
+  .kelly .eqn-line.nbg { padding: 4px; gap: 0 8px; }
+  .kelly .nbg-num { font-size: 26px; }
+  .kelly .nbg-cap { font-size: 10px; }
+  .nbg-x { width: 44px; height: 28px; }
+  .kelly .eqn-play.answered .nbg-cap { display: none; }
+  .kelly .eqn-play.answered .nbg-num { font-size: 20px; }
+  #nbg .eqn-after .work li { font-size: 12.5px; line-height: 1.2; }
+  #nbg .eqn-after .final-expr { font-size: 17px; }
+  .kelly .eqn-panel .bet-prompt { display: none; }
+  .kelly .eqn-panel .bet-card { padding: 6px 8px; row-gap: 0; }
+  .kelly .eqn-panel .k-ico { height: 38px; }
+  .kelly .eqn-panel .bet-win em { display: none; }
+  .kelly .eqn-panel .cub-ref { margin-top: 6px; padding: 5px 8px; }
+  .kelly .eqn-panel .cub-ref p { font-size: 13px; line-height: 1.25; }
+  .kelly .eqn-panel .k-label { font-size: 9px; }
+  .kelly .eqn-panel .msg { font-size: 14px; padding: 2px 8px; }
+  .kelly .eqn-after .result { padding-top: 4px; }
+  .kelly .eqn-after .final { padding: 4px 8px; margin-bottom: 4px; }
+  .kelly .eqn-after .final-label { display: none; }
+  .kelly .eqn-after .final-expr { font-size: 22px; }
+  #nbg .eqn-after .final-expr { font-size: 18px; }
+  .kelly .eqn-after .work li { font-size: 13px; line-height: 1.25; }
+  .eqn-after .cub-actions { margin-top: 4px; }
+  .eqn-after .cub-actions .btn { padding: 7px 4px; font-size: 14px; }
+}
+
+/* the quest tracker (Remy's Eye): one line, under the chips */
+#quest { position: absolute; top: 64px; left: 12px; max-width: min(340px, calc(100vw - 24px)); padding: 7px 10px 8px; background: rgba(8, 26, 8, .86); border: 2px solid #6cc84a; border-radius: 8px; color: #fff; font: 700 15px/1.25 'Nunito', system-ui, sans-serif; }
+#quest b { display: block; margin-bottom: 2px; font: 400 12px/1.2 'Silkscreen', monospace; letter-spacing: .06em; text-transform: uppercase; color: #ffc45c; }
+#quest span { display: block; }
+@media (max-width: 760px) { #quest { top: 52px; font-size: 13px; padding: 5px 8px 6px; } }

@@ -12,7 +12,6 @@ const Minefield = (() => {
   const CAP = M.PLOT * M.PLOT;                    // the most squares there ever are (the Hard level)
   const SHRINK = 0.16;                            // seconds for a square of grass to sink when it is dug
   const RIPPLE = 0.045;                           // seconds between one ring of a patch opening and the next
-  const WAIT = { toast: 0 };
   const DIGIT_COLORS = ['#5ab0ff', '#62e06f', '#ff6b6b', '#b98cff', '#ffb347', '#40e0d0', '#ffffff', '#ff8fd1'];   // bright, so they read on dirt
 
   function create(zone) {
@@ -27,7 +26,7 @@ const Minefield = (() => {
     let game = null, level = 1;
     const anim = new Map();                        // squares whose grass is sinking: i -> { delay, t, depth }
     const numberAt = new Map();                    // squares showing a number (so far): i -> n
-    let wrongFlags = [], bombsShown = [];
+    let wrongFlags = [];
     let endAt = -1, shake = 0;
 
     /* ----- the meshes, made once for the biggest grid and re-laid out for each level ----- */
@@ -149,7 +148,7 @@ const Minefield = (() => {
     }
 
     function resetVisuals() {
-      anim.clear(); numberAt.clear(); wrongFlags = []; bombsShown = []; endAt = -1;
+      anim.clear(); numberAt.clear(); wrongFlags = []; endAt = -1;
       bomb.count = spark.count = 0; crater.visible = false;
       layout(); rebuildNumbers(); rebuildFlags();
     }
@@ -177,7 +176,6 @@ const Minefield = (() => {
       const c = M.tileCenter(level, i), rep = M.report(game);
       wrongFlags = rep.wrongFlags;
       showBombs([i, ...rep.bombs.filter(b => b !== i)], i);
-      bombsShown = [i, ...rep.bombs];
       // the bombs you did not flag come up out of the grass, starting nearest the one that went off
       rep.bombs.forEach(b => { const d = M.tileCenter(level, b); anim.set(b, { delay: 0.25 + Math.hypot(d.x - c.x, d.z - c.z) * 0.06, t: 0, depth: 0, bomb: true }); });
       setGrass(i, 0); grass.instanceMatrix.needsUpdate = true;
@@ -198,7 +196,6 @@ const Minefield = (() => {
       Trophies.award('mines');
       Store.set({ minesWins: (Store.get().minesWins || 0) + 1 });
       if (!reduced()) {
-        const L = Lv();
         for (let k = 0; k < 6; k++) {
           const x = M.PLOT_AT.x0 + Math.random() * M.PLOT, z = M.PLOT_AT.z0 + Math.random() * M.PLOT;
           burst(k % 2 ? 'gold' : 'green', x, 0.8, z, 6, 1.2, 6.5, 0.15, 1.6);

@@ -10,7 +10,7 @@
    Each wing is 28 x 22, a little smaller than the 30 x 24 Arithmetic Academy. Coordinates: x grows east, z grows south, so you walk
    north (toward -z) from the door. The numbers that other code and the tests rely on are exported at the bottom. */
 const CasinoInterior = (() => {
-  const BUILD = 42; // bump together with the ?v= numbers in index.html
+  const BUILD = 45; // bump together with the ?v= numbers in index.html
 
   /* ---------- the plan ---------- */
   const WALL = 0.5;                                                        // wall thickness
@@ -205,7 +205,7 @@ const CasinoInterior = (() => {
 
   /* ---------- the build ---------- */
   function build(actions, H) {
-    const { box, flat, lambert, glow, textPlane, makeSign, solid, interact, createZone, buildTable, spawnNPCs, waterSurface } = H;
+    const { box, flat, lambert, glow, textPlane, makeSign, solid, interact, createZone, buildTable, spawnNPCs } = H;
     const zone = createZone('Prime Time Casino', {
       spawn: SPAWN,
       bounds: { minX: -45.4, maxX: 45.4, minZ: -36.0, maxZ: 14.9 },
@@ -492,7 +492,6 @@ const CasinoInterior = (() => {
       against the ceiling. Open blossoms, long trumpets, ruffled saucers, buds and curling tendrils (a few instanced shapes, each piece its own colour and angle),
       denser in the middle. It is still: nothing flickers. The layout is seeded, so it is the same every time. */
   function addGlassSculpture(zone, H, x, z, { ceilingY }) {
-    const { lambert } = H;
     const g = new THREE.Group(); g.position.set(x, 0, z); zone.group.add(g);
     const y0 = ceilingY - 0.1, A = 10.2, B = 8.8, D = 2.4;                  // the armature: the lower half of an ellipsoid, hung against the ceiling
     const bowl = new THREE.Mesh(new THREE.SphereGeometry(1, 30, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x7a5a26 }));      // (unlit warm bronze, so any gap between pieces is warm, never a black hole)

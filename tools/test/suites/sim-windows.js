@@ -3,16 +3,16 @@
 const assert = require('assert');
 const { plain } = require('../lib/util');
 const { WINDOWS } = require('../lib/windows');
-const PAY = { '#tri': 'trinomial', '#rad': 'radical', '#par': 'parabola', '#vtx': 'vertex', '#cub': 'cubes', '#pmul': 'polymul', '#padd': 'polyadd', '#eqn': 'missing', '#eqm': 'muldiv' };
+const PAY = { '#tri': 'trinomial', '#rad': 'radical', '#par': 'parabola', '#vtx': 'vertex', '#cub': 'cubes', '#pmul': 'polymul', '#padd': 'polyadd', '#eqn': 'missing', '#eqm': 'muldiv', '#nbg': 'numbers' };
 
 module.exports = { name: 'sim:windows', tier: 'sim', covers: ['index.html', 'js/*.js'], run: async ctx => {
-  const s = ctx.sim(), { doc, w, T, $ } = s; s.start(); await s.frames(3);
+  const s = ctx.sim(), { doc, T, $ } = s; s.start(); await s.frames(3);
   // closed at the start, and every window that is in the page wears the template
   assert.ok([...doc.querySelectorAll('.overlay')].every(o => o.classList.contains('hidden')), 'every window starts closed');
   assert.deepStrictEqual([...doc.querySelectorAll('.overlay')].filter(o => !o.classList.contains('kelly')).map(o => o.id), [], 'every window in the page wears the green template');
   assert.ok($('start-screen').classList.contains('kelly') && $('reader').classList.contains('kelly'), 'and so do the title screen and the reader');
   assert.strictEqual(doc.querySelectorAll('.chalk-board, .chalk-head, .chalk-btn, .chalk-chip, .lib-box, .lib-head, .lib-btn, .plan-board, .plan-head, .plan-btn, .plan-chip').length, 0, 'none of the old chrome is left');
-  const G = s.G, opened = [];
+  const opened = [];
   for (const [name, win] of Object.entries(WINDOWS)) {
     if (name === 'lesson') continue;                                   // (the lesson needs a table context; the lesson suites cover it)
     s.exec(win.open); await s.frames(2);

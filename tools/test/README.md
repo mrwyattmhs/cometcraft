@@ -28,8 +28,8 @@ play-cubes 17 s, play-mines 7-15 s, walk 45-55 s, plus about 25 s once to start 
 | Tier | What it is | Suites |
 |---|---|---|
 | unit | plain Node, the rules and the data | `tests/*.test.js` (22: payouts, trophies, every game's maths, the casino plan, the green palette's contrast ...) |
-| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the village and casino layout, measured, with a flood fill from the start), `sim:house` (the room inside the House of Algebra), `sim:polynomials`, `sim:cubes`, `sim:equations` |
-| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-equations`, `browser:play-mines` (real typing and clicking, and the arches measured on screen), `browser:walk` (a real keyboard walk through the casino archway to the tables), `browser:walk-house` (in through the House's doors, to its booth, out, and along the street of shops) |
+| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the village and casino layout, measured, with a flood fill from the start), `sim:house` (the room inside the House of Algebra), `sim:polynomials`, `sim:cubes`, `sim:equations`, `sim:numbers`, `sim:wardrobe`, `sim:quest` (Remy's Eye played from the first pet to the cat on the bed) |
+| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-equations`, `browser:play-numbers`, `browser:play-mines`, `browser:wardrobe`, `browser:quest` (real typing, tapping and clicking; the arches measured on screen; no scrolling at four screen sizes; the gold outlines counted in pixels), `browser:walk` (a real keyboard walk through the casino archway to the tables), `browser:walk-house` (in through the House's doors, to its booth, out, and along the street of shops) |
 | deep | long checks, only with `--full` or `--tier deep` | none yet |
 
 **Not rebuilt yet** (the old versions were lost when the work machine reset): the casino exterior flicker check, the chapel, the dorm's 3D pixels, and real-input flows for Lines, Coaster,
@@ -39,7 +39,8 @@ Practice, the library and the map. Their logic is covered by the unit tests and 
 
 ```
 node tools/test/self-check.js           # about 1 minute
-node tools/test/self-check.js --slow    # adds the real-browser breaks, about 5 minutes
+node tools/test/self-check.js --slow    # adds the real-browser breaks, about 8 minutes
+node tools/test/self-check.js --slow --only "number pad"    # just the breaks whose description contains that text
 ```
 
 It copies the project, breaks one thing at a time in the copy (a trophy never awarded, a window without the template, the minefield back beside the lamp ...) and requires the right
@@ -52,7 +53,16 @@ node tools/bundle.js            # dist/prime-time-preview.html (one file, for th
 node tools/bundle.js --check    # is dist/ stale?     node tools/bundle.js --version    # do every ?v= and BUILD agree?
 ```
 It reproduces the published preview byte for byte, and the zip is deterministic. `run.js` refuses to run if the version numbers disagree.
-To release: bump `BUILD` in `js/*.js` and every `?v=` in `index.html` together, `node tools/test/run.js`, then `node tools/bundle.js --out <where it goes>`.
+To release: `node tools/bump.js` (bumps every `BUILD` in `js/` and every `?v=` in `index.html` together), `node tools/test/run.js`, then `node tools/bundle.js --out <where it goes>`.
+
+## Keeping the code tidy
+
+Two checks found real dead code in November 2026 and are worth repeating now and then (neither needs anything installed in the project):
+
+- **Unused local variables and unreachable code:** ESLint with only `no-unused-vars` (`vars: local`), `no-unreachable`, `no-dupe-keys`, `no-useless-return` over `js/` and `tools/`. Ignore the warnings about each file's one top-level name (`Player`, `World` ...): those are used from other files, which a per-file linter cannot see.
+- **Dead CSS:** list every class in `css/style.css` and keep the ones whose name appears nowhere in `index.html` or `js/`. Check by hand for names built at run time (`rb-${type}` in the reader) before deleting a rule.
+
+After either, `node tools/test/run.js` runs exactly the suites the cleanup touched.
 
 ## Setup
 

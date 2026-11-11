@@ -1,7 +1,7 @@
 // A real keyboard walk (real Chromium, slow motion) into the House of Algebra and out again, and along the new street of shops: up to the doors and E to go in, the aisle, both booths and
 // E to open them, back to the door and E to leave; then along the street from the sidewalk, and into the front of a shop (it is solid). Everything else about the layout is measured in Node.
 const assert = require('assert');
-module.exports = { name: 'browser:walk-house', tier: 'browser', covers: ['js/house.js', 'js/world.js', 'js/player.js', 'js/collide.js', 'js/main.js', 'js/equation-game.js', 'index.html'], timeout: 900000, run: async ctx => {
+module.exports = { name: 'browser:walk-house', tier: 'browser', covers: ['js/house.js', 'js/world.js', 'js/player.js', 'js/collide.js', 'js/main.js', 'js/booth-game.js', 'index.html'], timeout: 900000, run: async ctx => {
   const g = await ctx.browser(), { page } = g;
   const pos = () => page.evaluate(() => ({ x: Player.x, z: Player.z, zone: __primeTime.getZone().name }));
   const walk = async (cond, maxMs) => { await page.keyboard.down('ShiftLeft'); await page.keyboard.down('KeyW'); const t0 = Date.now(); let p; do { await g.sleep(120); p = await pos(); } while (!cond(p) && Date.now() - t0 < maxMs); await page.keyboard.up('KeyW'); await page.keyboard.up('ShiftLeft'); await g.sleep(200); return pos(); };
@@ -18,6 +18,8 @@ module.exports = { name: 'browser:walk-house', tier: 'browser', covers: ['js/hou
   assert.strictEqual(await page.evaluate(() => EquationGame.isOpen()), true, 'E opens the Missing Number table'); await page.keyboard.press('Escape'); await g.sleep(300); assert.strictEqual(await page.evaluate(() => EquationGame.isOpen()), false);
   await g.at(8.0, -2.5, -Math.PI / 2, 0.02); assert.ok(await prompt(/Visit the Multiply & Divide booth/), 'the booth across the aisle shows its prompt'); await page.keyboard.press('KeyE'); await g.sleep(500);
   assert.strictEqual(await page.evaluate(() => MulDivGame.isOpen() && !EquationGame.isOpen()), true, 'E opens the Multiply and Divide table'); await page.keyboard.press('Escape'); await g.sleep(300); assert.strictEqual(await page.evaluate(() => MulDivGame.isOpen()), false);
+  await g.at(-8.0, 3.0, Math.PI / 2, 0.02); assert.ok(await prompt(/Visit the Numbers Game booth/), 'the third booth, next to the first, shows its prompt'); await page.keyboard.press('KeyE'); await g.sleep(500);
+  assert.strictEqual(await page.evaluate(() => NumbersGame.isOpen() && !EquationGame.isOpen()), true, 'E opens the Numbers Game'); await page.keyboard.press('Escape'); await g.sleep(300); assert.strictEqual(await page.evaluate(() => NumbersGame.isOpen()), false);
   /* ---------- and out ---------- */
   await g.at(0, 9.0, Math.PI, 0); await walk(q => q.z > 10.3, 40000); assert.ok(await prompt(/Leave the House of Algebra/), 'the way out shows its prompt'); await page.keyboard.press('KeyE'); await g.sleep(700);
   p = await pos(); assert.strictEqual(p.zone, 'Prime Time Village', 'E takes you back out'); assert.ok(Math.hypot(p.x - F.ex, p.z - F.ez) < 0.6, `in front of the doors (${p.x.toFixed(1)}, ${p.z.toFixed(1)})`);
@@ -25,5 +27,5 @@ module.exports = { name: 'browser:walk-house', tier: 'browser', covers: ['js/hou
   await g.at(-7.5, F.sz, Math.PI / 2, 0); p = await walk(q => q.x < -10.5, 40000); assert.ok(p.x < -9, `walked along the street, away from the road (x ${p.x.toFixed(2)})`);
   const stopZ = F.sz - 6.5 + 3.1 + 0.35;                                                                                                  // the north-side shop's front wall, plus your own width
   await g.at(-14, F.sz, 0, 0); p = await walk(q => q.z < stopZ - 1, 40000); assert.ok(Math.abs(p.z - stopZ) < 0.6, `the front of the shop on the north side is solid: you stop at it (z ${p.z.toFixed(2)}, expected about ${stopZ.toFixed(2)})`);
-  ctx.log('in through the doors, up the aisle, both booths open, out again; along the street and stopped by a shop front');
+  ctx.log('in through the doors, up the aisle, all three booths open, out again; along the street and stopped by a shop front');
 } };

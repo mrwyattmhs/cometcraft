@@ -71,7 +71,7 @@ const Pets = (() => {
     },
 
     cat(g, p) {
-      const m = lam(p.body), md = lam(p.dark), mb = lam(p.belly), mn = lam(p.nose), eye = lam(0x3f9a4a);
+      const m = lam(p.body), mb = lam(p.belly), mn = lam(p.nose), eye = lam(0x3f9a4a);
       const calico = p.patch !== undefined;
       const patch = calico ? lam(p.patch) : null, tan = calico ? lam(p.tan) : null;
       part(g, 0.26, 0.24, 0.5, m, 0, 0.3, 0);
@@ -223,5 +223,23 @@ const Pets = (() => {
     };
   }
 
-  return { PALETTES, make, animate, createFollower };
+  /** An eye patch over one eye, with its strap round the head (or none). For Remy, whose eye fell out. */
+  function setEyePatch(pet, on) {
+    const head = pet.userData.parts.head; let p = pet.userData.patch;
+    if (on && !p) {
+      p = new T.Group(); const black = lam(0x101014);
+      part(p, 0.078, 0.078, 0.03, black, 0.055, 0.02, 0.112);                              // the patch, over the eye on the plain side of her face
+      part(p, 0.234, 0.024, 0.214, black, 0, 0.055, 0).rotation.z = -0.3;                  // the strap, slanting round the head
+      head.add(p); pet.userData.patch = p;
+    }
+    if (p) p.visible = !!on;
+  }
+  /** Lying down with the legs tucked under: a cat asleep on a bed. (Do not call animate() on a pet that is lying down.) */
+  function lie(pet) {
+    const { parts, body } = pet.userData;
+    parts.legs.forEach(l => { l.rotation.x = 0; l.visible = false; });
+    body.position.y = -0.17; parts.head.position.y -= 0.04; pet.userData.lying = true;
+  }
+
+  return { PALETTES, make, animate, createFollower, setEyePatch, lie };
 })();

@@ -3,8 +3,8 @@
 const assert = require('assert');
 const { plain } = require('../lib/util');
 
-module.exports = { name: 'sim:house', tier: 'sim', covers: ['js/house.js', 'js/world.js', 'js/main.js', 'js/equations.js', 'js/equation-game.js', 'js/trophies.js', 'js/ui.js', 'index.html'], run: async ctx => {
-  const s = ctx.sim(), { T, G, $ } = s, W = T.World, Hs = T.House, house = G.house, hub = G.hub, R = Hs.ROOM; s.start(); await s.frames(2);
+module.exports = { name: 'sim:house', tier: 'sim', covers: ['js/house.js', 'js/world.js', 'js/main.js', 'js/equations.js', 'js/equations-md.js', 'js/number-pairs.js', 'js/booth-game.js', 'js/trophies.js', 'js/ui.js', 'index.html'], run: async ctx => {
+  const s = ctx.sim(), { T, G } = s, W = T.World, Hs = T.House, house = G.house, hub = G.hub, R = Hs.ROOM; s.start(); await s.frames(2);
   const blocked = (x, z, r = 0.35) => W.Collide.blocked(house, x, z, r);
 
   /* ---------- the room ---------- */
@@ -22,15 +22,16 @@ module.exports = { name: 'sim:house', tier: 'sim', covers: ['js/house.js', 'js/w
   assert.ok(kinds.drumkit[0].userData.at.z < -10 && Math.abs(kinds.drumkit[0].userData.at.x) < 1, 'the drum kit is at the back, in the middle'); assert.ok(Math.abs(kinds.micstand[0].userData.at.x) < 1, 'the mic stand is at centre stage');
 
   /* ---------- the booths ---------- */
-  const B = plain(Hs.BOOTHS); assert.strictEqual(B.length, 2, 'two booths so far: a booth is only built when its table exists (the unused placeholder booths are gone)'); assert.deepStrictEqual(B.map(b => b.unit), [1, 2], 'one booth for each unit');
-  assert.deepStrictEqual(B.map(b => b.id), ['missing', 'muldiv']); assert.ok(B.every(b => b.title && b.sub && b.label && b.symbols.length >= 1 && b.color), 'each has its own sign, prompt and floating symbols');
-  const west = B.filter(b => b.face === 'E'), east = B.filter(b => b.face === 'W'); assert.deepStrictEqual([west.length, east.length], [1, 1], 'one on each side of the aisle');
+  const B = plain(Hs.BOOTHS); assert.strictEqual(B.length, 3, 'three booths so far: a booth is only built when its table exists (there are no placeholder booths)'); assert.deepStrictEqual(B.map(b => b.unit), [1, 2, 3], 'one booth for each unit');
+  assert.deepStrictEqual(B.map(b => b.id), ['missing', 'muldiv', 'numbers']); assert.ok(B.every(b => b.title && b.sub && b.label && b.symbols.length >= 1 && b.color), 'each has its own sign, prompt and floating symbols');
+  const west = B.filter(b => b.face === 'E'), east = B.filter(b => b.face === 'W'); assert.deepStrictEqual([west.length, east.length], [2, 1], 'two on the west wall and one on the east');
   assert.ok(B[0].face === 'E' && B[1].face === 'W' && B[0].z === B[1].z && B[0].x === -B[1].x, 'facing each other across the aisle, next to the stage');
-  assert.ok(B.every(b => b.z === Math.min(...B.map(c => c.z))), 'the nearest the stage');
+  assert.ok(B[2].face === 'E' && B[2].x === B[0].x && B[2].z - B[0].z >= 5, 'the third booth stands next to the first on the west wall (far enough along that they do not touch: a booth is 5 wide)');
+  assert.ok(B.every(b => b.z <= R.maxZ - 4), 'and every booth is clear of the front wall');
   assert.ok(west.every(b => b.x < -10) && east.every(b => b.x > 10), 'west booth on the west wall, east booth on the east wall');
   B.forEach(b => assert.ok(blocked(b.x, b.z, 0.1), `unit ${b.unit}: the booth is solid`));
   B.forEach(b => assert.ok(b.z - 2.5 > R.stageFront, `unit ${b.unit}: clear of the stage`));
-  assert.deepStrictEqual(plain(house.interactables.map(i => i.label)), ['Leave the House of Algebra', 'Visit the Missing Number booth', 'Visit the Multiply & Divide booth'], 'no prompts for booths that do not exist');
+  assert.deepStrictEqual(plain(house.interactables.map(i => i.label)), ['Leave the House of Algebra', 'Visit the Missing Number booth', 'Visit the Multiply & Divide booth', 'Visit the Numbers Game booth'], 'no prompts for booths that do not exist');
   assert.ok(!/shutter/i.test(JSON.stringify(plain(house.interactables.map(i => i.label)))));
 
   /* ---------- everything can be reached from the door ---------- */
@@ -44,8 +45,10 @@ module.exports = { name: 'sim:house', tier: 'sim', covers: ['js/house.js', 'js/w
   hub.interactables.find(i => i.label === 'Enter the House of Algebra').action(); assert.strictEqual(G.getZone().name, 'House of Algebra'); assert.ok(Math.hypot(T.Player.x - house.spawn.x, T.Player.z - house.spawn.z) < 0.01, 'you appear just inside the door');
   house.interactables.find(i => i.label === 'Visit the Missing Number booth').action(); assert.ok(T.EquationGame.isOpen() && !T.MulDivGame.isOpen(), 'the first booth opens the Missing Number table'); T.EquationGame.close();
   house.interactables.find(i => i.label === 'Visit the Multiply & Divide booth').action(); assert.ok(T.MulDivGame.isOpen() && !T.EquationGame.isOpen(), 'the second booth opens the Multiply and Divide table'); T.MulDivGame.close();
+  house.interactables.find(i => i.label === 'Visit the Numbers Game booth').action(); assert.ok(T.NumbersGame.isOpen() && !T.EquationGame.isOpen() && !T.MulDivGame.isOpen(), 'the third booth opens the Numbers Game'); T.NumbersGame.close();
   house.interactables.find(i => i.label === 'Leave the House of Algebra').action(); assert.strictEqual(G.getZone().name, hub.name); assert.ok(Math.hypot(T.Player.x - Hs.EXIT.x, T.Player.z - Hs.EXIT.z) < 0.01, 'you come out in front of the doors');
   assert.ok(/House of Algebra/.test(T.Trophies.byId.missing.how) && /Missing Number booth/.test(T.Trophies.byId.missing.how), 'the trophy\'s sentence says where the booth is');
   assert.ok(/House of Algebra/.test(T.Trophies.byId.muldiv.how) && /Multiply & Divide booth/.test(T.Trophies.byId.muldiv.how), 'and so does the second one\'s');
-  assert.deepStrictEqual(s.errors, [], 'no errors'); ctx.log(`the room: stage with ${Object.values(kinds).flat().length} props, an open aisle, 2 booths, every prompt reachable, doors in and out`);
+  assert.ok(/House of Algebra/.test(T.Trophies.byId.numbers.how) && /Numbers Game booth/.test(T.Trophies.byId.numbers.how), 'and the third\'s');
+  assert.deepStrictEqual(s.errors, [], 'no errors'); ctx.log(`the room: stage with ${Object.values(kinds).flat().length} props, an open aisle, 3 booths, every prompt reachable, doors in and out`);
 } };

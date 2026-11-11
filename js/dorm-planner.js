@@ -5,14 +5,13 @@
    dorm.js; the furniture models are in dormroom.js; this file is the screen. */
 const DormPlanner = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 42; // must match Dorm.BUILD
+  const BUILD = 45; // must match Dorm.BUILD
   const CELL = 84, M = 60;                                   // pixels per grid cell, and the margin for the walls
   const W = Dorm.ROOM.w * CELL + 2 * M, H = Dorm.ROOM.d * CELL + 2 * M;
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
 
   let room = null, items = [], selected = null, rot = null, tool = 'place', hover = null, wired = false, canvas, ctx, clearTimer = null, note = '';
   const isOpen = () => !$('dorm').classList.contains('hidden');
-  const show = (id, on) => $(id).classList.toggle('hidden', !on);
 
   /* ---------- drawing ---------- */
   const px = c => M + c * CELL;

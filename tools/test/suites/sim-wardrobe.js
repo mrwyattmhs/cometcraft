@@ -6,7 +6,7 @@ const { plain, text } = require('../lib/util');
 const GOLD = 0xffc933;
 
 module.exports = { name: 'sim:wardrobe', tier: 'sim', covers: ['js/catalog.js', 'js/avatar.js', 'js/shop.js', 'js/store.js', 'js/main.js', 'js/ui.js', 'index.html'], run: async ctx => {
-  const s = ctx.sim(), { T, G, doc, w } = s, { Catalog: C, Avatar, Store, Shop } = T; s.start(); await s.frames(2);
+  const s = ctx.sim(), { T, G, doc } = s, { Catalog: C, Avatar, Store, Shop } = T; s.start(); await s.frames(2);
   const bars = root => { let n = 0; root.traverse(o => { if (o.isMesh && o.material && o.material.type === 'MeshBasicMaterial' && o.material.color.getHex() === GOLD) n++; }); return n; };
   const me = G.me, P = me.userData.parts;
   const clickTab = label => { const b = [...doc.querySelectorAll('#shop button')].find(x => x.textContent.trim() === label); assert.ok(b, `a ${label} tab`); b.click(); };

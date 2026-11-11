@@ -3,8 +3,8 @@
 //   const s = sim.create();  s.T.Store, s.T.PolyMulGame ...  s.$('id'), s.click(el), s.key('KeyE'), await s.frames(5), s.G (the game's __primeTime), s.errors
 const fs = require('fs'), path = require('path');
 const { JSDOM } = require('jsdom');
-const { ROOT, TEST, read, sleep } = require('./util');
-const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Equations', 'EquationsMD', 'EquationGame', 'MulDivGame', 'House', 'Avatar', 'Catalog', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
+const { TEST, read, sleep } = require('./util');
+const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Equations', 'EquationsMD', 'NumberPairs', 'EquationGame', 'MulDivGame', 'NumbersGame', 'House', 'Avatar', 'Catalog', 'RemyQuest', 'Pets', 'Dorm', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
   'TrinomialGame', 'RadicalGame', 'ParabolaGame', 'VertexGame', 'LinesGame', 'CoasterGame', 'Shop', 'TrophyCase', 'MapGame', 'ArithmeticGame', 'LittleLibrary', 'DormPlanner', 'Factoring', 'Trinomials', 'Radicals'];
 
 function create() {

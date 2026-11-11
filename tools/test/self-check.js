@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-/* Test the tests. From the project folder:   node tools/test/self-check.js   (add --slow to include the real-browser mutations, about 2 more minutes)
+/* Test the tests. From the project folder:   node tools/test/self-check.js   (add --slow to include the real-browser mutations, about 8 more minutes; add --only TEXT to run just the breaks whose description contains TEXT)
 
    A suite that quietly stopped checking what it claims to is worse than no suite. So this copies the project to a temporary folder, breaks one thing at a time in the COPY (the project
    itself is never touched), runs the suite that is supposed to notice, and requires it to FAIL. Every line below says what was broken and which suite caught it. If one is not caught,
    that suite has a hole: fix the suite, not this list.  Add a line here whenever a bug slips through a suite. */
 const fs = require('fs'), path = require('path'), os = require('os'), { spawnSync } = require('child_process');
-const ROOT = path.resolve(__dirname, '../..'), slow = process.argv.includes('--slow');
+const ROOT = path.resolve(__dirname, '../..'), slow = process.argv.includes('--slow'), only = process.argv.includes('--only') ? process.argv[process.argv.indexOf('--only') + 1].toLowerCase() : null;
 
 /** [what is broken, file, text to find, text to put instead, suite that must fail, slow?] */
 const MUTATIONS = [
@@ -26,11 +26,11 @@ const MUTATIONS = [
   ['the multiplication of polynomials is wrong', 'js/polys.js', 'r[i + j] += a * b;', 'r[i + j] += a + b;', 'unit:polys'],
   ['a trophy sentence names the wrong wing', 'js/trophies.js', "at the Polynomial Coaster table in the casino's Polynomials wing", "at the Polynomial Coaster table in the casino's Graphing wing", 'unit:trophies'],
   ['the casino plan loses a table', 'js/casino-interior.js', 'cubes: { x: -39, z: 5.2 },', '', 'unit:casino'],
-  ['version numbers disagree (index.html says 38)', 'index.html', 'css/style.css?v=42', 'css/style.css?v=38', 'VERSION'],
+  ['version numbers disagree (one link in index.html says 1)', 'index.html', `css/style.css?v=${require('../bundle').versions().number}`, 'css/style.css?v=1', 'VERSION'],
   // the House of Algebra and the Missing Number
   ['the equation checker accepts the wrong number (the box is added to, but it subtracts)', 'js/equations.js', 'add1: n + p.a,', 'add1: n - p.a,', 'unit:equations'],
-  ['a right answer at either equation booth earns no trophy progress', 'js/equation-game.js', ' Trophies.award(cfg.trophy);', '', 'sim:equations'],
-  ['Enter in the box checks AND skips to the next problem (Missing Number)', 'js/equation-game.js', '{ e.preventDefault(); e.stopPropagation(); check(); } });', '{ check(); } });', 'sim:equations'],
+  ['a right answer at either equation booth earns no trophy progress', 'js/booth-game.js', ' Trophies.award(cfg.trophy);', '', 'sim:equations'],
+  ['Enter in the box checks AND skips to the next problem (the booths)', 'js/booth-game.js', "if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation();", "if (e.key !== 'Enter') return;", 'sim:equations'],
   ['Missing Number Hard pays 40, not 50', 'js/economy.js', 'missing: [10, 25, 50],', 'missing: [10, 25, 40],', 'unit:economy'],
   ['a guitar goes missing from the stage', 'js/house.js', "guitarOnStand(g, -4.2, y0, -9.6, { body: 0x2563c9, trim: 0xf0e6d0, turn: 0.2 });", '', 'sim:house'],
   ['you can walk onto the stage', 'js/house.js', 'solid(zone, 0, sc, 22, stageD); ', '', 'sim:house'],
@@ -41,10 +41,10 @@ const MUTATIONS = [
   ['the House\'s door prompt is inside the building', 'js/house.js', "interact(zone, x1 + 2.6, cz, 2.4, 'Enter the House of Algebra', actions.enterHouse);", "interact(zone, x1 - 2.6, cz, 2.4, 'Enter the House of Algebra', actions.enterHouse);", 'sim:world'],
   // the second booth (Multiply and Divide), the shelf and the trophy case
   ['the multiply-and-divide checker accepts the wrong number (the box is multiplied, but it adds)', 'js/equations-md.js', 'mul1: n * p.a,', 'mul1: n + p.a,', 'unit:equations-md'],
-  ['the Multiply and Divide booth awards the wrong trophy', 'js/equation-game.js', "trophy: 'muldiv', title: 'Multiply & Divide'", "trophy: 'missing', title: 'Multiply & Divide'", 'sim:equations'],
+  ['the Multiply and Divide booth awards the wrong trophy', 'js/booth-game.js', "trophy: 'muldiv', title: 'Multiply & Divide'", "trophy: 'missing', title: 'Multiply & Divide'", 'sim:equations'],
   ['Multiply and Divide Hard pays 40, not 50', 'js/economy.js', 'muldiv: [10, 25, 50],', 'muldiv: [10, 25, 40],', 'unit:economy'],
   ['the Multiply and Divide booth is taken out of the House', 'js/house.js', "    { id: 'muldiv', unit: 2, x: 13.3, z: -2.5, face: 'W',", "    { id: 'muldiv-gone', unit: 2, x: 13.3, z: 8.5, face: 'W',", 'sim:house'],
-  ['an unused placeholder booth is added back', 'js/house.js', "symbols: ['times', 'divide'], color: 0xff9f4a, fg: '#ffc47a' },\n  ];", "symbols: ['times', 'divide'], color: 0xff9f4a, fg: '#ffc47a' },\n    { id: 'unit3', unit: 3, x: -13.3, z: 3, face: 'E', title: 'UNIT 3', sub: 'COMING SOON', label: 'Peek at the Unit 3 booth', symbols: ['box'], color: 0x888888, fg: '#cccccc' },\n  ];", 'sim:house'],
+  ['an unused placeholder booth is added back', 'js/house.js', "symbols: ['times', 'plus'], color: 0xb48cff, fg: '#d9c2ff' },\n  ];", "symbols: ['times', 'plus'], color: 0xb48cff, fg: '#d9c2ff' },\n    { id: 'unit4', unit: 4, x: 13.3, z: 3, face: 'W', title: 'UNIT 4', sub: 'COMING SOON', label: 'Peek at the Unit 4 booth', symbols: ['box'], color: 0x888888, fg: '#cccccc' },\n  ];", 'sim:house'],
   ['the shelf goes back to nine to a board', 'js/trophies.js', 'const SHELF_CAPACITY = 10;', 'const SHELF_CAPACITY = 9;', 'unit:trophies'],
   // the Kelly Green set with gold outlines, and where the House and the street stand
   ['a piece of the Kelly Green set costs 400, not 5,000', 'js/catalog.js', "add('pants', 'kelly-gold', 'Kelly Green Pants, gold outline', { color: KELLY, outline: 'gold', price: PREMIUM });", "add('pants', 'kelly-gold', 'Kelly Green Pants, gold outline', { color: KELLY, outline: 'gold', price: BASIC });", 'unit:catalog'],
@@ -54,13 +54,45 @@ const MUTATIONS = [
   ['5,000 is written 5000 in the shop', 'js/shop.js', "const money = n => n.toLocaleString('en-US');", 'const money = n => String(n);', 'sim:wardrobe'],
   ['the House is moved back next to the casino', 'js/house.js', 'z0: -13.5, z1: -0.5, cz: -7,', 'z0: -22, z1: -9, cz: -15.5,', 'sim:world'],
   ['the street of shops is moved back north (without its shops)', 'js/world.js', 'const STREET = { x0: -33, x1: -6.4, z: 13.5 };', 'const STREET = { x0: -33, x1: -6.4, z: 10 };', 'sim:world'],
+  // the number pad in the equation booths
+  ['a digit key is missing from the number pad', 'js/booth-game.js', "['7', '8', '9', '4', '5', '6', '1', '2', '3', 'back', '0', 'check']", "['7', '8', '9', '4', '5', '6', '1', '2', 'back', '0', 'check']", 'sim:equations'],
+  ['tapping a digit does nothing', 'js/booth-game.js', 'else if (digits.length < 3) box.value += key;', 'else if (false) box.value += key;', 'sim:equations'],
+  ['the box summons the phone keyboard again', 'js/booth-game.js', "b.inputMode = 'none';", "b.inputMode = 'numeric';", 'sim:equations'],
+  ['the number pad stays on screen after you answer', 'js/booth-game.js', "$('pad').classList.add('hidden'); $('after').classList.remove('hidden');", "$('after').classList.remove('hidden');", 'sim:equations'],
+  ['the pad\'s Check key is not the Check button', 'js/booth-game.js', 'if (PAD[k]) b.id = `${P}-${k}`;', 'if (PAD[k]) b.id = `${P}-x${k}`;', 'sim:equations'],
+  // the Numbers Game (two numbers with a given product and sum) and the booth engine's two boxes and plus-or-minus key
+  ['the Numbers Game accepts any pair with the right product, whatever it adds to', 'js/number-pairs.js', 'x * y === p.product && x + y === p.sum;', 'x * y === p.product;', 'unit:number-pairs'],
+  ['the plus-or-minus key works on Easy, where no answer is negative', 'js/booth-game.js', "if (signedNow()) box.value = (neg ? '' : '-') + digits;", "box.value = (neg ? '' : '-') + digits;", 'sim:numbers'],
+  ['taps always go into the first box', 'js/booth-game.js', "    b.addEventListener('focus', () => { active = i; });\n", '', 'sim:numbers'],
+  ['Enter in the first box checks instead of moving to the empty one', 'js/booth-game.js', 'if (empty && empty !== b && filled(b)) empty.focus(); else check();', 'check();', 'sim:numbers'],
+  ['a right number beside a wrong one is marked wrong too', 'js/booth-game.js', "b.classList.add(ok || at >= 0 ? 'ok' : 'miss');", "b.classList.add(ok ? 'ok' : 'miss');", 'sim:numbers'],
+  ['the Numbers Game awards another booth\'s trophy', 'js/booth-game.js', "trophy: 'numbers', title: 'Numbers Game'", "trophy: 'missing', title: 'Numbers Game'", 'sim:numbers'],
+  ['Numbers Game Hard pays 40, not 50', 'js/economy.js', 'numbers: [10, 25, 50],', 'numbers: [10, 25, 40],', 'unit:economy'],
+  ['the Numbers Game booth is taken out of the House', 'js/house.js', "    { id: 'numbers', unit: 3, x: -13.3, z: 3, face: 'E',", "    { id: 'numbers-gone', unit: 3, x: -13.3, z: 3, face: 'E',", 'sim:house'],
+  // Remy's Eye, the quest
+  ['the quest starts on the ninth pet', 'js/remy-quest.js', 'const PETS_TO_START = 10,', 'const PETS_TO_START = 9,', 'unit:remy-quest'],
+  ['the Pet Corner says something else', 'js/remy-quest.js', "const OK_LINE = 'Remy is ok, she will get used to one eye.';", "const OK_LINE = 'Remy is fine.';", 'unit:remy-quest'],
+  ['the eye comes back at the end (the patch comes off)', 'js/remy-quest.js', "const hasPatch = q => clean(q).step !== 'none';", "const hasPatch = q => clean(q).step !== 'none' && clean(q).step !== 'done';", 'unit:remy-quest'],
+  ['a Minesweeper win skips straight to the Pet Corner', 'js/remy-quest.js', "{ q: { step: 'wash', answers: 0 }, event: 'found' }", "{ q: { step: 'vet', answers: 0 }, event: 'found' }", 'unit:remy-quest'],
+  ['the quest\'s reward is never paid', 'js/remy-quest.js', "      if (r.event === 'finish') Store.earn(REWARD);\n", '', 'sim:quest'],
+  ['the fountain never gets its prompt', 'js/remy-quest.js', "if (c.step === 'wash' && !has) hub.interactables.push(wash); else if", 'if', 'sim:quest'],
+  ['the Pet Corner opens its shop over the quest\'s message', 'js/main.js', "if (id === 'pets' && quest.vet()) return;", "if (id === 'pets') quest.vet();", 'sim:quest'],
+  ['Remy is on the bed before the quest is done', 'js/remy-quest.js', 'bed.visible = onBed(q()); if (!bed.visible) return;', 'bed.visible = hasPatch(q()); if (!bed.visible) return;', 'sim:quest'],
+  ['on a bunk bed Remy floats at the height of a single bed', 'js/remy-quest.js', "y: it.type === 'bed' ? 0.82 : 0.7,", 'y: 0.82,', 'sim:quest'],
+  ['walking up to a place gives no reminder', 'js/remy-quest.js', 'const text = reminder(q(), name); if (text) UI.toast(text);', 'reminder(q(), name);', 'sim:quest'],
+  ['a pet inside the cooldown is counted (mashing E starts the quest)', 'js/store.js', '    if (nowMs - lastRemyPet < REMY_COOLDOWN_MS) return false;\n', '', 'sim:quest'],
+  ['Remy gets no eye patch', 'js/remy-quest.js', 'if (remy) Pets.setEyePatch(remy.avatar, hasPatch(c));', '', 'sim:quest'],
   // the real browser: slow
   ['white text on a cream card (the old Lines bug)', 'css/style.css', '.kelly .lin-steps li.active { background: #1e6314;', '.kelly .lin-steps li.active { background: #fff6cf;', 'browser:tour', true],
   ['a window is wider than a phone', 'css/style.css', '.kelly.overlay { background: rgba(6, 22, 6, .66); grid-template-columns: minmax(0, 1fr); }', '.kelly.overlay { background: rgba(6, 22, 6, .66); }', 'browser:play-polys', true],
   ['blanks lose their arch-colour outline', 'js/poly-game.js', "bx.style.borderColor = ARC_COLORS[row.color % 3]; bx.classList.add('outlined');", "bx.classList.add('outlined');", 'browser:play-polys', true],
-  ['the Missing Number box shrinks too small to type in', 'css/style.css', '.kelly .eqn-box { box-sizing: border-box; width: 132px; height: 92px;', '.kelly .eqn-box { box-sizing: border-box; width: 132px; height: 30px;', 'browser:play-equations', true],
+  ['the Missing Number box shrinks too small to type in', 'css/style.css', '.kelly .eqn-box { box-sizing: border-box; width: 120px; height: 80px;', '.kelly .eqn-box { box-sizing: border-box; width: 120px; height: 30px;', 'browser:play-equations', true],
   ['the trophy case needs a fourth row again (six columns for 19 trophies)', 'js/trophy-case.js', 'list.length > 18 ? 7 : list.length > 15 ? 6 : 5', 'list.length > 15 ? 6 : 5', 'browser:tour', true],
   ['the gold outlines are built but never drawn (an invisible material)', 'js/avatar.js', 'new THREE.MeshBasicMaterial({ color: GOLD });', 'new THREE.MeshBasicMaterial({ color: GOLD, visible: false });', 'browser:wardrobe', true],
+  ['the pad keys grow too big for a short phone', 'css/style.css', '.kelly .eqn-key { min-height: 44px; font-size: 22px; }', '.kelly .eqn-key { min-height: 74px; font-size: 22px; }', 'browser:play-equations', true],
+  ['the level cards keep their long descriptions on a phone', 'css/style.css', '  .kelly .eqn-panel .bet-desc { display: none; }\n', '  .kelly .eqn-panel .bet-desc { display: block; }\n', 'browser:play-equations', true],
+  ['the Numbers Game\'s answer lines are too big and wrap', 'css/style.css', '#nbg .eqn-after .final-expr { font-size: 23px; white-space: nowrap; }', '#nbg .eqn-after .final-expr { font-size: 44px; white-space: normal; }', 'browser:play-numbers', true],
+  ['the quest tracker sits on top of the chip counter', 'css/style.css', '#quest { position: absolute; top: 64px; left: 12px;', '#quest { position: absolute; top: 10px; left: 12px;', 'browser:quest', true],
   ['the archway is walled off', 'js/casino-interior.js', 'box(g, \'wallGild\', 2 * ARCH.halfWidth, HH - ARCH.height, WALL, 0, ARCH.height + (HH - ARCH.height) / 2, nz);', 'solid(zone, 0, nz, 2 * ARCH.halfWidth, WALL, HH);', 'browser:walk', true],
 ];
 
@@ -71,6 +103,7 @@ fs.symlinkSync(path.join(ROOT, 'tools/test/node_modules'), path.join(tmp, 'tools
 let missed = 0, ran = 0;
 console.log(`breaking things in a copy (${tmp}), one at a time${slow ? ', including the slow browser ones' : ''}:\n`);
 for (const [what, file, find, put, suite, isSlow] of MUTATIONS) {
+  if (only && !what.toLowerCase().includes(only)) continue;                                  // --only TEXT: just the breaks whose description contains TEXT
   if (isSlow && !slow) { console.log(`  (skipped, slow)  ${what}`); continue; }
   const f = path.join(tmp, file), orig = fs.readFileSync(f, 'utf8');
   if (!orig.includes(find)) { console.log(`  ?  ${what}: the text to break was not found in ${file} (the code changed: update this line)`); missed++; continue; }
