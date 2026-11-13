@@ -3,7 +3,7 @@
 const assert = require('assert');
 const { plain } = require('../lib/util');
 
-module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/house.js', 'js/casino-interior.js', 'js/minesweeper.js', 'js/minefield.js', 'js/sandbox.js', 'js/player.js', 'js/collide.js', 'js/economy.js', 'js/content.js', 'index.html'], run: async ctx => {
+module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/house.js', 'js/lab.js', 'js/casino-interior.js', 'js/minesweeper.js', 'js/minefield.js', 'js/sandbox.js', 'js/player.js', 'js/collide.js', 'js/economy.js', 'js/content.js', 'index.html'], run: async ctx => {
   const s = ctx.sim(), { T, G } = s, W = T.World, CI = T.CasinoInterior, M = T.Minesweeper;
   const blocked = (zone, x, z, r = 0.35) => W.Collide.blocked(zone, x, z, r);
 
@@ -31,7 +31,7 @@ module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/h
 
   /* ---------- the village: Minesweeper behind the dorm ---------- */
   const hub = G.hub, { x0, z0 } = M.PLOT_AT, P = M.PLOT, pad = 0.6;
-  assert.strictEqual(hub.interactables.length, 13, 'the village\'s walk-up prompts: four shops, the casino, the Academy, the blueprint board, Minesweeper, Wilson Hall, the House of Algebra, the library, the notice board and Remy');
+  assert.strictEqual(hub.interactables.length, 14, 'the village\'s walk-up prompts: four shops, the casino, the Academy, the blueprint board, Minesweeper, Wilson Hall, the House of Algebra, the Science Lab, the library, the notice board and Remy');
   const hits = hub.colliders.filter(c => c.maxX > x0 - pad && c.minX < x0 + P + pad && c.maxZ > z0 - pad && c.minZ < z0 + P + pad); assert.deepStrictEqual(plain(hits), [], 'nothing solid stands on the field');
   const dorm = hub.colliders.find(c => c.minX > 10 && c.maxX < 23 && c.minZ > 24 && c.maxZ < 43 && c.maxX - c.minX > 8 && c.maxZ - c.minZ > 14); assert.ok(dorm, 'the dorm is there');
   assert.ok(x0 - pad - dorm.maxX >= 8, `a wide lawn between the dorm and the field (${(x0 - pad - dorm.maxX).toFixed(1)} blocks)`);
@@ -40,7 +40,7 @@ module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/h
   hub.sandboxPath.forEach(m => { const bb = new s.w.THREE.Box3().setFromObject(m); assert.ok(!(bb.max.x > x0 - pad && bb.min.x < x0 + P + pad && bb.max.z > z0 - pad && bb.min.z < z0 + P + pad), 'the field does not cover the sandbox path'); });
   const post = hub.colliders.find(c => Math.abs((c.minX + c.maxX) / 2 - (x0 - 1.3)) < 0.01 && Math.abs((c.minZ + c.maxZ) / 2 - (z0 + 3)) < 0.01); assert.ok(post, 'the signpost is solid');
   assert.deepStrictEqual(plain(hub.colliders.filter(c => c !== post && Math.hypot((c.minX + c.maxX) / 2 - (x0 - 1.3), (c.minZ + c.maxZ) / 2 - (z0 + 3)) < 7)), [], 'nothing else solid within 7 blocks of the sign: no street lamp beside it');
-  const trees = hub.colliders.filter(c => Math.abs(c.maxX - c.minX - 1.2) < 0.01 && Math.abs(c.maxZ - c.minZ - 1.2) < 0.01); assert.strictEqual(trees.length, 12, 'the village has 12 trees');
+  const trees = hub.colliders.filter(c => Math.abs(c.maxX - c.minX - 1.2) < 0.01 && Math.abs(c.maxZ - c.minZ - 1.2) < 0.01); assert.strictEqual(trees.length, 18, 'the village has 18 trees (12, and six along the path to the lab)');
   trees.forEach(t => { const tx = (t.minX + t.maxX) / 2, tz = (t.minZ + t.maxZ) / 2; assert.ok(!(tx > x0 - 2.1 && tx < x0 + P + 2.1 && tz > z0 - 2.1 && tz < z0 + P + 2.1), `the tree at ${tx}, ${tz} would hang over the field`); });
   assert.ok(hub.wander.maxX < x0 - 2, 'villagers do not wander onto the field');
   const spot = hub.interactables.find(i => i.label === 'Play Minesweeper'); assert.ok(spot && spot.x < x0 && spot.x > dorm.maxX && spot.z > z0 && spot.z < z0 + P, 'the sign is on the strip between the dorm and the field');
@@ -48,8 +48,8 @@ module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/h
 
   /* ---------- the village: the street of shops (east to west, a path down the middle) and the House of Algebra at its north end ---------- */
   const ST = W.STREET, SP = W.SHOP_SPOTS, HF = T.House.FRONT, EXIT = T.House.EXIT;
-  assert.ok(ST.z - 3 <= 11.5 && ST.z - 3 >= 10, 'the crosswalk (z 8.5 to 11.5) comes out at the corner of the street\'s path'); assert.ok(ST.x1 <= -6.4 && ST.x0 < -30, 'it runs from the road\'s west sidewalk to the far west'); assert.ok(ST.z > 10, 'and the street is set south of the crosswalk\'s middle, toward the park\'s tree');
-  for (let x = -7; x >= -31; x -= 0.5) for (const z of [ST.z - 2, ST.z, ST.z + 2]) assert.ok(!blocked(hub, x, z, 0.35), `the street is open from the sidewalk to the bench at its end (x ${x}, z ${z})`);
+  assert.ok(ST.z - 3 <= 11.5 && ST.z - 3 >= 10, 'the crosswalk (z 8.5 to 11.5) comes out at the corner of the street\'s path'); assert.ok(ST.x1 <= -6.4 && ST.x0 <= -52, 'it runs from the road\'s west sidewalk all the way out to the Science Lab'); assert.ok(ST.z > 10, 'and the street is set south of the crosswalk\'s middle, toward the park\'s tree');
+  for (let x = -7; x >= -51.5; x -= 0.5) for (const z of [ST.z - 2, ST.z, ST.z + 2]) assert.ok(!blocked(hub, x, z, 0.35), `the path is open from the sidewalk right out to the lab's doors (x ${x}, z ${z})`);
   assert.deepStrictEqual(plain(SP.map(p => p.id)).sort(), ['accessories', 'hints', 'pets', 'style'], 'the four shops');
   assert.deepStrictEqual(plain(SP.map(p => [p.face, p.z])).sort().map(a => a.join()), [`N,${ST.z + 6.5}`, `N,${ST.z + 6.5}`, `S,${ST.z - 6.5}`, `S,${ST.z - 6.5}`], 'two on each side, the north side facing south and the south side facing north');
   SP.forEach(p => { const front = p.z + (p.face === 'S' ? 3 : -3), edge = ST.z + (p.face === 'S' ? -3 : 3); assert.ok(Math.abs(front - edge) <= 0.6, `${p.id}: its front is on the path\'s edge`); assert.ok(blocked(hub, p.x, p.z, 0.1), `${p.id}: the shop is solid`);
@@ -73,6 +73,15 @@ module.exports = { name: 'sim:world', tier: 'sim', covers: ['js/world.js', 'js/h
     hub.interactables.forEach(i => assert.ok(ptsV.some(p => Math.hypot(p[0] - i.x, p[1] - i.z) < i.r), `from the start you can reach "${i.label}"`));
     assert.ok(ptsV.every(([x, z]) => x >= hub.bounds.minX && x <= hub.bounds.maxX && z >= hub.bounds.minZ && z <= hub.bounds.maxZ), 'and you can never leave the village'); }
   trees.forEach(t => { const tx = (t.minX + t.maxX) / 2, tz = (t.minZ + t.maxZ) / 2; assert.ok(!(tx > HF.x0 - 1.7 && tx < HF.x1 + 1.7 && tz > HF.z0 - 1.7 && tz < HF.z1 + 1.7), `the tree at ${tx}, ${tz} is not on the House`); assert.ok(!(tz > ST.z - 3.7 && tz < ST.z + 3.7 && tx < -6 && tx > -33.5), `the tree at ${tx}, ${tz} is not on the street`); });
-  ctx.log('village: the street runs east to west with a path down the middle, the House stands at its north end, and every prompt can be reached');
+  // the Science Lab, across the end of the path
+  { const LF = T.Lab.FRONT, LE = T.Lab.EXIT, ldoor = hub.interactables.find(i => i.label === 'Enter the Science Lab');
+    assert.ok(ldoor && Math.abs(ldoor.z - ST.z) < 0.01 && ldoor.x > LF.x1 && ldoor.x < LF.x1 + 4, 'its door prompt is on the forecourt, level with the path: the path runs straight to the doors'); assert.strictEqual(LF.cz, ST.z, 'the doors are in the middle of the path');
+    assert.ok(LF.x0 >= hub.bounds.minX + 3 && LF.z0 >= 0 && LF.z1 <= 30, `it stands well inside the village (west wall ${LF.x0}, the edge is ${hub.bounds.minX})`); assert.ok(Math.abs(ST.x0 - LF.x1) < 0.01, 'and the street ends exactly at its front wall');
+    const lown = hub.colliders.filter(c => c.minX >= LF.x0 - 1 && c.maxX <= LF.x1 + 0.5 && c.minZ >= LF.z0 - 1 && c.maxZ <= LF.z1 + 1 && c.maxX - c.minX > 5); assert.ok(lown.length >= 1, 'the lab is solid');
+    assert.deepStrictEqual(plain(hub.colliders.filter(c => !lown.includes(c) && c.maxX > LF.x0 - 0.3 && c.minX < LF.x1 + 0.3 && c.maxZ > LF.z0 - 0.3 && c.minZ < LF.z1 + 0.3)), [], 'nothing else is built on the lab\'s footprint');
+    assert.ok(!blocked(hub, LE.x, LE.z, 0.35) && Math.hypot(LE.x - ldoor.x, LE.z - ldoor.z) < 4, 'you come out onto free ground in front of the doors');
+    trees.forEach(t => { const tx = (t.minX + t.maxX) / 2, tz = (t.minZ + t.maxZ) / 2; assert.ok(!(tx > LF.x0 - 1.7 && tx < LF.x1 + 1.7 && tz > LF.z0 - 1.7 && tz < LF.z1 + 1.7), `the tree at ${tx}, ${tz} is not on the lab`); assert.ok(!(tz > ST.z - 3.7 && tz < ST.z + 3.7 && tx < -6 && tx > LF.x1 - 1), `the tree at ${tx}, ${tz} is not on the path to the lab`); });
+    assert.ok(hub.colliders.filter(c => c.maxX - c.minX < 1.6 && c.maxZ - c.minZ < 1.6 && c.minX < -36 && c.maxX > -52 && Math.abs((c.minZ + c.maxZ) / 2 - ST.z) < 2.0).length === 0, 'no lamp or bench stands in the middle of the path (the lamps are on its edges)'); }
+  ctx.log('village: the street runs east to west with a path down the middle to the Science Lab, the House stands at its north end, and every prompt can be reached');
   assert.deepStrictEqual(s.errors, [], 'no errors');
 } };

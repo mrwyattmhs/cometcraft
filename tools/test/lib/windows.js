@@ -16,6 +16,8 @@ const WINDOWS = {
   dorm:      { open: `DormPlanner.open(__primeTime.dorm.dormRoom)`, root: '#dorm', wing: true },
   missing:   { open: `EquationGame.open()`, root: '#eqn', wing: true },     muldiv:    { open: `MulDivGame.open()`, root: '#eqm', wing: true },
   numbers:   { open: `NumbersGame.open()`, root: '#nbg', wing: true },
+  clock:     { open: `ClockGame.open()`, root: '#clk', wing: true },
+  elements:  { open: `ElementGame.open()`, root: '#elm', wing: true },   cells:     { open: `CellGame.open()`, root: '#cel', wing: true },   atoms:     { open: `AtomsGame.open()`, root: '#abd', wing: true },
   mines:     { open: `__primeTime.minesMenu.open()`, root: '#mines' },               lesson:    { open: `(typeof LessonPanel !== 'undefined') && LessonPanel.open()`, root: '#lesson' },
 };
 /** Extra states: [name, async (page, g) => put the window in that state]. Each is scanned for readable text. */
@@ -32,6 +34,10 @@ const STATES = [
   ['missing:menu', open(WINDOWS.missing.open)], ['missing:play', seq(open(WINDOWS.missing.open), click('#eqn-levels .bet'))],
   ['muldiv:menu', open(WINDOWS.muldiv.open)], ['muldiv:play', seq(open(WINDOWS.muldiv.open), click('#eqm-levels .bet'))],
   ['numbers:menu', open(WINDOWS.numbers.open)], ['numbers:play', seq(open(WINDOWS.numbers.open), click('#nbg-levels .bet:nth-child(3)'))],
+  ['clock:menu', open(WINDOWS.clock.open)], ['clock:play', seq(open(WINDOWS.clock.open), click('#clk-levels .bet:nth-child(3)'))],
+  ['elements:menu', open(WINDOWS.elements.open)], ['elements:play', seq(open(WINDOWS.elements.open), click('#elm-levels .bet:nth-child(3)'))],
+  ['cells:menu', open(WINDOWS.cells.open)], ['cells:play', seq(open(WINDOWS.cells.open), click('#cel-levels .bet:nth-child(3)'))],
+  ['atoms:menu', open(WINDOWS.atoms.open)], ['atoms:play', seq(open(WINDOWS.atoms.open), click('#abd-levels .bet:nth-child(3)'))],
   ['addsub:menu', open(WINDOWS.addsub.open)], ['addsub:play', seq(open(WINDOWS.addsub.open), click('#padd-levels .bet:nth-child(2)'))],
   ['shop:open', open(WINDOWS.shop.open)], ['hints:open', open(WINDOWS.hints.open)], ['trophies:open', open(WINDOWS.trophies.open)],
   ['arith:rules', open(WINDOWS.arith.open)], ['arith:play', seq(open(WINDOWS.arith.open), click('#arith-start'))],

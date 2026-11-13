@@ -28,8 +28,8 @@ play-cubes 17 s, play-mines 7-15 s, walk 45-55 s, plus about 25 s once to start 
 | Tier | What it is | Suites |
 |---|---|---|
 | unit | plain Node, the rules and the data | `tests/*.test.js` (22: payouts, trophies, every game's maths, the casino plan, the green palette's contrast ...) |
-| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the village and casino layout, measured, with a flood fill from the start), `sim:house` (the room inside the House of Algebra), `sim:polynomials`, `sim:cubes`, `sim:equations`, `sim:numbers`, `sim:wardrobe`, `sim:quest` (Remy's Eye played from the first pet to the cat on the bed) |
-| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-equations`, `browser:play-numbers`, `browser:play-mines`, `browser:wardrobe`, `browser:quest` (real typing, tapping and clicking; the arches measured on screen; no scrolling at four screen sizes; the gold outlines counted in pixels), `browser:walk` (a real keyboard walk through the casino archway to the tables), `browser:walk-house` (in through the House's doors, to its booth, out, and along the street of shops) |
+| sim | the game in jsdom, its own files loaded, no real layout | `sim:windows` (every window: template, header, pay, opens and closes), `sim:world` (the village and casino layout, measured, with a flood fill from the start), `sim:house` (the room inside the House of Algebra), `sim:polynomials`, `sim:cubes`, `sim:equations`, `sim:numbers`, `sim:wardrobe`, `sim:quest` (Remy's Eye played from the first pet to the cat on the bed), `sim:lab`, `sim:science` (the three Science Lab games to their trophies), `sim:clock` (the wall clocks show the real time; the clock game's three levels), `sim:shelf` (the three-board trophy shelf, with every furniture placement tried against it) |
+| browser | real Chromium | `browser:tour` (every window in every state, desktop and phone: template, readable text, fits, a seeded click-around), `browser:play-polys`, `browser:play-cubes`, `browser:play-equations`, `browser:play-numbers`, `browser:play-mines`, `browser:wardrobe`, `browser:quest`, `browser:play-science`, `browser:play-clock`, `browser:walk-lab` (real typing, tapping and clicking; the arches measured on screen; no scrolling at four screen sizes; the gold outlines counted in pixels), `browser:walk` (a real keyboard walk through the casino archway to the tables), `browser:walk-house` (in through the House's doors, to its booth, out, and along the street of shops) |
 | deep | long checks, only with `--full` or `--tier deep` | none yet |
 
 **Not rebuilt yet** (the old versions were lost when the work machine reset): the casino exterior flicker check, the chapel, the dorm's 3D pixels, and real-input flows for Lines, Coaster,
@@ -66,7 +66,7 @@ After either, `node tools/test/run.js` runs exactly the suites the cleanup touch
 
 ## Setup
 
-`cd tools/test && npm install` (the versions are pinned; Three.js must stay at r128, which is what the game uses). Chromium: `CHROME_PATH=/path/to/chrome`, or it finds one in `~/.cache/puppeteer`.
+`cd tools/test && npm install` (the versions are pinned; Three.js must stay at r128, which is what the game uses). Chromium: `CHROME_PATH=/path/to/chrome`, or it finds one in puppeteer's folder (`~/.cache/puppeteer`) or Playwright's (`/opt/pw-browsers`, `~/.cache/ms-playwright`).
 `GAME_ROOT=/path/to/an/unzipped/copy node tools/test/run.js --suite tour` tests that copy instead of the project.
 
 ## Writing a suite

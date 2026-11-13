@@ -4,7 +4,7 @@
 const fs = require('fs'), path = require('path');
 const { JSDOM } = require('jsdom');
 const { TEST, read, sleep } = require('./util');
-const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Equations', 'EquationsMD', 'NumberPairs', 'EquationGame', 'MulDivGame', 'NumbersGame', 'House', 'Avatar', 'Catalog', 'RemyQuest', 'Pets', 'Dorm', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
+const EXPOSE = ['Store', 'UI', 'Player', 'Economy', 'Trophies', 'World', 'CONTENT', 'Polys', 'PolyMulGame', 'PolyAddGame', 'Equations', 'EquationsMD', 'NumberPairs', 'Elements', 'Cells', 'AtomBuilder', 'NumPad', 'Clock', 'ClockGame', 'ElementGame', 'CellGame', 'AtomsGame', 'Lab', 'EquationGame', 'MulDivGame', 'NumbersGame', 'House', 'Avatar', 'Catalog', 'RemyQuest', 'Pets', 'Dorm', 'Cubes', 'CubesGame', 'Minesweeper', 'Minefield', 'MinesMenu', 'CasinoInterior', 'CraftingGame',
   'TrinomialGame', 'RadicalGame', 'ParabolaGame', 'VertexGame', 'LinesGame', 'CoasterGame', 'Shop', 'TrophyCase', 'MapGame', 'ArithmeticGame', 'LittleLibrary', 'DormPlanner', 'Factoring', 'Trinomials', 'Radicals'];
 
 function create() {

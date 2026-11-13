@@ -14,7 +14,7 @@ module.exports = { name: 'sim:quest', tier: 'sim', covers: ['js/remy-quest.js', 
   const goTo = async (x, z) => { Player.teleport(x, z, 0); await s.frames(4); };
 
   /* ---------- before: nothing shows ---------- */
-  assert.strictEqual(step(), 'none'); assert.strictEqual(tracker(), null); assert.ok(!patch(remy.avatar), 'Remy has both eyes'); assert.ok(!spot('Wash the eyeball')); assert.ok(spot('Browse the Pet Corner')); assert.strictEqual(hub.interactables.length, 13);
+  assert.strictEqual(step(), 'none'); assert.strictEqual(tracker(), null); assert.ok(!patch(remy.avatar), 'Remy has both eyes'); assert.ok(!spot('Wash the eyeball')); assert.ok(spot('Browse the Pet Corner')); const base = hub.interactables.length; assert.strictEqual(base, 14);
   for (let n = 1; n <= 9; n++) { pet(); assert.strictEqual(Store.get().remyPets, n); assert.strictEqual(toast(), 'Remy purrs.'); assert.strictEqual(dlg(), null); assert.strictEqual(step(), 'none'); }
   pet(500); assert.strictEqual(Store.get().remyPets, 9, 'a pet inside the two-second cooldown is not counted'); assert.strictEqual(step(), 'none', 'and cannot start the quest');
 
@@ -34,11 +34,11 @@ module.exports = { name: 'sim:quest', tier: 'sim', covers: ['js/remy-quest.js', 
   /* ---------- 1. find it: a Minesweeper win ---------- */
   Store.set({ minesWins: (Store.get().minesWins || 0) + 1 });
   assert.deepStrictEqual(dlg() && dlg().title, 'You dug up the eyeball!'); assert.strictEqual(step(), 'wash'); assert.match(tracker(), /Wash the eyeball in the fountain in the park/); shut();
-  const wash = spot('Wash the eyeball'); assert.ok(wash && Math.hypot(wash.x - plaza.x, wash.z - plaza.z) < 0.01, 'the fountain has a prompt now'); assert.strictEqual(hub.interactables.length, 14);
+  const wash = spot('Wash the eyeball'); assert.ok(wash && Math.hypot(wash.x - plaza.x, wash.z - plaza.z) < 0.01, 'the fountain has a prompt now'); assert.strictEqual(hub.interactables.length, base + 1);
   await goTo(0, 44); await goTo(shop.x, shop.z + 1); assert.match(toast(), /Wash the eyeball first, in the fountain in the park/); await goTo(0, 44); await goTo(plaza.x, plaza.z + 3.5); assert.match(toast(), /Press E to wash the eyeball/);
   /* ---------- 2. wash it ---------- */
   wash.action(); assert.deepStrictEqual(dlg() && dlg().title, 'The eyeball is clean.'); assert.strictEqual(step(), 'vet'); shut();
-  assert.ok(!spot('Wash the eyeball'), 'the fountain\'s prompt is gone again'); assert.strictEqual(hub.interactables.length, 13); assert.ok(spot('Ask the Pet Corner about Remy') === shop, 'the Pet Corner\'s prompt asks about Remy');
+  assert.ok(!spot('Wash the eyeball'), 'the fountain\'s prompt is gone again'); assert.strictEqual(hub.interactables.length, base); assert.ok(spot('Ask the Pet Corner about Remy') === shop, 'the Pet Corner\'s prompt asks about Remy');
   await goTo(0, 44); await goTo(shop.x, shop.z + 1); assert.match(toast(), /Press E to ask the Pet Corner about Remy/);
   /* ---------- 3. the Pet Corner: five right answers, then back ---------- */
   shop.action(); assert.match(dlg().body, /Get 5 answers right at the booths in the House of Algebra, then come back/); assert.ok($('shop').classList.contains('hidden'), 'the shop does not open on top of it'); assert.strictEqual(step(), 'answers'); shut();

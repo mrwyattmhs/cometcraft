@@ -8,11 +8,13 @@ const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css
 
 function findChrome() {
   if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
-  for (const home of [os.homedir(), '/home/claude', '/root']) {
-    const base = path.join(home, '.cache/puppeteer/chrome');
-    if (fs.existsSync(base)) for (const v of fs.readdirSync(base).sort().reverse()) { const p = path.join(base, v, 'chrome-linux64/chrome'); if (fs.existsSync(p)) return p; }
+  const newest = (base, sub) => { if (!fs.existsSync(base)) return null; for (const v of fs.readdirSync(base).sort().reverse()) { const p = path.join(base, v, sub); if (fs.existsSync(p)) return p; } return null; };
+  for (const home of [os.homedir(), '/home/claude', '/root']) { const p = newest(path.join(home, '.cache/puppeteer/chrome'), 'chrome-linux64/chrome'); if (p) return p; }      // puppeteer's own download
+  for (const base of [process.env.PLAYWRIGHT_BROWSERS_PATH, '/opt/pw-browsers', path.join(os.homedir(), '.cache/ms-playwright')].filter(Boolean)) {                            // or Playwright's
+    if (!fs.existsSync(base)) continue;
+    for (const d of fs.readdirSync(base).filter(n => /^chromium-\d+$/.test(n)).sort().reverse()) for (const sub of ['chrome-linux64/chrome', 'chrome-linux/chrome']) { const p = path.join(base, d, sub); if (fs.existsSync(p)) return p; }
   }
-  throw new Error('no Chromium found: set CHROME_PATH');
+  throw new Error('no Chromium found: set CHROME_PATH (puppeteer\'s and Playwright\'s usual folders were checked)');
 }
 
 async function launch({ width = 1280, height = 800, hideStart = true } = {}) {
