@@ -105,7 +105,9 @@ const DormRoom = (() => {
     const { buildSymbol, symbolSize } = H;
     const shelfRoot = new T.Group(), trophyRoot = new T.Group();
     zone.group.add(shelfRoot, trophyRoot);
-    const SHELF = { x0: 4.6, step: 0.567, boardY: [3.0, 2.4], z: 2.22, width: 6.0 };   // 10 slots (Trophies.SHELF_CAPACITY), centred where the 9-slot board was; the brackets sit just outside the end slots
+    // Three boards of 10 (Trophies.SHELF_CAPACITY), 0.4 apart, the top one just under the ceiling and the bottom one just clear of the top of a bunk bed (2.3) against this wall. A trophy is
+    // drawn at TROPHY_SCALE of its natural size so it fits the gap (about 0.30 tall: the gap under the board above is 0.32, and tests/suites/sim-shelf.js measures every trophy).
+    const SHELF = { x0: 4.6, step: 0.567, boardY: [3.15, 2.75, 2.35], z: 2.22, width: 6.0 }, TROPHY_SCALE = 0.66;
     const hex = n => '#' + n.toString(16).padStart(6, '0');
 
     function buildTrophy(def) {
@@ -153,10 +155,10 @@ const DormRoom = (() => {
       rows.forEach((row, r) => {
         const y = SHELF.boardY[r];
         box(shelfRoot, 'wood', SHELF.width, 0.08, 0.34, SHELF.x0 + SHELF.width / 2, y, SHELF.z);
-        [SHELF.x0 + 0.12, SHELF.x0 + SHELF.width - 0.12].forEach(x => box(shelfRoot, 'wood', 0.08, 0.3, 0.3, x, y - 0.19, SHELF.z));
+        [SHELF.x0 + 0.12, SHELF.x0 + SHELF.width - 0.12].forEach(x => box(shelfRoot, 'wood', 0.08, 0.2, 0.3, x, y - 0.14, SHELF.z));
         row.forEach((id, i) => {
           const t = buildTrophy(Trophies.byId[id]);
-          t.position.set(SHELF.x0 + 0.45 + i * SHELF.step, y + 0.04, SHELF.z);
+          t.scale.setScalar(TROPHY_SCALE); t.position.set(SHELF.x0 + 0.45 + i * SHELF.step, y + 0.04, SHELF.z);
           t.userData.trophy = id;
           trophyRoot.add(t);
         });

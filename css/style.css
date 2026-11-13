@@ -1080,3 +1080,131 @@ div.pair-box { cursor: default; }
 #quest b { display: block; margin-bottom: 2px; font: 400 12px/1.2 'Silkscreen', monospace; letter-spacing: .06em; text-transform: uppercase; color: #ffc45c; }
 #quest span { display: block; }
 @media (max-width: 760px) { #quest { top: 52px; font-size: 13px; padding: 5px 8px 6px; } }
+
+/* ---------- the Science Lab: Element Match and Cell Lab (click the picture) ---------- */
+.pick-panel { width: min(980px, 100%); }
+.pick-play { display: grid; gap: 8px; }
+.kelly .pick-ask { margin: 0; padding: 7px 12px; text-align: center; font: 800 26px/1.15 var(--k-body); color: #fff; background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; }
+.pick-fig { min-width: 0; }
+.pick-bar { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.pick-bar .wager-line { flex: 0 0 auto; margin: 0; }
+.kelly .pick-bar .msg { flex: 1 1 auto; margin: 0; }
+.kelly .pick-bar .btn { flex: 0 0 auto; min-width: 150px; padding: 12px 18px; font-size: 20px; }
+.pick-after { display: flex; align-items: center; gap: 14px; min-height: 52px; }
+.kelly .pick-after .result { flex: 1 1 auto; margin: 0; padding: 0; }
+.kelly .pick-after .final { margin: 0; padding: 6px 12px; display: flex; align-items: center; gap: 12px; text-align: left; }
+.kelly .pick-after .final-label { flex: 0 0 auto; white-space: nowrap; }
+.kelly .pick-after .final-text { font-size: 18px; font-weight: 700; line-height: 1.25; }
+.pick-after .cub-actions { margin: 0; flex: 0 0 auto; flex-wrap: nowrap; }
+.pick-after .cub-actions .btn { min-width: 0; padding: 10px 14px; }
+/* the periodic table: 18 columns of tiles, coloured by family, the two f-block rows underneath */
+.pick-pt { overflow-x: auto; padding: 4px 2px; }
+.pt { display: grid; grid-template-columns: repeat(18, minmax(31px, 1fr)); gap: 3px; --tile: 40px; min-width: 590px; }
+.pt-tile { appearance: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 0; margin: 0; cursor: pointer; border: 2px solid rgba(0, 0, 0, .5); border-radius: 5px; color: #10200c; font-family: var(--k-body); line-height: 1; background: #ffe58a; min-width: 0; }
+.pt-z { align-self: flex-start; margin: 2px 0 0 3px; font-size: 10px; font-weight: 700; }
+.pt-sym { font-size: 17px; font-weight: 800; }
+.pt-tile:hover { filter: brightness(1.1); }
+.pt-tile:focus-visible { outline: 3px solid #fff; outline-offset: 1px; }
+.pt-tile.picked { outline: 4px solid #fff; outline-offset: 1px; transform: scale(1.14); position: relative; z-index: 2; box-shadow: 0 0 0 2px #1a1100; }
+.pt-tile.right { background: #5fe06a !important; outline: 4px solid #fff; outline-offset: 1px; position: relative; z-index: 2; transform: scale(1.14); }
+.pt-tile.wrong { background: #ff7a6a !important; outline: 3px solid #fff; position: relative; z-index: 1; }
+.pick-fig.answered .pt-tile:not(.right):not(.wrong) { cursor: default; opacity: .8; }
+.pt-gap { display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: 700; line-height: 1.1; color: #fff; border: 2px dashed rgba(255, 255, 255, .5); border-radius: 5px; }
+.fam-alkali { background: #ff9a8a; } .fam-alkaline { background: #ffc98a; } .fam-transition { background: #ffe58a; } .fam-post { background: #c7e8a0; } .fam-metalloid { background: #8fe0c4; }
+.fam-nonmetal { background: #9ad4ff; } .fam-halogen { background: #c2b4ff; } .fam-noble { background: #f0a8e8; } .fam-lanthanide { background: #ffd0e8; } .fam-actinide { background: #e8c0a8; }
+/* the cell picture */
+.pick-cell { display: flex; justify-content: center; }
+.cell-svg { width: 100%; max-width: 600px; height: auto; max-height: 340px; background: #0f3a0b; border: 2px solid var(--k-edge); border-radius: 10px; }
+.cell-part { cursor: pointer; outline: none; }
+.cell-part:hover, .cell-part:focus-visible { filter: brightness(1.14); }
+.cell-part.picked { filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 3px #fff) drop-shadow(0 0 2px #fff); }
+.cell-part.right { filter: drop-shadow(0 0 7px #4aff5a) drop-shadow(0 0 4px #4aff5a) drop-shadow(0 0 2px #fff); }
+.cell-part.wrong { filter: drop-shadow(0 0 7px #ff5a4a) drop-shadow(0 0 3px #ff5a4a); }
+.pick-fig.answered .cell-part { cursor: default; }
+/* the Atom Builder: a headline and a row of three labelled boxes */
+.kelly .eqn-line.abd { flex-direction: column; flex-wrap: nowrap; gap: 8px; padding: 10px 8px; }
+.abd-head { display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.kelly .abd-title { font-size: 32px; }
+.kelly .abd-sub { font-size: 17px; font-weight: 700; color: var(--k-gold); text-shadow: none; }
+.abd-cols { display: flex; gap: 16px; justify-content: center; }
+.abd-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.kelly .abd-cap { font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--k-gold); text-shadow: none; }
+.kelly .abd .eqn-box { width: 104px; height: 70px; font-size: 42px; }
+.kelly .eqn-play.answered .abd-title { font-size: 24px; }
+.kelly .eqn-play.answered .abd .eqn-box { width: 84px; height: 52px; font-size: 32px; }
+@media (max-width: 760px) {
+  .kelly .pick-ask { font-size: 19px; padding: 5px 8px; }
+  .pick-bar, .pick-after { flex-wrap: wrap; gap: 6px; }
+  .pick-bar .wager-line { display: none; }
+  .kelly .pick-bar .btn { min-width: 120px; padding: 10px 14px; }
+  .kelly .pick-after .final { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .kelly .pick-after .final-text { font-size: 15px; }
+  .pt { --tile: 34px; grid-template-columns: repeat(18, 31px); }
+  .pt-sym { font-size: 15px; } .pt-z { font-size: 9px; }
+  .cell-svg { max-height: 36vh; }
+  .kelly .abd-title { font-size: 21px; } .kelly .abd-sub { font-size: 14px; } .abd-cols { gap: 8px; }
+  .kelly .abd .eqn-box { width: 82px; height: 54px; font-size: 32px; }
+  .kelly .eqn-play.answered .abd-title { font-size: 18px; }
+  .kelly .eqn-play.answered .abd .eqn-box { width: 66px; height: 42px; font-size: 26px; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .pt { --tile: 30px; grid-template-columns: repeat(18, 28px); }
+  .kelly .pick-ask { font-size: 17px; padding: 4px 8px; }
+  .kelly .pick-after .final { padding: 3px 8px; } .kelly .pick-after .final-label { display: none; } .kelly .pick-after .final-text { font-size: 13px; line-height: 1.2; }
+  .pick-after .cub-actions .btn { padding: 7px 10px; font-size: 14px; }
+  .pt-z { display: none; } .pt-sym { font-size: 13px; }
+  .cell-svg { max-height: 30vh; }
+  .kelly .abd-title { font-size: 18px; } .kelly .abd-sub { font-size: 12px; }
+  .kelly .abd .eqn-box { width: 70px; height: 46px; font-size: 28px; } .abd-cap { font-size: 10px; }
+  .kelly .eqn-play.answered .abd .eqn-box { width: 58px; height: 36px; font-size: 22px; } .kelly .eqn-play.answered .abd-cap { display: none; }
+}
+
+/* ---------- reading the clock (the Arithmetic Academy's classroom clock, and the Science Lab's) ---------- */
+.kelly .clk-ask { margin: 4px 0 0; padding: 6px 12px; text-align: center; font: 800 26px/1.15 var(--k-body); color: #fff; background: var(--k-deep); border: 2px solid var(--k-edge); border-radius: 8px; }
+.clk-fig { display: flex; justify-content: center; padding: 6px 0 2px; }
+.clk-svg { height: min(240px, 34vh); width: auto; aspect-ratio: 1; max-width: 100%; touch-action: none; user-select: none; -webkit-user-select: none; }
+.clk-svg:focus-visible { outline: 4px solid #fff; outline-offset: 2px; border-radius: 50%; }
+.clk-hand line { stroke: #1d1d1d; }
+.clk-hand.clk-set line { stroke: #2f6fdb; }
+.clk-hand.clk-wrong line { stroke: #d9483b; }
+.clk-hand.clk-right line { stroke: #2fa84a; }
+.clk-interactive .clk-hand.clk-set { cursor: grab; }
+.clk-interactive .clk-numeral { cursor: pointer; }
+.clk-interactive .clk-numeral:hover text { fill: #2f6fdb; }
+.clk-ctl { display: grid; gap: 8px; margin-top: 8px; }
+.clk-nudge { display: flex; gap: 8px; }
+.kelly .clk-step { flex: 1 1 0; min-height: 54px; padding: 0; font: 800 24px var(--k-body); }
+.kelly .clk-nudge .clk-five { display: none; }                  /* the five-minute steps are for Medium only: on Easy five would be five hours */
+.kelly .clk-nudge.clk-minutes .clk-five { display: block; }
+.kelly .clk-ctl > .btn.primary { min-height: 58px; font-size: 22px; }
+.clk-time { display: flex; align-items: flex-start; justify-content: center; gap: 10px; padding: 6px 0 2px; }
+.kelly .clk-colon { font-size: 52px; font-weight: 800; line-height: 64px; color: #fff; }
+.kelly .clk-time .eqn-box { width: 104px; height: 66px; font-size: 42px; }
+.kelly .final-text { font-size: 18px; font-weight: 700; line-height: 1.25; }
+.kelly .eqn-play.answered .clk-time .eqn-box { width: 84px; height: 52px; font-size: 32px; }
+.kelly .eqn-play.answered .clk-svg { height: min(200px, 29vh); }
+.kelly .eqn-play.answered .hint { display: none; }
+@media (max-width: 760px) {
+  .kelly .clk-ask { font-size: 17px; padding: 4px 8px; }
+  .clk-svg { height: min(200px, 29vh); }
+  .kelly .eqn-play.answered .clk-svg { height: min(120px, 17vh); }
+  .clock-panel .wager-line { display: none; }
+  .kelly .eqn-play.reading .hint { display: none; }
+  .kelly .eqn-play.reading .clk-svg { height: min(150px, 22vh); }
+  .kelly .eqn-play.reading.answered .clk-svg { height: min(100px, 15vh); }
+  .kelly .clk-step { min-height: 44px; font-size: 20px; }
+  .kelly .clk-ctl > .btn.primary { min-height: 46px; font-size: 19px; }
+  .kelly .clk-time .eqn-box { width: 76px; height: 48px; font-size: 30px; } .kelly .clk-colon { font-size: 36px; line-height: 48px; }
+  .kelly .eqn-play.answered .clk-time .eqn-box { width: 60px; height: 38px; font-size: 24px; }
+  .kelly .final-text { font-size: 15px; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .kelly .clk-ask { font-size: 15px; padding: 3px 6px; }
+  .clk-svg { height: min(160px, 26vh); }
+  .kelly .eqn-play.reading .clk-svg { height: min(126px, 20vh); }
+  .kelly .eqn-play.answered .clk-svg { height: min(96px, 15vh); }
+  .kelly .clk-time .eqn-box { width: 66px; height: 42px; font-size: 26px; } .kelly .clk-colon { font-size: 30px; line-height: 42px; }
+  .kelly .clk-step { min-height: 40px; } .kelly .clk-ctl > .btn.primary { min-height: 40px; font-size: 17px; }
+  .kelly .eqn-play.answered .clk-time { display: none; }
+  .kelly .final-text { font-size: 13px; }
+}

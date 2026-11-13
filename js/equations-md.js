@@ -9,7 +9,7 @@
    Hard    all four shapes, up to 12, the box divided into (24 / [ ] = 4), and sometimes the equation turned round:  20 = [ ] x 4
    (x is the multiplication sign and / the division sign, drawn as the real symbols.) */
 const EquationsMD = (() => {
-  const BUILD = 45; // bump together with the ?v= numbers in index.html
+  const BUILD = 47; // bump together with the ?v= numbers in index.html
   const TIMES = '\u00d7', DIVIDE = '\u00f7';
   const LEVELS = [
     { level: 1, name: 'Easy', sample: `[ ] ${TIMES} 4 = 20`, desc: `Find the number that was multiplied, like [ ] ${TIMES} 4 = 20`, forms: ['mul1'] },

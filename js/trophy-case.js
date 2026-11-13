@@ -91,7 +91,7 @@ const TrophyCase = (() => {
       const nm = document.createElement('span'); nm.className = 'tc-name'; nm.textContent = e.name;
       card.append(cv, nm); grid.append(card);
     });
-    const cols = list.length > 18 ? 7 : list.length > 15 ? 6 : 5;           // 15 trophies fill three rows of five, up to 18 three rows of six, and up to 21 three rows of seven (so the window never needs a fourth row)
+    const cols = list.length > 21 ? 8 : list.length > 18 ? 7 : list.length > 15 ? 6 : 5;           // 15 trophies fill three rows of five, up to 18 three rows of six, up to 21 three rows of seven and up to 24 three rows of eight (so the window never needs a fourth row)
     grid.style.setProperty('--tc-cols', cols);
     for (let i = 0, pad = (cols - (list.length % cols)) % cols; i < pad; i++) { const f = document.createElement('div'); f.className = 'tc-card empty'; f.setAttribute('aria-hidden', 'true'); grid.append(f); }      // so every shelf board runs the full width
     $('count').textContent = `${Trophies.earnedCount(s.trophies || [])} of ${list.length} earned`;

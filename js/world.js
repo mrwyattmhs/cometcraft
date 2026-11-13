@@ -175,8 +175,9 @@ const World = (() => {
 
   /* ---------- hub: the village ---------- */
   /** The street of shops: it runs from the road's west sidewalk (x -6.4) west to x -33, 6 wide, its middle at z 13.5, so its north edge (z 10.5) meets the south half of the
-      crosswalk (z 8.5 to 11.5). It is set south, toward the park's great tree, to leave a wide lawn between it and the House of Algebra. */
-  const STREET = { x0: -33, x1: -6.4, z: 13.5 };
+      crosswalk (z 8.5 to 11.5). It is set south, toward the park's great tree, to leave a wide lawn between it and the House of Algebra.
+      Past the last shops the path runs on, west, to the door of the Science Lab (js/lab.js), which stands across its end (x -70 to -54). */
+  const STREET = { x0: -53, x1: -6.4, z: 13.5 };
   /** Two shops on each side, each facing the path: the north side faces south, the south side faces north. A shop is 6 deep and 7 wide, and its front is 0.5 back from the paving's edge. */
   const SHOP_SPOTS = [
     { id: 'hints', x: -14, z: 7, face: 'S' }, { id: 'pets', x: -25, z: 7, face: 'S' },
@@ -1217,7 +1218,7 @@ const World = (() => {
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
       spawn: { x: 0, z: DORM.zc, yaw: 0 },                              // the dorm is directly on your right
-      bounds: { minX: -34, maxX: 58, minZ: -33, maxZ: 52 },                // (the east edge is 6 blocks further out than it was, to give the sandbox and the minefield room)
+      bounds: { minX: -74, maxX: 58, minZ: -33, maxZ: 52 },                // (the east edge is 6 blocks further out than it was, to give the sandbox and the minefield room; the west edge is 40 out, for the street on to the Science Lab)
       sky: 0x8fc8f0, fog: [0x8fc8f0, 45, 120],
       wander: { minX: -30, maxX: 22.5, minZ: -17, maxZ: 44 },                // (stops well short of the minefield behind the dorm, which starts at x 30.3)
     });
@@ -1235,8 +1236,9 @@ const World = (() => {
     flat(g, 'paving', STREET.x1 - STREET.x0, 6, (STREET.x0 + STREET.x1) / 2, 0.04, STREET.z);        // the street, from the sidewalk to its end
     flat(g, 'flagstone', STREET.x1 - STREET.x0, 1.6, (STREET.x0 + STREET.x1) / 2, 0.06, STREET.z);   // and a path of flagstones down the middle of it
     SHOP_SPOTS.forEach(s => buildShopFacing(zone, s, CONTENT.shops[s.id], () => actions.openShop(s.id)));
-    [[-19.5, -2.6], [-19.5, 2.6], [-31.6, -2.6], [-31.6, 2.6]].forEach(([x, dz]) => addLamp(zone, x, STREET.z + dz));      // lamps between the pairs of shops and at the far end, on the path's edges
-    addBenchFacing(zone, -32.4, STREET.z, 'E');                                                          // a bench at the end of the street, looking back up it
+    [-19.5, -31.6, -42.5, -50.5].forEach(x => [-2.6, 2.6].forEach(dz => addLamp(zone, x, STREET.z + dz)));      // lamps between the pairs of shops, and on along the path to the lab, on the path's edges
+    addBenchFacing(zone, -38, STREET.z - 4.4, 'S'); addBenchFacing(zone, -38, STREET.z + 4.4, 'N');         // a bench on each side of the path where the shops end, facing it
+    if (typeof Lab !== 'undefined') Lab.buildFront(zone, actions);                                       // the Science Lab, across the end of the path (js/lab.js)
 
     buildCasinoFront(zone, actions);   // straight ahead at the end of the road
     buildFountain(zone);               // off to the right
@@ -1260,7 +1262,7 @@ const World = (() => {
     interact(zone, -7.5, nz + 1.6, 2.0, 'Read the notice board', actions.readBoard);
 
     // trees on either side, then the fence and the clouds
-    [[-33, -9], [-33, -3], [-33, 2], [-32, 19], [-26, 26], [-31, 29],
+    [[-33, -9], [-33, -3], [-33, 2], [-32, 19], [-26, 26], [-31, 29], [-45, 5], [-45, 22], [-58, 3], [-58, 24], [-64, -4], [-52, -6],
      [31, 2], [47, 20], [54, 28], [53, 38], [54, 46], [30, 48]]
       .forEach(([x, z]) => addTree(zone, x, z));
 
@@ -1415,6 +1417,13 @@ const World = (() => {
     return { cells, w: 14, h: rows.length };
   };
 
+  // a flask: a narrow neck with a rim, widening to a flat base, for the sign on the Science Lab's roof
+  const flaskCells = () => {
+    const rows = [[4, 9], ...Array.from({ length: 5 }, () => [5, 8]), ...Array.from({ length: 14 }, (_, i) => [4 - Math.round(i * 4 / 13), 9 + Math.round(i * 4 / 13)])], cells = [];
+    rows.forEach(([a, b], r) => { for (let c = a; c <= b; c++) cells.push([c, rows.length - 1 - r]); });
+    return { cells, w: 14, h: rows.length };
+  };
+
   // a flag on a pole with a little base, for the Minesweeper trophy and the sign over the minefield
   const flagCells = () => {
     const rows = ['..#.........', '..####......', '..#######...', '..##########', '..#######...', '..####......', '..#.........', '..#.........', '..#.........', '..#.........', '..#.........', '.####.......', '#########...'];
@@ -1435,6 +1444,7 @@ const World = (() => {
     cube:      { shape: cubeCells,     u: 0.1,   mirrorBack: false },
     box:       { shape: boxCells,      u: 0.1,   mirrorBack: false },
     guitar:    { shape: guitarCells,   u: 0.1,   mirrorBack: false },
+    flask:     { shape: flaskCells,    u: 0.1,   mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },
@@ -1691,18 +1701,9 @@ const World = (() => {
     zone.animated.push(dt => { globe.rotation.y += dt * 0.5; });
     solid(zone, 12.5, -10.2, 0.9, 0.9);
 
-    const clock = textPlane(1.3, 1.3, (c, cv) => {
-      const r = cv.width / 2;
-      c.fillStyle = '#f4f1e6'; c.beginPath(); c.arc(r, r, r - 2, 0, Math.PI * 2); c.fill();
-      c.strokeStyle = '#2a2a2a'; c.lineWidth = 6; c.stroke();
-      c.lineWidth = 4;
-      for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6; c.beginPath(); c.moveTo(r + Math.sin(a) * r * 0.78, r - Math.cos(a) * r * 0.78); c.lineTo(r + Math.sin(a) * r * 0.9, r - Math.cos(a) * r * 0.9); c.stroke(); }
-      c.lineWidth = 6; c.beginPath(); c.moveTo(r, r); c.lineTo(r + Math.sin(Math.PI * 0.6) * r * 0.45, r - Math.cos(Math.PI * 0.6) * r * 0.45); c.stroke();
-      c.lineWidth = 4; c.beginPath(); c.moveTo(r, r); c.lineTo(r + Math.sin(Math.PI * 0.05) * r * 0.7, r - Math.cos(Math.PI * 0.05) * r * 0.7); c.stroke();
-    });
-    clock.position.set(6, 4.6, 11.97);
-    clock.rotation.y = Math.PI;
-    g.add(clock);
+    // the classroom clock shows the REAL time, with every hour labelled (clock.js), and you can walk up to it and press E to practise reading it
+    Clock.live(zone, { x: 6, y: 4.2, z: 11.97, rotY: Math.PI, size: 2.0 });
+    interact(zone, 6, 10.2, 2.4, 'Read the classroom clock', () => actions.openTable('clock'));
 
     const poster = textPlane(3, 3.2, (c, cv) => {
       c.fillStyle = '#f7f1d8'; c.fillRect(0, 0, cv.width, cv.height);

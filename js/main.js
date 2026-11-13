@@ -40,6 +40,8 @@
     enterDorm: () => setZone(dorm, dorm.spawn),
     enterHouse: () => setZone(house, house.spawn),
     leaveHouse: () => setZone(hub, House.EXIT),
+    enterLab: () => setZone(lab, lab.spawn),
+    leaveLab: () => setZone(hub, Lab.EXIT),
     leaveDorm: () => setZone(hub, World.DORM_EXIT),
     openPlanner: () => DormPlanner.open(dorm.dormRoom),
     openShop: id => { if (id === 'pets' && quest.vet()) return; if (id === 'hints') UI.shop(id); else Shop.open(id); },   // (during Remy's Eye the Pet Corner has something to say first)
@@ -57,6 +59,10 @@
       else if (m === 'missing') EquationGame.open();
       else if (m === 'muldiv') MulDivGame.open();
       else if (m === 'numbers') NumbersGame.open();
+      else if (m === 'elements') ElementGame.open();
+      else if (m === 'cells') CellGame.open();
+      else if (m === 'atoms') AtomsGame.open();
+      else if (m === 'clock') ClockGame.open();
       else if (m === 'radical') RadicalGame.open();
       else if (m === 'lines') LinesGame.open();
       else if (m === 'coaster') CoasterGame.open();
@@ -70,7 +76,8 @@
   const school = World.buildSchool(actions);
   const dorm = World.buildDorm(actions);
   const house = House.build(actions);                                    // the House of Algebra's room (its front is part of the village)
-  scene.add(hub.group, casino.group, school.group, dorm.group, house.group);
+  const lab = Lab.build(actions);                                        // the Science Lab's room (its front, across the end of the street of shops, is part of the village)
+  scene.add(hub.group, casino.group, school.group, dorm.group, house.group, lab.group);
 
   let zone = hub;
   function setZone(next, spawn) {
@@ -87,6 +94,7 @@
   school.group.visible = false;
   dorm.group.visible = false;
   house.group.visible = false;
+  lab.group.visible = false;
   const quest = RemyQuest.attach({ hub, dorm, dormRoom: dorm.dormRoom, getZone: () => zone });   // Remy's Eye: the eye patch, the tracker, the reminders, the cat on the bed
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
@@ -285,6 +293,10 @@
       else if (EquationGame.isOpen()) EquationGame.close();
       else if (MulDivGame.isOpen()) MulDivGame.close();
       else if (NumbersGame.isOpen()) NumbersGame.close();
+      else if (ElementGame.isOpen()) ElementGame.close();
+      else if (CellGame.isOpen()) CellGame.close();
+      else if (AtomsGame.isOpen()) AtomsGame.close();
+      else if (ClockGame.isOpen()) ClockGame.close();
       else if (RadicalGame.isOpen()) RadicalGame.close();
       else if (LinesGame.isOpen()) LinesGame.close();
       else if (CoasterGame.isOpen()) CoasterGame.close();
@@ -388,5 +400,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, quest, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, lab, quest, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

@@ -7,10 +7,12 @@
    its booth (there is no markup for it in index.html).
 
    createBoothTable(cfg) -> { open, close, isOpen, state, problem, level, box, boxes }
-     cfg    { id, logic, payKey, wins, losses, trophy, title, formula, remember: [text, ...], hint? }
-     logic  a pure module (equations.js, equations-md.js, number-pairs.js) with: LEVELS ({ level, name, sample, desc, signed? }), levelOf, problem(level, rng, last), isCorrect(problem, ...numbers),
-            answerOf, steps, done (the finished statement), text, and EITHER pieces(problem) (an equation with one box in it) OR view(problem) ({ kind: 'diamond', top, bottom, topLabel,
-            bottomLabel }: two boxes, a target above them and one below). A level with signed: true can have negative answers, and then the pad's plus-or-minus key works. */
+     cfg    { id, logic, payKey, wins, losses, trophy, title, formula, remember: [text, ...], hint?, prompt?, wing? (the place named over the title: 'House of Algebra' unless given), leave? ('Leave booth') }
+     logic  a pure module (equations.js, equations-md.js, number-pairs.js, atoms.js) with: LEVELS ({ level, name, sample, desc, signed? }), levelOf, problem(level, rng, last), isCorrect(problem, ...numbers),
+            answerOf, steps, done (the finished statement), text, and EITHER pieces(problem) (an equation with one box in it) OR view(problem): { kind: 'diamond', top, bottom, topLabel,
+            bottomLabel } (two boxes, a target above them and one below) or { kind: 'row', head, sub, labels } (a headline and a row of labelled boxes, one for each label). A level with signed:
+            true can have negative answers, and then the pad's plus-or-minus key works. logic.ordered: true means each box has its own meaning (protons, neutrons, electrons), so each is marked
+            right or wrong by its own place; otherwise (the two numbers of the Numbers Game) a right number in either box is right. */
 function createBoothTable(cfg) {
   const P = cfg.id, L = cfg.logic, $ = id => document.getElementById(`${P}-${id}`), signedTable = L.LEVELS.some(l => l.signed);
   let problem = null, level = 1, state = 'idle', wired = false, last = null, boxes = [], active = 0;
@@ -25,8 +27,8 @@ function createBoothTable(cfg) {
     const d = document.createElement('div'); d.id = P; d.className = 'overlay hidden kelly'; d.dataset.state = 'idle';
     d.innerHTML =
       `<div class="mc-panel eqn-panel" role="dialog" aria-modal="true" aria-labelledby="${P}-title">` +
-      `<header class="craft-head"><div class="k-title"><span class="k-wing">House of Algebra</span><div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="${P}-title">${cfg.title}</h2><span class="k-formula">${cfg.formula}</span></div></div>` +
-      `<div class="craft-meta"><span id="${P}-wallet" class="wallet-chip">0 chips</span><button id="${P}-close" class="btn small" type="button">Leave booth</button></div></header>` +
+      `<header class="craft-head"><div class="k-title"><span class="k-wing">${cfg.wing || 'House of Algebra'}</span><div class="k-titlerow"><span class="k-cube" aria-hidden="true"></span><h2 id="${P}-title">${cfg.title}</h2><span class="k-formula">${cfg.formula}</span></div></div>` +
+      `<div class="craft-meta"><span id="${P}-wallet" class="wallet-chip">0 chips</span><button id="${P}-close" class="btn small" type="button">${cfg.leave || 'Leave booth'}</button></div></header>` +
       `<div id="${P}-pick"><span class="k-label">Pick a level</span><p class="bet-prompt">${cfg.prompt || 'Find the number that goes in the box.'} A wrong answer never costs you chips.</p><div id="${P}-levels" class="bet-grid"></div>` +
       `<div class="cub-ref"><span class="k-label">Remember</span>${cfg.remember.map(t => `<p>${t}</p>`).join('')}</div></div>` +
       `<div id="${P}-play" class="eqn-play hidden">` +
@@ -40,22 +42,11 @@ function createBoothTable(cfg) {
   /* ---------- the number pad ----------
      Without negatives it is a phone's keypad, 7 8 9 / 4 5 6 / 1 2 3 / backspace 0 Check. A booth with negative answers gets a fourth column for backspace, plus-or-minus and 0, with Check as a
      wide key underneath, so it is no taller. Tapping a key acts on the box you last touched; mousedown is cancelled so that box keeps its focus. */
-  const PAD = { back: ['\u232b', 'Backspace'], sign: ['\u00b1', 'Plus or minus'], check: ['Check', 'Check my answer'] };
   function buildPad() {
-    const pad = $('pad'), order = signedTable ? ['7', '8', '9', 'back', '4', '5', '6', 'sign', '1', '2', '3', '0', 'check'] : ['7', '8', '9', '4', '5', '6', '1', '2', '3', 'back', '0', 'check'];
-    if (signedTable) pad.classList.add('eqn-pad4');
-    order.forEach(k => {
-      const [label, name] = PAD[k] || [k, k], b = el('button', 'btn eqn-key', label); b.type = 'button'; b.dataset.key = k; b.setAttribute('aria-label', name);
-      if (PAD[k]) b.id = `${P}-${k}`; if (k === 'check') b.classList.add('primary', 'eqn-keycheck');
-      pad.appendChild(b);
-    });
-    pad.addEventListener('mousedown', e => e.preventDefault());
-    pad.addEventListener('click', e => {
+    NumPad.build($('pad'), P, signedTable);
+    $('pad').addEventListener('click', e => {
       const k = e.target.closest('.eqn-key'), box = boxes[active]; if (!k || state !== 'playing' || k.dataset.key === 'check' || !box) return;
-      const key = k.dataset.key, neg = box.value.startsWith('-'), digits = box.value.replace('-', '');
-      if (key === 'back') box.value = box.value.slice(0, -1);
-      else if (key === 'sign') { if (signedNow()) box.value = (neg ? '' : '-') + digits; }
-      else if (digits.length < 3) box.value += key;
+      NumPad.tap(box, k.dataset.key, signedNow());
       if ($('msg').classList.contains('bad')) setMsg(''); box.focus({ preventScroll: true });
     });
   }
@@ -85,17 +76,13 @@ function createBoothTable(cfg) {
   function start(l) { level = L.levelOf(l).level; last = null; deal(); }
 
   /* ---------- a new problem ---------- */
-  /** A box: a real input. It does not summon a phone's keyboard (the pad is the input) but a physical keyboard types into it: digits only, and a leading minus sign on a level with negatives. */
-  function makeBox(i, n) {
-    const b = el('input', 'eqn-box'); b.type = 'text'; b.inputMode = 'none'; b.autocomplete = 'off'; b.maxLength = 4;
-    b.setAttribute('aria-label', n === 1 ? 'The missing number' : i === 0 ? 'First number' : 'Second number');
-    b.addEventListener('input', () => { const neg = signedNow() && b.value.trim().startsWith('-'); b.value = (neg ? '-' : '') + b.value.replace(/[^0-9]/g, '').slice(0, 3); if ($('msg').classList.contains('bad')) setMsg(''); });
-    b.addEventListener('focus', () => { active = i; });
-    b.addEventListener('keydown', e => {
-      if (e.key !== 'Enter') return; e.preventDefault(); e.stopPropagation();
-      const empty = boxes.find(x => !filled(x)); if (empty && empty !== b && filled(b)) empty.focus(); else check();          // Enter in a filled box moves on to an empty one; otherwise it checks
+  /** A box (see NumPad.box): Enter in a filled box moves on to an empty one, and otherwise checks; typing clears a nag. */
+  function makeBox(i, n, label) {
+    return NumPad.box({
+      label: label || (n === 1 ? 'The missing number' : i === 0 ? 'First number' : 'Second number'), signedNow,
+      onInput: () => { if ($('msg').classList.contains('bad')) setMsg(''); }, onFocus: () => { active = i; },
+      onEnter: b => { const empty = boxes.find(x => !filled(x)); if (empty && empty !== b && filled(b)) empty.focus(); else check(); },
     });
-    return b;
   }
   function deal() {
     problem = L.problem(level, Math.random, last); last = problem; state = 'playing'; boxes = []; active = 0;
@@ -107,6 +94,11 @@ function createBoothTable(cfg) {
       const bot = el('div', 'nbg-bot'); bot.append(el('span', 'nbg-num', v.bottom), el('span', 'nbg-cap', v.bottomLabel));
       const cross = el('span', 'nbg-x'); cross.setAttribute('aria-hidden', 'true');
       boxes = [makeBox(0, 2), makeBox(1, 2)]; line.append(top, boxes[0], cross, boxes[1], bot);
+    } else if (v.kind === 'row') {                                          // a headline, and a row of labelled boxes (the Atom Builder: protons, neutrons, electrons)
+      line.className = 'eqn-line abd'; line.setAttribute('aria-label', L.text(problem));
+      const head = el('div', 'abd-head'); head.append(el('span', 'abd-title', v.head), el('span', 'abd-sub', v.sub));
+      const cols = el('div', 'abd-cols'); boxes = v.labels.map((lab, i) => { const b = makeBox(i, v.labels.length, lab[0].toUpperCase() + lab.slice(1)), col = el('div', 'abd-col'); col.append(b, el('span', 'abd-cap', lab)); cols.append(col); return b; });
+      line.append(head, cols);
     } else {                                                                // an equation with one box in it
       line.className = 'eqn-line'; line.setAttribute('aria-label', `The equation ${L.text(problem).replace('[ ]', 'box')}`);
       v.pieces.forEach(pc => {
@@ -123,10 +115,10 @@ function createBoothTable(cfg) {
   function check() {
     if (state !== 'playing') return;
     const empty = boxes.find(b => !filled(b));
-    if (empty) { setMsg(boxes.length > 1 ? 'Fill in both boxes first.' : 'Tap or type a number into the box first.', 'bad'); empty.focus(); return; }
+    if (empty) { setMsg(boxes.length === 1 ? 'Tap or type a number into the box first.' : boxes.length === 2 ? 'Fill in both boxes first.' : 'Fill in all three boxes first.', 'bad'); empty.focus(); return; }
     const nums = boxes.map(b => Number(b.value)), ok = L.isCorrect(problem, ...nums), s = Store.get(), left = [].concat(L.answerOf(problem));
     state = 'done';
-    boxes.forEach((b, i) => { const at = left.indexOf(nums[i]); if (at >= 0) left.splice(at, 1); b.disabled = true; b.classList.add(ok || at >= 0 ? 'ok' : 'miss'); });      // each box is marked on its own: a number that IS one of the answers is green
+    boxes.forEach((b, i) => { const at = L.ordered ? (nums[i] === left[i] ? i : -1) : left.indexOf(nums[i]); if (!L.ordered && at >= 0) left.splice(at, 1); b.disabled = true; b.classList.add(ok || at >= 0 ? 'ok' : 'miss'); });      // each box is marked on its own: a number that IS an answer is green (in its own place, if the places mean something)
     if (ok) { const win = Economy.PAY[cfg.payKey][level - 1]; Store.earn(win); Store.set({ [cfg.wins]: s[cfg.wins] + 1 }); Trophies.award(cfg.trophy); setMsg(`Correct! +${win} chips.`, 'good'); }
     else { Store.set({ [cfg.losses]: s[cfg.losses] + 1 }); setMsg('Not this time. Nothing lost.', 'bad'); }
     showResult(ok);
@@ -160,4 +152,10 @@ const NumbersGame = createBoothTable({
   id: 'nbg', logic: NumberPairs, payKey: 'numbers', wins: 'numbersWins', losses: 'numbersLosses', trophy: 'numbers', title: 'Numbers Game', formula: '\u00d7 32, + 18',
   prompt: 'Find the two numbers that multiply to the top number and add to the bottom one.', hint: 'Tap a box, then the number pad (or type).',
   remember: ['16 and 2 multiply to 32 and add to 18. The order does not matter.', 'This is how you split the middle term: x\u00b2 + 18x + 32 = (x + 16)(x + 2).'],
+});
+/** The Science Lab's Atom Builder: build an atom's protons, neutrons and electrons. */
+const AtomsGame = createBoothTable({
+  id: 'abd', logic: AtomBuilder, payKey: 'atoms', wins: 'atomsWins', losses: 'atomsLosses', trophy: 'atoms', title: 'Atom Builder', formula: 'p \u00b7 n \u00b7 e', wing: 'Science Lab', leave: 'Leave station',
+  prompt: 'Build the atom: give its protons, neutrons and electrons.', hint: 'Tap a box, then the number pad (or type).',
+  remember: ['Protons = the atomic number. Neutrons = the mass number take away the protons. A neutral atom has as many electrons as protons.', 'An ion that lost electrons is + and has fewer; one that gained them is \u2212 and has more. Need an atomic number? The periodic table is on the lab wall.'],
 });

@@ -5,8 +5,8 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 45; // bump together with the ?v= numbers in index.html
-  const SHELF_CAPACITY = 10; // trophies on one shelf; the eleventh starts a second shelf below it (two shelves hold 20)
+  const BUILD = 47; // bump together with the ?v= numbers in index.html
+  const SHELF_CAPACITY = 10, MAX_SHELVES = 3; // trophies on one shelf; the eleventh starts a second shelf below it and the twenty-first a third (three shelves hold 30)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
       formula tables, or 'd20', 'map' and 'blocks' for the practice table, the wall map and the sandbox. how: a sentence for the trophy case saying how it is earned
@@ -25,6 +25,10 @@ const Trophies = (() => {
     { id: 'missing', name: 'Missing Number', symbol: { words: ['MISSING', 'NUMBER'] }, color: 0x4aa3ff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Missing Number booth in the House of Algebra." },
     { id: 'muldiv', name: 'Multiply & Divide', symbol: { words: ['MULTIPLY', 'DIVIDE'] }, color: 0xff9f4a, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Multiply & Divide booth in the House of Algebra." },
     { id: 'numbers', name: 'Numbers Game', symbol: { words: ['NUMBERS', 'GAME'] }, color: 0xb48cff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Numbers Game booth in the House of Algebra." },
+    { id: 'elements', name: 'Element Match', symbol: { words: ['ELEMENT', 'MATCH'] }, color: 0x4ad8c8, goal: 100, noun: 'found', how: "Find 100 elements correctly at the Element Match station in the Science Lab." },
+    { id: 'cells', name: 'Cell Lab', symbol: { words: ['CELL', 'LAB'] }, color: 0x7ee06a, goal: 100, noun: 'found', how: "Click 100 cell parts correctly at the Cell Lab station in the Science Lab." },
+    { id: 'atoms', name: 'Atom Builder', symbol: { words: ['ATOM', 'BUILDER'] }, color: 0xff6ad5, goal: 100, noun: 'built', how: "Build 100 atoms correctly at the Atom Builder station in the Science Lab." },
+    { id: 'clock', name: 'Read the Clock', symbol: { words: ['READ THE', 'CLOCK'] }, color: 0xffd24a, goal: 100, noun: 'read', how: "Read 100 clocks correctly at the classroom clock in the Arithmetic Academy (or at the clock in the Science Lab)." },
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },
     { id: 'vertex', name: 'Vertex Table', symbol: { words: ['VERTEX', 'FORM'] }, color: 0xffb347, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Vertex Table in the casino's Graphing wing." },
@@ -50,12 +54,11 @@ const Trophies = (() => {
     return { solved: next, trophies: list, earned };
   }
 
-  /** Where the trophies sit: the first shelf holds SHELF_CAPACITY, the rest go on a second shelf below it (which only exists once
-      it is needed). Trophies stay in the order they were earned. */
+  /** Where the trophies sit: the first shelf holds SHELF_CAPACITY, the next trophies go on a second shelf below it, then a third (each only exists once it is needed). Trophies stay in the
+      order they were earned. */
   function shelves(trophies) {
-    const list = [...new Set(trophies.filter(valid))];
-    const rows = [list.slice(0, SHELF_CAPACITY)];
-    if (list.length > SHELF_CAPACITY) rows.push(list.slice(SHELF_CAPACITY, 2 * SHELF_CAPACITY));
+    const list = [...new Set(trophies.filter(valid))], rows = [list.slice(0, SHELF_CAPACITY)];
+    for (let r = 1; r < MAX_SHELVES && list.length > r * SHELF_CAPACITY; r++) rows.push(list.slice(r * SHELF_CAPACITY, (r + 1) * SHELF_CAPACITY));
     return rows;
   }
 
@@ -113,7 +116,7 @@ const Trophies = (() => {
     return el;
   }
 
-  return { BUILD, SHELF_CAPACITY, GAMES, IDS, byId, valid, count, apply, shelves, entries, earnedCount, progressText, award, chip };
+  return { BUILD, SHELF_CAPACITY, MAX_SHELVES, GAMES, IDS, byId, valid, count, apply, shelves, entries, earnedCount, progressText, award, chip };
 })();
 
 if (typeof module !== 'undefined' && module.exports) module.exports = Trophies;

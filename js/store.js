@@ -15,6 +15,8 @@ const Store = (() => {
     missingWins: 0, missingLosses: 0,                                           // the House of Algebra: the Missing Number booth
     muldivWins: 0, muldivLosses: 0,                                             // and the Multiply and Divide booth
     numbersWins: 0, numbersLosses: 0,                                           // and the Numbers Game booth
+    clockWins: 0, clockLosses: 0,                                               // reading the clock
+    elementsWins: 0, elementsLosses: 0, cellsWins: 0, cellsLosses: 0, atomsWins: 0, atomsLosses: 0,        // the Science Lab: Element Match, Cell Lab, Atom Builder
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0, linesWins: 0, linesLosses: 0, coasterWins: 0, coasterDerails: 0,
     minesWins: 0, minesLosses: 0,                    // Minesweeper games won and lost (a win pays chips and counts toward the trophy)
     arithBest: { add: 0, sub: 0, mul: 0, div: 0 },   // most problems solved in one 60-second round, per table
@@ -53,6 +55,7 @@ const Store = (() => {
     state.missingWins = whole(state.missingWins); state.missingLosses = whole(state.missingLosses);
     state.muldivWins = whole(state.muldivWins); state.muldivLosses = whole(state.muldivLosses);
     state.numbersWins = whole(state.numbersWins); state.numbersLosses = whole(state.numbersLosses);
+    ['clock', 'elements', 'cells', 'atoms'].forEach(k => { state[`${k}Wins`] = whole(state[`${k}Wins`]); state[`${k}Losses`] = whole(state[`${k}Losses`]); });
     state.polymulWins = whole(state.polymulWins); state.polymulLosses = whole(state.polymulLosses); state.polyaddWins = whole(state.polyaddWins); state.polyaddLosses = whole(state.polyaddLosses);
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
