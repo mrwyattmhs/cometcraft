@@ -36,7 +36,8 @@ async function launch({ width = 1280, height = 800, hideStart = true } = {}) {
   await page.goto(base, { waitUntil: 'load' });
   await page.waitForFunction(() => !!window.__primeTime, { timeout: 30000 });
   // press Play like a player (the game ignores the keys until it has been started); a script's click gets no pointer lock, so nothing else changes
-  if (hideStart) await page.evaluate(() => { document.getElementById('play').click(); document.getElementById('start-screen').classList.add('hidden'); });
+  if (hideStart) await page.evaluate(() => { __primeTime.daily.pause(); document.getElementById('play').click();      // (the daily quest is paused: its 200-chip reward must not land in the middle of another game's arithmetic)
+    document.getElementById('start-screen').classList.add('hidden'); });
   const api = {
     page, errors, base, sleep, root,
     ev: (fn, ...a) => page.evaluate(fn, ...a),

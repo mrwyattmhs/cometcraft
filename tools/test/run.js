@@ -68,7 +68,7 @@ async function softReset(g) {
   g.errors.length = 0; await g.page.setViewport({ width: 1280, height: 800 });
   await g.page.evaluate(() => {
     Math.random = window.__origRandom || Math.random;
-    Store.reset(); const G = __primeTime; G.setZone(G.hub, G.hub.spawn);
+    Clock.setNow(); __primeTime.daily.pause(); Store.reset(); const G = __primeTime; G.setZone(G.hub, G.hub.spawn);        // (the real clock again, and the daily quest paused: see tools/test/lib/sim.js)
   });
   await g.closeAll();
 }
@@ -132,7 +132,7 @@ async function main() {
     if (failedTier && !flag('--keep-going')) { batch.forEach(s => results.push({ s, skipped: true })); console.log(`  - ${t}: ${batch.length} suites not run (a ${failedTier} suite failed; fix that first, or use --keep-going)`); continue; }
     for (const s of batch) {
       process.stdout.write(`  ${s.name} ... `); let r = await runOne(s), flaky = false;
-      if (!r.ok && (s.tier === 'browser' || s.tier === 'deep')) { process.stdout.write('failed, retrying once ... '); const r2 = await runOne(s); if (r2.ok) { r = r2; flaky = true; } else r = { ...r2, first: r.error }; }
+      if (!r.ok && (s.tier === 'browser' || s.tier === 'deep')) { process.stdout.write(`failed (${String(r.error || '').split('\n')[0].slice(0, 200)}), retrying once ... `); const r2 = await runOne(s); /* (the first failure is shown: a flaky pass should say what flaked) */  if (r2.ok) { r = r2; flaky = true; } else r = { ...r2, first: r.error }; }
       console.log(r.ok ? `${flaky ? 'passed on the retry (FLAKY: it failed once first)' : 'ok'} (${(r.ms / 1000).toFixed(1)}s)` : `FAILED (${(r.ms / 1000).toFixed(1)}s)`);
       if (!r.ok) { console.log(r.error.split('\n').map(l => '      ' + l).join('\n')); failedTier = failedTier || t; }
       results.push({ s, ...r, flaky });

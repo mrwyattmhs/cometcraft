@@ -9,7 +9,7 @@
      Hard    "What time does the clock show?":  READ the clock and type the hour and the minutes
    The maths has no DOM, so it is unit tested in Node (tests/clock.test.js). Hands are angles in degrees, clockwise from 12. */
 const Clock = (() => {
-  const BUILD = 47; // bump together with the ?v= numbers in index.html
+  const BUILD = 50; // bump together with the ?v= numbers in index.html
 
   /* ---------- the time ---------- */
   let nowFn = () => new Date();

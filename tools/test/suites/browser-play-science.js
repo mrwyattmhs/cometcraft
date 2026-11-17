@@ -9,7 +9,7 @@ const { FITS } = require('../lib/scan');
 module.exports = { name: 'browser:play-science', tier: 'browser', covers: ['js/elements.js', 'js/cells.js', 'js/atoms.js', 'js/pick-game.js', 'js/booth-game.js', 'css/style.css', 'js/economy.js', 'js/store.js', 'js/trophies.js', 'js/ui.js', 'index.html'], timeout: 900000, run: async ctx => {
   const g = await ctx.browser(), { page } = g;
   const state = (game, st) => page.waitForFunction((n, s) => (0, eval)(n).state() === s, { timeout: 20000 }, game, st);
-  const open = (game, pre, lv) => page.evaluate((n, p, l) => { (0, eval)(n).open(); document.querySelectorAll(`#${p}-levels .bet`)[l - 1].click(); }, game, pre, lv);
+  const open = async (game, pre, lv) => { await g.closeAll(); await page.evaluate((n, p, l) => { (0, eval)(n).open(); document.querySelectorAll(`#${p}-levels .bet`)[l - 1].click(); }, game, pre, lv); };      // (one window at a time, as a player has it: which of two open windows is on top depends on which was made first)
   const info = game => page.evaluate(n => ({ chips: Store.get().chips, problem: (0, eval)(n).problem, picked: (0, eval)(n).picked }), game);
   /** A point on screen where a real click lands on this part: found by asking the browser what is there. */
   const pointFor = (pre, key) => page.evaluate((p, k) => { const fig = document.getElementById(`${p}-fig`), r = (fig.querySelector('svg') || fig).getBoundingClientRect(); for (let y = r.top + 2; y < r.bottom; y += 3) for (let x = r.left + 2; x < r.right; x += 3) { const t = document.elementFromPoint(x, y), h = t && t.closest('[data-key]'); if (h && h.dataset.key === k) return { x, y }; } return null; }, pre, key);

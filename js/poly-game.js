@@ -1,25 +1,20 @@
-/* The two tables of the Polynomials wing, on one screen design (the window is made the first time you sit down, so there is no markup for it in index.html):
-     PolyMulGame  the Multiply table      (overlay #pmul)   Easy 10, Medium 25, Hard 50 chips per right answer
-     PolyAddGame  the Add/Sub table       (overlay #padd)   Easy (add) 10, Medium (subtract) 25
+/* The ADD/SUB TABLE of the Polynomials wing (overlay #padd), on its own screen design (the window is made the first time you sit down, so there is no markup for it in index.html). The
+   Multiply table is an area model and has its own window: js/area-game.js.
+
+     PolyAddGame  the Add/Sub table   Easy (add) 10, Medium (subtract) 25 chips per right answer
 
    The picture is the way students think about the distributive property: an ARCH from a term outside to each term inside the polynomial it multiplies.
-     Multiply:  the two polynomials are written out and an arch runs from EACH TERM of the first to EACH TERM of the second, a colour for each term it starts from.
-                Step 1  the answer written out, one blank for each arch, as one line:  (2x + 1)(x + 3)  gives  [ ]x\u00b2 + [ ]x + [ ]x + [ ]  (you fill in 2, 6, 1, 3).
-                        The blanks follow the arches in order (the first term across the second polynomial, then the next term across it) and each blank is outlined in
-                        its arch's colour. Nothing is worked out for you: no captions, no inline arithmetic. Click into a blank and its arch lights up.
-                Step 2  combine like terms, again as one line: [ ]x\u00b2 + [ ]x + [ ]  (2, 7, 3), one blank for each power, highest first, zeros included
-                A cubed binomial is two rounds of that, as on paper: (x + 2)(x + 2) first, then that answer times (x + 2). After the first round you see the right answer to
-                it (whatever you typed) so the second round starts from the correct polynomial.
-     Subtract:  the minus sign is "distributed" with arches too: one from the minus sign to each term of the second polynomial.
-                Step 1  the second polynomial written out with its signs changed, as one line of blanks;  Step 2  combine like terms
-     Add:       Step 1  combine like terms
-   Numbers are typed (a minus sign for a negative). One shot per problem: a right answer pays and counts toward the trophy, a wrong one costs nothing, and either way the
-   right answers show with the worked steps. */
-const ARC_COLORS = ['#ffc45c', '#7fe3ff', '#ff9ad5'];     // the colour of the arches that start at the 1st, 2nd and 3rd term (and of that term's multiplications in Step 1)
+     Subtract:  the minus sign is "distributed" with arches: one from the minus sign to each term of the second polynomial.
+                Step 1  the second polynomial written out with its signs changed, as one line of blanks, each outlined in its arch's colour (click into a blank and its arch lights up)
+                Step 2  combine like terms, as one line: [ ]x\u00b2 + [ ]x + [ ], one blank for each power, highest first, zeros included
+     Add:       Step 1  combine like terms (there is nothing to distribute)
+   Numbers are typed (a minus sign for a negative). One shot per problem: a right answer pays and counts toward the trophy, a wrong one costs nothing, and either way the right answers
+   show with the worked steps. */
+const ARC_COLORS = ['#ffc45c', '#7fe3ff', '#ff9ad5'];     // the colour of an arch and of its blank (the minus sign's arches are all the first colour)
 
 function createPolyTable(cfg) {
   const P = cfg.prefix, $ = id => document.getElementById(`${P}-${id}`);
-  let problem = null, stages = [], si = 0, level = 1, state = 'idle', wired = false, last = null, stageOk = [], blocks = [], cur = null;
+  let problem = null, stage = null, level = 1, state = 'idle', wired = false, last = null, cur = null;
   const isOpen = () => !!document.getElementById(P) && !document.getElementById(P).classList.contains('hidden');
   const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
   const svgEl = (tag, attrs) => { const n = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs || {}).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
@@ -51,12 +46,12 @@ function createPolyTable(cfg) {
       b.addEventListener('click', () => start(L.level));
       $('levels').appendChild(b);
     });
-    $('close').addEventListener('click', close); $('check').addEventListener('click', check); $('next').addEventListener('click', onNext);
+    $('close').addEventListener('click', close); $('check').addEventListener('click', check); $('next').addEventListener('click', () => deal());
     $('change').addEventListener('click', () => { state = 'picking'; show('pick'); const c = $('levels').querySelector('.bet'); if (c) c.focus(); });
     $('wallet').parentNode.insertBefore(Trophies.chip(cfg.trophy), $('wallet'));
     Store.onChange(() => { $('wallet').textContent = `${Store.get().chips} chips`; });
     // Enter moves on once a round or a problem is done (Enter inside a box is handled by the box and goes no further)
-    document.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.defaultPrevented && isOpen() && (state === 'done' || state === 'between') && !e.repeat && document.activeElement && document.activeElement.tagName !== 'BUTTON') { e.preventDefault(); onNext(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.defaultPrevented && isOpen() && state === 'done' && !e.repeat && document.activeElement && document.activeElement.tagName !== 'BUTTON') { e.preventDefault(); deal(); } });
     window.addEventListener('resize', redraw);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(redraw);
   }
@@ -71,19 +66,19 @@ function createPolyTable(cfg) {
 
   /* ---------- a new problem ---------- */
   function deal() {
-    problem = cfg.problem(level, Math.random, last); last = problem; stages = cfg.stages(problem); si = 0; stageOk = []; blocks = []; cur = null; state = 'playing';
+    problem = cfg.problem(level, Math.random, last); last = problem; stage = cfg.stage(problem); cur = null; state = 'playing';
     $('wager').textContent = `Level: ${cfg.levelOf(level).name}. Pays ${cfg.pay[level - 1]} chips if you get it right.`;
     $('poly').textContent = cfg.text(problem);
     $('hint').textContent = cfg.hint(problem);
     $('steps').textContent = ''; setMsg(''); $('result').classList.add('hidden'); $('result').textContent = '';
     $('check').classList.remove('hidden'); $('next').classList.add('hidden'); $('change').classList.add('hidden');
-    show('play'); addStage(0);
+    show('play'); buildStage();
   }
 
   /* ---------- the arches ---------- */
   /** The picture of a distribution: the polynomials written out, with an arch from each term outside to each term inside. */
-  function archBlock(st, tag) {
-    const box = el('div', 'poly-arch'); box.setAttribute('data-stage', tag); box.setAttribute('role', 'group'); box.setAttribute('aria-label', st.archLabel);
+  function archBlock(st) {
+    const box = el('div', 'poly-arch'); box.setAttribute('role', 'group'); box.setAttribute('aria-label', st.archLabel);
     st.items.forEach(it => {
       if (it.lit !== undefined) { box.appendChild(el('span', 'poly-lit', it.lit)); return; }
       const t = el('span', 'poly-term', it.text); t.dataset.ref = it.ref;
@@ -91,7 +86,7 @@ function createPolyTable(cfg) {
       box.appendChild(t);
     });
     const svg = svgEl('svg', { class: 'poly-arcs', 'aria-hidden': 'true', focusable: 'false' }); box.appendChild(svg);
-    box._st = st; box._svg = svg; box._tag = tag;
+    box._st = st; box._svg = svg;
     // the arches exist from the start; their shapes are worked out once the picture is on screen
     st.arcs.forEach(a => { svg.appendChild(svgEl('path', { class: 'poly-arc', 'data-from': a.from, 'data-to': a.to, 'data-side': a.side, 'data-color': String(a.color % 3), fill: 'none', stroke: ARC_COLORS[a.color % 3], 'stroke-width': '3', 'stroke-linecap': 'round' })); });
     return box;
@@ -105,19 +100,19 @@ function createPolyTable(cfg) {
     const paths = [...svg.querySelectorAll('path.poly-arc')], count = (key, ref) => st.arcs.filter(a => a[key] === ref).length, rank = (a, key) => st.arcs.filter(b => b[key] === a[key]).indexOf(a);
     svg.querySelectorAll('defs').forEach(d => d.remove());             // one little arrowhead for each colour
     const defs = svgEl('defs');
-    ARC_COLORS.forEach((c, k) => { const m = svgEl('marker', { id: `${P}-head-${box._tag}-${k}`, markerWidth: '7', markerHeight: '7', refX: '3.5', refY: '3.5', orient: 'auto', markerUnits: 'userSpaceOnUse' }); m.appendChild(svgEl('path', { d: 'M0,0 L7,3.5 L0,7 z', fill: c })); defs.appendChild(m); });
+    ARC_COLORS.forEach((c, k) => { const m = svgEl('marker', { id: `${P}-head-${k}`, markerWidth: '7', markerHeight: '7', refX: '3.5', refY: '3.5', orient: 'auto', markerUnits: 'userSpaceOnUse' }); m.appendChild(svgEl('path', { d: 'M0,0 L7,3.5 L0,7 z', fill: c })); defs.appendChild(m); });
     svg.insertBefore(defs, svg.firstChild);
     st.arcs.forEach((a, k) => {
       const f = center(a.from), t = center(a.to), path = paths[k]; if (!f || !t || !path) return;
       const above = a.side === 'above', x1 = f.x + (rank(a, 'from') - (count('from', a.from) - 1) / 2) * 7, x2 = t.x + (rank(a, 'to') - (count('to', a.to) - 1) / 2) * 9;
       const y1 = above ? f.top - 3 : f.bottom + 3, y2 = above ? t.top - 5 : t.bottom + 5, h = (Math.min(58, 8 + 2.2 * Math.sqrt(Math.abs(x2 - x1))) + rank(a, 'from') * 3) * (above ? -1 : 1);      // a longer arch goes higher, so the shorter ones nest inside it
       path.setAttribute('d', `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${(y1 + h * 1.35).toFixed(1)}, ${x2.toFixed(1)} ${(y2 + h * 1.35).toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`);
-      path.setAttribute('marker-end', `url(#${P}-head-${box._tag}-${a.color % 3})`);
+      path.setAttribute('marker-end', `url(#${P}-head-${a.color % 3})`);
     });
   }
-  const redraw = () => blocks.forEach(b => { if (b.arch) drawArches(b.arch); });
+  const redraw = () => { if (cur && cur.arch) drawArches(cur.arch); };
 
-  /* ---------- one stage: the arches, Step 1's boxes, Step 2's boxes ---------- */
+  /* ---------- the problem's picture: the arches, Step 1's boxes, Step 2's boxes ---------- */
   /** A box for a whole number (a minus sign allowed). */
   function numBox(label, into) {
     const i = el('input', 'poly-num'); i.type = 'text'; i.inputMode = 'text'; i.autocomplete = 'off'; i.maxLength = 5; i.setAttribute('aria-label', label);
@@ -127,14 +122,13 @@ function createPolyTable(cfg) {
   }
   function section(parent, title) { const s = el('section', 'poly-step'); s.appendChild(el('h3', '', title)); parent.appendChild(s); return s; }
 
-  function addStage(k) {
-    const st = stages[k], v = problem.v, n = stages.length, wrap = el('div', 'poly-stage'); wrap.dataset.stage = String(k + 1);
+  function buildStage() {
+    const st = stage, v = problem.v, wrap = el('div', 'poly-stage');
     const b = { first: [], second: [], all: [], arch: null, wrap, hover: -1 };
-    if (n > 1) wrap.appendChild(el('h3', 'poly-round', st.roundTitle));
     let num = 1;
     if (st.rows.length) {
       const s1 = section(wrap, `Step ${num++}: ${st.firstTitle}`);
-      if (st.items) { b.arch = archBlock(st, k + 1); s1.appendChild(b.arch); }
+      if (st.items) { b.arch = archBlock(st); s1.appendChild(b.arch); }
       const line1 = el('div', 'poly-line poly-expand'); s1.appendChild(line1);               // the expanded line: [ ]x\u00b2 + [ ]x + [ ]x + [ ]  (one blank for each arch)
       st.rows.forEach((row, i) => {
         if (i) line1.appendChild(el('span', 'poly-plus', '+'));
@@ -151,7 +145,7 @@ function createPolyTable(cfg) {
       if (i) line.appendChild(el('span', 'poly-plus', '+'));
       const bx = numBox(`The number in front of ${d === 0 ? 'the constant term' : Polys.power(v, d)}`, b); b.second.push(bx); line.appendChild(bx); line.appendChild(el('span', 'poly-pow', Polys.power(v, d)));
     });
-    $('steps').appendChild(wrap); blocks.push(b); cur = b; si = k;
+    $('steps').appendChild(wrap); cur = b;
     requestAnimationFrame(() => requestAnimationFrame(redraw));
     if (b.all[0]) b.all[0].focus();
   }
@@ -163,16 +157,10 @@ function createPolyTable(cfg) {
     if (state !== 'playing') return;
     const first = cur.first.map(parse), second = cur.second.map(parse), missing = cur.all.find(b => parse(b) === null);
     if (missing) { setMsg(`Fill in every box first. Type a minus sign (${MINUS} or -) for a negative number.`, 'bad'); missing.focus(); return; }
-    const r = stages[si].check(first, second);
+    const r = stage.check(first, second);
     const mark = (list, marks) => list.forEach((b, i) => { b.style.borderColor = ''; b.classList.add(marks[i] ? 'ok' : 'miss'); b.disabled = true; });      // (the arch-colour outline gives way to green / red)
-    mark(cur.first, r.first); mark(cur.second, r.second); stageOk[si] = r.ok;
-    if (si < stages.length - 1) {                                        // a round of a cube is done: on to the next one, starting from the right answer
-      state = 'between';
-      setMsg(r.ok ? 'That round is right! Now multiply that answer by the last factor.' : 'Not quite. The right numbers are marked. The next round starts from the correct answer.', r.ok ? 'good' : 'bad');
-      $('check').classList.add('hidden'); $('next').textContent = 'Continue'; $('next').classList.remove('hidden'); $('next').focus({ preventScroll: true });
-      return;
-    }
-    const ok = stageOk.every(Boolean), s = Store.get(); state = 'done';
+    mark(cur.first, r.first); mark(cur.second, r.second);
+    const ok = r.ok, s = Store.get(); state = 'done';
     if (ok) {
       const win = cfg.pay[level - 1];
       Store.earn(win); Store.set({ [cfg.wins]: s[cfg.wins] + 1 }); Trophies.award(cfg.trophy);
@@ -180,11 +168,6 @@ function createPolyTable(cfg) {
     } else { Store.set({ [cfg.losses]: s[cfg.losses] + 1 }); setMsg('Not this time. Nothing lost. Here is how it works.', 'bad'); }
     showResult(ok);
     $('check').classList.add('hidden'); $('next').textContent = 'Next problem'; $('next').classList.remove('hidden'); $('change').classList.remove('hidden'); $('next').focus({ preventScroll: true });
-  }
-  /** The Continue / Next problem button. */
-  function onNext() {
-    if (state === 'between') { state = 'playing'; setMsg(''); $('next').classList.add('hidden'); $('check').classList.remove('hidden'); addStage(si + 1); }
-    else if (state === 'done') deal();
   }
   function showResult(ok) {
     const r = $('result'); r.textContent = '';
@@ -200,7 +183,7 @@ function createPolyTable(cfg) {
 
   return {
     open, close, isOpen, state: () => state, get problem() { return problem; }, get level() { return level; }, get boxes() { return cur; },
-    get stageIndex() { return si; }, get stageCount() { return stages.length; }, get stages() { return stages; },
+    get stage() { return stage; },
   };
 }
 
@@ -217,27 +200,6 @@ function polyPieces(poly, v, prefix, ownerColors) {
   return out;
 }
 
-/* ---------- the Multiply table ---------- */
-const PolyMulGame = createPolyTable({
-  prefix: 'pmul', title: 'Multiply Table', formula: '(a + b)(c + d)', trophy: 'polymul', wins: 'polymulWins', losses: 'polymulLosses',
-  levels: Polys.MUL_LEVELS, levelOf: Polys.mulLevelOf, pay: Economy.PAY.polymul,
-  intro: 'Multiply the polynomials, then combine like terms. A wrong answer never costs you chips.',
-  reminder: ['Distribute: draw an arch from each term of the first polynomial to each term of the second, and do each multiplication. Multiply the numbers, and add the powers: (3x)(2x\u00b2) = 6x\u00b3.', 'Like terms have the same power of the variable: 5x and 3x make 8x. A power that is missing gets a 0.'],
-  problem: Polys.mulProblem, text: Polys.mulText,
-  hint: p => (p.factors.length > 2 ? 'A cube is two rounds: multiply the first two factors and combine, then multiply that answer by the last factor. Type a minus sign for a negative number.' : 'Each arch is one multiplication. Fill in the blanks in the order of the arches, then combine like terms. Type a minus sign for a negative number.'),
-  stages: p => Polys.mulStages(p).map((st, k) => ({
-    roundTitle: k === 0 ? `Round 1: multiply the first two factors, ${Polys.paren(st.left, p.v)}${Polys.paren(st.right, p.v)}` : `Round 2: multiply that answer by the last factor, ${Polys.paren(st.left, p.v)}${Polys.paren(st.right, p.v)}`,
-    firstTitle: 'Distribute: multiply along every arch and write out the answer.',
-    archLabel: `${Polys.fmt(st.left, p.v)} times ${Polys.fmt(st.right, p.v)}: each term of the first is multiplied by each term of the second`,
-    items: [...polyPieces(st.left, p.v, 'L', true), ...polyPieces(st.right, p.v, 'R', false)],
-    arcs: st.products.map(x => ({ from: `L${x.i}`, to: `R${x.j}`, color: x.i % 3, side: x.i % 2 === 0 ? 'above' : 'below' })),
-    rows: st.products.map(x => ({ caption: x.caption, label: `The number for ${x.caption}`, d: x.d, color: x.i % 3 })),
-    degrees: st.degrees, result: st.result,
-    check: (first, second) => { const r = Polys.checkStage(st, { products: first, combined: second }); return { ok: r.ok, first: r.products, second: r.combined }; },
-  })),
-  answerText: p => `${Polys.mulText(p)} = ${Polys.fmt(Polys.mulResult(p), p.v)}`, steps: Polys.mulSteps,
-});
-
 /* ---------- the Add/Subtract table ---------- */
 const PolyAddGame = createPolyTable({
   prefix: 'padd', title: 'Add/Sub Table', formula: 'P \u00b1 Q', trophy: 'polyadd', wins: 'polyaddWins', losses: 'polyaddLosses',
@@ -246,9 +208,9 @@ const PolyAddGame = createPolyTable({
   reminder: ['Like terms have the same power of the variable: 3x\u00b2 and 5x\u00b2 make 8x\u00b2. A power that is missing gets a 0.', `Subtracting is distributing a minus sign: an arch from the ${Polys.MINUS} to every term changes every sign: ${Polys.MINUS}(x\u00b2 ${Polys.MINUS} 5x + 4) = ${Polys.MINUS}x\u00b2 + 5x ${Polys.MINUS} 4.`],
   problem: Polys.addProblem, text: Polys.addText,
   hint: p => (p.op < 0 ? 'Distribute the minus sign (the arches), then combine like terms. Type a minus sign for a negative number.' : 'Combine like terms. Type a minus sign for a negative number.'),
-  stages: p => {
+  stage: p => {
     const terms = Polys.termsOf(p.Q), res = Polys.addResult(p), degs = Polys.addDegrees(p), sub = p.op < 0;
-    return [{
+    return {
       firstTitle: 'Distribute the minus sign: write out the second polynomial with every sign changed.',
       archLabel: `the minus sign is distributed to each term of ${Polys.fmt(p.Q, p.v)}`,
       items: sub ? [{ lit: `${Polys.paren(p.P, p.v)} ` }, { ref: 'S', text: Polys.MINUS, color: 0 }, { lit: ' ' }, ...polyPieces(p.Q, p.v, 'R', false)] : null,
@@ -256,7 +218,7 @@ const PolyAddGame = createPolyTable({
       rows: sub ? terms.map(t => ({ caption: `${Polys.MINUS}(${Polys.termText(t.c, t.d, p.v)})`, label: `The new term for ${Polys.MINUS}(${Polys.termText(t.c, t.d, p.v)})`, d: t.d, color: 0 })) : [],
       degrees: degs, result: res,
       check: (first, second) => { const r = Polys.checkAdd(p, { distributed: sub ? first : [], combined: second }); return { ok: r.ok, first: r.distributed, second: r.combined }; },
-    }];
+    };
   },
   answerText: p => `${Polys.addText(p)} = ${Polys.fmt(Polys.addResult(p), p.v)}`, steps: Polys.addSteps,
 });

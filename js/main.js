@@ -95,6 +95,7 @@
   dorm.group.visible = false;
   house.group.visible = false;
   lab.group.visible = false;
+  const daily = DailyQuest.attach();                                     // the daily quest: the tracker, the popups, the 200-chip reward (js/daily.js)
   const quest = RemyQuest.attach({ hub, dorm, dormRoom: dorm.dormRoom, getZone: () => zone });   // Remy's Eye: the eye patch, the tracker, the reminders, the cat on the bed
   scene.background = new THREE.Color(hub.fog[0]);
   scene.fog = new THREE.Fog(hub.fog[0], hub.fog[1], hub.fog[2]);
@@ -243,12 +244,14 @@
     startMsg.textContent = text;
     $('play').textContent = started ? 'Resume' : 'Play';
     startScreen.classList.remove('hidden');
+    daily.hold(true);                                                      // and goes away again while the title or pause screen is up
   }
 
   $('play').addEventListener('click', () => {
     started = true;
     startScreen.classList.add('hidden');
     requestLock();
+    daily.hold(false);                                                     // the daily quest's tracker shows while you play (nothing pops up by itself)
   });
 
   document.addEventListener('pointerlockchange', () => {
@@ -318,6 +321,7 @@
     if (e.code === 'KeyL' && !e.repeat && focused && focused.lesson) LessonPanel.open(focused.lesson);
     if (e.code === 'KeyV') Player.third = !Player.third;
     if (e.code === 'KeyC' && !e.repeat) Shop.openCloset();
+    if (e.code === 'KeyQ' && !e.repeat) daily.open();                        // today's quest, whenever you like
     if (!e.repeat && minesHere() && ['KeyF', 'KeyX'].includes(e.code)) minesAct(e.code === 'KeyF' ? 'flag' : 'dig', true);   // on the minefield F flags and X digs
     else if (!e.repeat && ['KeyF', 'KeyX', 'Enter', 'KeyH', 'KeyN'].includes(e.code)) sandboxKey(e.code);
     if (!e.repeat && e.code === 'KeyR' && zone === hub && mines.contains(Player.x, Player.z, 6)) minesMenu.open();   // R near the field: pick a new game
@@ -400,5 +404,5 @@
   requestAnimationFrame(frame);
 
   // a handle for tests and the browser console; nothing in the game reads it
-  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, lab, quest, setZone, getZone: () => zone, getShowcase: () => showcase };
+  window.__primeTime = { scene, camera, me, follower, sandbox, mines, minesMenu, dorm, viewPencil, viewCalc, hub, casino, school, house, lab, quest, daily, setZone, getZone: () => zone, getShowcase: () => showcase };
 })();

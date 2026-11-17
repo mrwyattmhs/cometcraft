@@ -1,0 +1,9 @@
+# The installed test libraries (about 90 MB). Do not commit them: `cd tools/test && npm install` makes them again from package-lock.json (which IS committed).
+node_modules/
+
+# What the test runner remembers about the last run, and files the bundler builds
+tools/test/.test-cache.json
+tools/test/last-run.json
+dist/
+
+.DS_Store

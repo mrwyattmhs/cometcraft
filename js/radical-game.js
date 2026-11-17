@@ -12,7 +12,7 @@
    The math lives in radicals.js; this file is only the interface. */
 const RadicalGame = (() => {
   const $ = id => document.getElementById(id);
-  const BUILD = 47; // must match Radicals.BUILD
+  const BUILD = 50; // must match Radicals.BUILD
   const MAX_FACTORS = 9;
   const PRIMES = Factoring.primesUpTo(100);
 

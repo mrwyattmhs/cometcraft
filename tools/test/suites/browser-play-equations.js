@@ -12,7 +12,7 @@ module.exports = { name: 'browser:play-equations', tier: 'browser', covers: ['js
     const E = require(tb.mod), sel = x => `#${tb.pre}-${x}`;
     const info = () => page.evaluate(n => { const G = (0, eval)(n); return { chips: Store.get().chips, state: G.state(), problem: G.problem, solved: (Store.get().solved || {}) }; }, tb.game);
     const state = st => page.waitForFunction((n, s) => (0, eval)(n).state() === s, { timeout: 20000 }, tb.game, st);
-    const open = lv => page.evaluate((n, pre, l) => { (0, eval)(n).open(); document.querySelectorAll(`#${pre}-levels .bet`)[l - 1].click(); }, tb.game, tb.pre, lv);
+    const open = async lv => { await g.closeAll(); await page.evaluate((n, pre, l) => { (0, eval)(n).open(); document.querySelectorAll(`#${pre}-levels .bet`)[l - 1].click(); }, tb.game, tb.pre, lv); };      // (one window at a time, as a player has it)
     const typeIn = async v => { await page.click(`${sel('eq')} .eqn-box`); await page.keyboard.type(String(v)); };
 
     await open(1); await state('playing'); let s = await info(), p = s.problem; const c0 = s.chips;

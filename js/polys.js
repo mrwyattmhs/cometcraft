@@ -18,7 +18,7 @@
    Add/Subtract levels:    Easy   add two polynomials, each a binomial or a trinomial
                            Medium subtract them: the minus sign has to be distributed first */
 const Polys = (() => {
-  const BUILD = 47; // bump together with the ?v= numbers in index.html
+  const BUILD = 50; // bump together with the ?v= numbers in index.html
   const VARS = ['x', 'y', 'z', 'a', 'n', 't'];
   const MINUS = '\u2212';
   const SUP = { 2: '\u00b2', 3: '\u00b3', 4: '\u2074', 5: '\u2075', 6: '\u2076' };
@@ -57,68 +57,101 @@ const Polys = (() => {
   const sameProblem = (a, b) => !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
   const BINOMIAL_SHAPES = [[1, 0], [2, 0], [2, 1]];
 
-  /* ======================================================================= MULTIPLICATION ======================================================================= */
+/* ======================================================================= MULTIPLICATION: THE AREA MODEL ======================================================================= */
   const MUL_LEVELS = [
-    { level: 1, name: 'Easy', desc: 'A binomial times a binomial, like (x + 3)(x + 5). Perfect squares too: (x \u2212 4)\u00b2', sample: '(x + 3)(x \u2212 5)', products: 4 },
-    { level: 2, name: 'Medium', desc: 'A binomial and a trinomial, like (x + 2)(x\u00b2 \u2212 x + 4)', sample: '(x + 2)(x\u00b2 \u2212 x + 4)', products: 6 },
-    { level: 3, name: 'Hard', desc: 'A cubed binomial like (x + 2)\u00b3, or a squared trinomial like (x\u00b2 + x \u2212 3)\u00b2', sample: '(x + 2)\u00b3', products: 8 },
+    { level: 1, name: 'Easy', desc: 'A monomial times a binomial, like 3x(x + 5)', sample: '3x(x + 5)', cells: 2 },
+    { level: 2, name: 'Medium', desc: 'A binomial times a binomial, like (x + 3)(x \u2212 5). Perfect squares too: (x \u2212 4)\u00b2', sample: '(x + 3)(x \u2212 5)', cells: 4 },
+    { level: 3, name: 'Hard', desc: 'A binomial times a trinomial, or a trinomial times a trinomial', sample: '(x + 2)(x\u00b2 \u2212 x + 4)', cells: 9 },
   ];
   const mulLevelOf = l => MUL_LEVELS[Math.max(1, Math.min(MUL_LEVELS.length, Math.floor(Number(l)) || 1)) - 1];
 
-  /** A multiplication problem: { kind: 'mul', level, v, factors: [poly, ...] }. A cube or a square has the same factor repeated. */
+  /** A multiplication problem: { kind: 'mul', level, v, factors: [P, Q] }. P is written down the left side of the rectangle and Q across the top. */
   function mulProblem(level, rng = Math.random, last = null) {
     const L = mulLevelOf(level).level;
     for (let tries = 0; tries < 60; tries++) {
       const v = pick(rng, VARS);
       let factors;
-      if (L === 1) {
+      if (L === 1) {                                                                    // a monomial times a binomial: 3x(x + 5), \u22122x(x\u00b2 \u2212 4)
+        const mono = fromTerms([{ c: nonzero(rng, -6, 6), d: rng() < 0.7 ? 1 : 2 }]), r = rng();
+        const shape = r < 0.6 ? [1, 0] : r < 0.8 ? [2, 0] : [2, 1];
+        factors = [mono, fromTerms(shape.map((d, i) => ({ c: i === 0 ? pick(rng, [1, 1, 1, 2, 3]) : nonzero(rng, -9, 9), d })))];
+      } else if (L === 2) {                                                             // two binomials; perfect squares and (ax + b)(ax - b) come up too
         const a = pick(rng, [1, 1, 1, 2, 3]), r = rng();
         const P = fromTerms([{ c: a, d: 1 }, { c: nonzero(rng, -8, 8), d: 0 }]);
-        if (r < 0.3) factors = [P, P];                                                                                          // a perfect square
-        else if (r < 0.4) factors = [P, fromTerms([{ c: a, d: 1 }, { c: -P[0], d: 0 }])];                                       // (ax + b)(ax - b)
+        if (r < 0.3) factors = [P, P];                                                  // a perfect square
+        else if (r < 0.4) factors = [P, fromTerms([{ c: a, d: 1 }, { c: -P[0], d: 0 }])];   // (ax + b)(ax - b)
         else factors = [P, fromTerms([{ c: pick(rng, [1, 1, 2, 3]), d: 1 }, { c: nonzero(rng, -8, 8), d: 0 }])];
-      } else if (L === 2) {
-        const shape = pick(rng, BINOMIAL_SHAPES);
-        const bin = fromTerms(shape.map((d, i) => ({ c: nonzero(rng, i === 0 ? -3 : -6, i === 0 ? 3 : 6), d })));
-        const tri = fromTerms([2, 1, 0].map((d, i) => ({ c: nonzero(rng, i === 0 ? -2 : -5, i === 0 ? 2 : 5), d })));
-        factors = rng() < 0.5 ? [bin, tri] : [tri, bin];
-      } else if (rng() < 0.5) {
-        const P = fromTerms([{ c: pick(rng, [1, 1, 2]), d: 1 }, { c: nonzero(rng, -4, 4), d: 0 }]); factors = [P, P, P];          // a cubed binomial
-      } else {
-        const T = fromTerms([2, 1, 0].map((d, i) => ({ c: nonzero(rng, i === 0 ? -2 : -3, i === 0 ? 2 : 3), d }))); factors = [T, T];   // a squared trinomial
+      } else {                                                                          // a binomial and a trinomial (either way round), or two trinomials
+        const tri = () => fromTerms([2, 1, 0].map((d, i) => ({ c: nonzero(rng, i === 0 ? -2 : -4, i === 0 ? 2 : 4), d })));
+        if (rng() < 0.5) {
+          const bin = fromTerms(pick(rng, BINOMIAL_SHAPES).map((d, i) => ({ c: nonzero(rng, i === 0 ? -3 : -6, i === 0 ? 3 : 6), d }))), t = tri();
+          factors = rng() < 0.5 ? [bin, t] : [t, bin];
+        } else factors = [tri(), tri()];
       }
       const p = { kind: 'mul', level: L, v, factors };
       if (!sameProblem(p, last)) return p;
     }
-    return { kind: 'mul', level: L, v: VARS[0], factors: [[1, 1], [2, 1]] };
+    return { kind: 'mul', level: L, v: VARS[0], factors: [[0, 3], [5, 1]] };
   }
 
-  /** The problem as written: (x + 3)(x + 5), or (x + 3)\u00b2 and (x + 2)\u00b3 when one factor is repeated. */
+  /** The problem as written: 3x(x + 5), (x + 3)(x + 5), and (x + 3)\u00b2 when both factors are the same binomial. */
   function mulText(p) {
-    const f = p.factors, same = f.every(q => equal(q, f[0]));
-    return same && f.length > 1 ? `${paren(f[0], p.v)}${SUP[f.length]}` : f.map(q => paren(q, p.v)).join('');
+    const [P, Q] = p.factors;
+    if (termsOf(P).length === 1) return `${fmt(P, p.v)}${paren(Q, p.v)}`;
+    return equal(P, Q) ? `${paren(P, p.v)}${SUP[2]}` : `${paren(P, p.v)}${paren(Q, p.v)}`;
+  }
+  /** The answer the whole problem must reach, as a polynomial. */
+  const mulResult = p => mul(p.factors[0], p.factors[1]);
+
+  /** The area model: the first polynomial's terms down the left side (highest power first), the second's across the top, and in each square the area: its row's term times its column's term.
+        { rows, cols, cells, degrees }
+        cells    a list of rows, each a list of { c, d, caption }, row by row, left to right
+        degrees  the powers the squares reach, highest first, with none left out: one box each on the "combine like terms" line (zeros included) */
+  function mulGrid(p) {
+    const rows = termsOf(p.factors[0]), cols = termsOf(p.factors[1]);
+    const cells = rows.map(a => cols.map(b => ({ c: a.c * b.c, d: a.d + b.d, caption: `${capTerm(a, p.v)} \u00b7 ${capTerm(b, p.v)}` })));
+    const ds = cells.flat().map(x => x.d), hi = Math.max(...ds), lo = Math.min(...ds);
+    return { rows, cols, cells, degrees: Array.from({ length: hi - lo + 1 }, (_, i) => hi - i) };
+  }
+  /** The right answer, box by box: the squares as terms (row by row, left to right), and the coefficient for each power on the combine line. */
+  function mulAnswer(p) {
+    const g = mulGrid(p), res = mulResult(p);
+    return { cells: g.cells.flat().map(x => ({ c: x.c, d: x.d })), combined: g.degrees.map(d => res[d] || 0) };
   }
 
-  /** A multiplication, one distribution at a time. Two factors are one stage; a cube is two: the first two factors, then that answer times the last.
-      A stage is { left, right, leftTerms, rightTerms, products, degrees, result }:
-        products  one for each arch: the term i of the left polynomial times the term j of the right one, { i, j, c, d, caption } in the order i, then j
-        degrees   the powers of the answer, highest first (one combine box each, zeros included)
-        result    the answer to this stage, which is the left polynomial of the next */
-  function mulStages(p) {
-    const out = []; let left = p.factors[0];
-    for (let k = 1; k < p.factors.length; k++) {
-      const right = p.factors[k], lt = termsOf(left), rt = termsOf(right), products = [];
-      lt.forEach((a, i) => rt.forEach((b, j) => products.push({ i, j, c: a.c * b.c, d: a.d + b.d, caption: `${capTerm(a, p.v)} \u00b7 ${capTerm(b, p.v)}` })));
-      const result = mul(left, right), n = degree(left) + degree(right);
-      out.push({ left, right, leftTerms: lt, rightTerms: rt, products, degrees: Array.from({ length: n + 1 }, (_, i) => n - i), result });
-      left = result;
-    }
-    return out;
+  /* ---------- typing a term into a square ---------- */
+  const SUP_VALUE = { '\u00b2': 2, '\u00b3': 3, '\u2074': 4, '\u2075': 5, '\u2076': 6 };
+  /** Read what was typed in a square as a term { c, d }, or null if it is not one: an optional sign (a plus is allowed), then digits, then the variable with an optional power: 15, \u22126x, x\u00b2, \u2212x^3. The
+      variable must be the one in the problem. */
+  function parseTerm(text, v) {
+    const t = String(text == null ? '' : text).replace(/[\u2212\u2013\u2014]/g, '-').replace(/\s+/g, '').toLowerCase();
+    const m = /^([-+]?)(\d*)(?:([a-z])(?:\^(\d+)|([\u00b2\u00b3\u2074\u2075\u2076]))?)?$/.exec(t);
+    if (!m) return null;
+    const [, sign, digits, letter, caret, sup] = m;
+    if (!digits && !letter) return null;
+    if (letter && letter !== String(v).toLowerCase()) return null;
+    return { c: (digits === '' ? 1 : Number(digits)) * (sign === '-' ? -1 : 1), d: letter ? (caret ? Number(caret) : sup ? SUP_VALUE[sup] : 1) : 0 };
   }
-  /** The product the whole problem must reach, as a polynomial. */
-  const mulResult = p => p.factors.reduce((acc, q) => mul(acc, q), [1]);
-  /** The correct answer to one stage, box by box. */
-  const stageAnswer = st => ({ products: st.products.map(x => x.c), combined: st.degrees.map(d => st.result[d] || 0) });
+  /** Tidy what a keyboard typed into a square: a real minus sign, ^2 as a small 2, lower case, and nothing that cannot be part of a term. A ^ that has just been typed after the variable waits
+      for its digit (the keyboard types one key at a time), and a ^ with a power that has no small form is dropped. (The pad makes only tidy text.) */
+  function tidyTerm(text, v) {
+    const L = String(v).toLowerCase(), SUPS = '\u00b2\u00b3\u2074\u2075\u2076';
+    let t = String(text == null ? '' : text).toLowerCase().replace(/[-\u2013\u2014]/g, '\u2212').replace(/\^([2-6])/g, (m, n) => SUP[n]).replace(/\^\d/g, '');
+    t = t.replace(new RegExp(`[^0-9\\u2212^${L}${SUPS}]`, 'g'), '');
+    const neg = t.startsWith('\u2212'); t = t.replace(/\u2212/g, '');
+    const m = new RegExp(`^(\\d*)(${L}(?:[${SUPS}]|\\^)?)?`).exec(t);
+    return (neg ? '\u2212' : '') + m[1].slice(0, 2) + (m[2] || '');
+  }
+  /** What a key on the term pad does to the text in a square: a digit (two at most, and none after the variable), the minus sign (it flips the sign), backspace (it takes the variable and its
+      power off in one go), or the variable with a power 1 to 4 (key 'v1' to 'v4', replacing any variable already there). A box on the combine line only takes numbers, so those keys do nothing there. */
+  function padTap(text, key, v) {
+    const m = /^(\u2212?)(\d*)([a-z][\u00b2\u00b3\u2074\u2075\u2076]?)?$/.exec(String(text || '')) || ['', '', '', ''], neg = m[1], digits = m[2], varPart = m[3] || '';
+    if (/^\d$/.test(key)) return varPart || digits.length >= 2 ? text || '' : `${neg}${digits}${key}`;
+    if (key === 'neg') return neg ? `${digits}${varPart}` : `\u2212${digits}${varPart}`;
+    if (key === 'back') return varPart ? `${neg}${digits}` : digits ? `${neg}${digits.slice(0, -1)}` : '';
+    const n = /^v([1-4])$/.exec(key); if (n) return `${neg}${digits}${v}${n[1] === '1' ? '' : SUP[n[1]]}`;
+    return text || '';
+  }
 
   /* ======================================================================= ADD AND SUBTRACT ======================================================================= */
   const ADD_LEVELS = [
@@ -155,8 +188,13 @@ const Polys = (() => {
   const whole = n => typeof n === 'number' && Number.isInteger(n);
   /** Compare a list of typed numbers with the right list: which are right. Anything that is not a whole number, or a list of the wrong length, is wrong. */
   const markList = (want, got) => want.map((w, i) => Array.isArray(got) && whole(got[i]) && got[i] === w);
-  /** Check one stage: which product boxes and which combine boxes are right. */
-  function checkStage(st, ans) { const w = stageAnswer(st), a = ans || {}, products = markList(w.products, a.products), combined = markList(w.combined, a.combined); return { ok: products.every(Boolean) && combined.every(Boolean), products, combined }; }
+  /** Check a multiplication: ans = { cells: [what was typed in each square, row by row], combined: [the number typed for each power, highest first] }. Which squares and which combine boxes are
+      right (a square is right if it is the same term, however it was typed). Every box is marked on its own, against the true answer. */
+  function checkMul(p, ans) {
+    const w = mulAnswer(p), a = ans || {};
+    const cells = w.cells.map((t, i) => { const g = Array.isArray(a.cells) ? parseTerm(a.cells[i], p.v) : null; return !!g && g.c === t.c && g.d === t.d; });
+    return { ok: cells.every(Boolean) && markList(w.combined, a.combined).every(Boolean), cells, combined: markList(w.combined, a.combined) };
+  }
   function checkAdd(p, ans) {
     const w = addAnswer(p), a = ans || {}, distributed = markList(w.distributed, a.distributed), combined = markList(w.combined, a.combined);
     return { ok: distributed.every(Boolean) && combined.every(Boolean), distributed, combined };
@@ -164,17 +202,14 @@ const Polys = (() => {
 
   /* ======================================================================= WORKED SOLUTIONS ======================================================================= */
   /** "x\u00b2 + 8x + 15" from a list of coefficients over the given powers. */
+  /** The worked solution of a multiplication, a line at a time: one line for each row of the rectangle, then the like terms combined, then the answer. */
   function mulSteps(p) {
-    const v = p.v, out = [], stages = mulStages(p), two = stages.length > 1;
-    stages.forEach((st, k) => {
-      const lead = two ? (k === 0 ? 'First, multiply the first two factors' : `Now multiply that answer by the last factor, ${paren(p.factors[p.factors.length - 1], v)}`) : 'Multiply every term of the first polynomial by every term of the second';
-      const what = two ? `${paren(st.left, v)}${paren(st.right, v)}` : '';
-      out.push(`${lead}${what ? `: ${what}` : ''} (${st.products.length} products): ${st.products.map(x => `${x.caption} = ${termText(x.c, x.d, v)}`).join(', ')}.`);
-      const like = st.degrees.map(d => ({ d, items: st.products.filter(x => x.d === d) })).filter(g => g.items.length > 1)
-        .map(g => `${power(v, g.d) || 'the numbers'}: ${g.items.map(x => (x.c < 0 ? `(${MINUS}${Math.abs(x.c)})` : x.c)).join(' + ')} = ${st.result[g.d] < 0 ? MINUS + Math.abs(st.result[g.d]) : st.result[g.d]}`);
-      out.push(`Combine like terms (terms with the same power of ${v}): ${like.length ? like.join('; ') : 'there are none to combine'}${two ? `, so ${fmt(st.result, v)}` : ''}.`);
-    });
-    out.push(`So ${mulText(p)} = ${fmt(mulResult(p), v)}.`);
+    const v = p.v, g = mulGrid(p), res = mulResult(p), out = [];
+    g.cells.forEach((row, i) => out.push(`Row ${i + 1} (${termText(g.rows[i].c, g.rows[i].d, v)}): ${row.map(x => `${x.caption} = ${termText(x.c, x.d, v)}`).join(', ')}.`));
+    const like = g.degrees.map(d => ({ d, items: g.cells.flat().filter(x => x.d === d) })).filter(q => q.items.length > 1)
+      .map(q => `${q.items.map((x, k) => (k === 0 ? termText(x.c, x.d, v) : `${x.c < 0 ? MINUS : '+'} ${mag(x.c, x.d, v)}`)).join(' ')} = ${res[q.d] ? termText(res[q.d], q.d, v) : '0'}`);
+    out.push(like.length ? `Combine like terms (the same power of ${v}): ${like.join('; ')}.` : `There are no like terms to combine: write the terms in order.`);
+    out.push(`So ${mulText(p)} = ${fmt(res, v)}.`);
     return out;
   }
   function addSteps(p) {
@@ -192,7 +227,7 @@ const Polys = (() => {
   return {
     BUILD, VARS, MINUS, MUL_LEVELS, ADD_LEVELS, mulLevelOf, addLevelOf,
     trim, degree, add, sub, neg, mul, equal, termsOf, fromTerms, fmt, paren, termText, power,
-    mulProblem, mulText, mulResult, mulStages, stageAnswer, checkStage, mulSteps,
+    mulProblem, mulText, mulResult, mulGrid, mulAnswer, parseTerm, tidyTerm, padTap, checkMul, mulSteps,
     addProblem, addText, addResult, addDistributed, addDegrees, addAnswer, checkAdd, addSteps,
   };
 })();

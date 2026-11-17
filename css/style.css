@@ -829,7 +829,6 @@ div.pair-box { cursor: default; }
 /* the distributive-property arches: each term of the first polynomial gets a colour, and an arch of that colour runs to each term of the second */
 .kelly .poly-stage { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .kelly .poly-step, .kelly .poly-steps { min-width: 0; max-width: 100%; }
-.kelly .poly-round { margin: 6px 0 0; font-family: var(--px); font-size: 14px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; color: #fff; text-shadow: var(--k-pop); }
 .kelly .poly-arch { position: relative; display: block; box-sizing: border-box; min-width: 0; max-width: 100%; margin: 2px 0 10px; padding: 68px 12px; text-align: center; overflow-x: auto; white-space: nowrap; font-size: 38px; font-weight: 800; line-height: 1.2; color: #fff; text-shadow: var(--k-pop); }
 .kelly .poly-term { display: inline-block; padding: 0 3px; margin: 0 1px; border-bottom: 4px solid transparent; }
 .kelly .poly-arcs { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
@@ -1075,11 +1074,26 @@ div.pair-box { cursor: default; }
   .eqn-after .cub-actions .btn { padding: 7px 4px; font-size: 14px; }
 }
 
-/* the quest tracker (Remy's Eye): one line, under the chips */
-#quest { position: absolute; top: 64px; left: 12px; max-width: min(340px, calc(100vw - 24px)); padding: 7px 10px 8px; background: rgba(8, 26, 8, .86); border: 2px solid #6cc84a; border-radius: 8px; color: #fff; font: 700 15px/1.25 'Nunito', system-ui, sans-serif; }
-#quest b { display: block; margin-bottom: 2px; font: 400 12px/1.2 'Silkscreen', monospace; letter-spacing: .06em; text-transform: uppercase; color: #ffc45c; }
-#quest span { display: block; }
-@media (max-width: 760px) { #quest { top: 52px; font-size: 13px; padding: 5px 8px 6px; } }
+/* the quest trackers under the chips: Remy's Eye (when there is one) and the daily quest, stacked */
+#trackers { position: absolute; top: 64px; left: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: min(340px, calc(100vw - 24px)); }
+#quest, #daily { padding: 7px 10px 8px; background: rgba(8, 26, 8, .86); border: 2px solid #6cc84a; border-radius: 8px; color: #fff; font: 700 15px/1.25 'Nunito', system-ui, sans-serif; }
+#daily { border-color: #ffc45c; }
+#quest b, #daily b { display: block; margin-bottom: 2px; font: 400 12px/1.2 'Silkscreen', monospace; letter-spacing: .06em; text-transform: uppercase; color: #ffc45c; }
+#quest span, #daily span { display: block; }
+@media (max-width: 760px) { #trackers { top: 52px; } #quest, #daily { font-size: 13px; padding: 5px 8px 6px; } }
+
+/* the daily quest's card, in a popup */
+.dq-card { text-align: left; padding: 4px 2px 2px; }
+.dq-kicker { display: block; font: 400 13px/1.2 var(--px); letter-spacing: .08em; text-transform: uppercase; color: #fff3cf; }       /* small text needs 4.5:1, and gold on this green is only 3.7: the paler gold the other windows use */
+.dlg-body .dq-task { margin: 6px 0 10px; font: 800 28px/1.15 var(--k-body, 'Nunito', system-ui, sans-serif); color: #fff; }
+.dq-bar { height: 20px; background: rgba(0, 0, 0, .4); border: 2px solid #6cc84a; border-radius: 10px; overflow: hidden; }
+.dq-bar i { display: block; height: 100%; background: linear-gradient(#ffd96a, #ffc45c); transition: width .3s; }
+.dq-done .dq-bar i { background: linear-gradient(#a8f08a, #6cc84a); }
+.dlg-body .dq-count { margin: 6px 0 8px; font-size: 24px; font-weight: 800; }
+.dlg-body .dq-where, .dlg-body .dq-reward { margin: 0 0 6px; font-size: 19px; line-height: 1.25; }
+.dq-reward small { font-size: 15px; opacity: .85; }
+.dq-card b { color: #fff3cf; }
+@media (max-width: 760px) { .dlg-body .dq-task { font-size: 22px; } .dlg-body .dq-count { font-size: 20px; } .dlg-body .dq-where, .dlg-body .dq-reward { font-size: 16px; } }
 
 /* ---------- the Science Lab: Element Match and Cell Lab (click the picture) ---------- */
 .pick-panel { width: min(980px, 100%); }
@@ -1191,7 +1205,7 @@ div.pair-box { cursor: default; }
   .clock-panel .wager-line { display: none; }
   .kelly .eqn-play.reading .hint { display: none; }
   .kelly .eqn-play.reading .clk-svg { height: min(150px, 22vh); }
-  .kelly .eqn-play.reading.answered .clk-svg { height: min(100px, 15vh); }
+  .kelly .eqn-play.reading.answered .clk-svg { height: min(80px, 11vh); }
   .kelly .clk-step { min-height: 44px; font-size: 20px; }
   .kelly .clk-ctl > .btn.primary { min-height: 46px; font-size: 19px; }
   .kelly .clk-time .eqn-box { width: 76px; height: 48px; font-size: 30px; } .kelly .clk-colon { font-size: 36px; line-height: 48px; }
@@ -1207,4 +1221,69 @@ div.pair-box { cursor: default; }
   .kelly .clk-step { min-height: 40px; } .kelly .clk-ctl > .btn.primary { min-height: 40px; font-size: 17px; }
   .kelly .eqn-play.answered .clk-time { display: none; }
   .kelly .final-text { font-size: 13px; }
+}
+
+/* ---------- the Multiply table: an area model (the polynomials outside a rectangle, a square for each row and column, a line underneath to combine like terms) ---------- */
+.area-panel { width: min(980px, 100%); }                       /* (an eqn-panel, which brings the shared header, picker and phone rules; this one is wider for the rectangle and the pad) */
+.area-play { display: grid; grid-template-columns: minmax(0, 1fr) 262px; gap: 18px; align-items: start; }
+.area-main { min-width: 0; }
+.kelly .area-poly { margin: 4px 0 0; text-align: center; font: 800 30px/1.15 var(--k-body); color: #fff; }
+.kelly .area-play .felt { padding: 12px; margin: 10px 0 8px; }
+.area { display: grid; gap: 6px; align-items: center; }
+.area-corner { text-align: center; font: 800 26px var(--k-body); color: var(--k-edge); }
+.area-head { text-align: center; font: 800 25px var(--k-body); color: var(--k-gold); padding: 4px 8px; border-radius: 6px; min-width: 46px; white-space: nowrap; }
+.area-rowhead { justify-self: end; }
+.area-head.on { color: #fff; background: rgba(255, 255, 255, .16); outline: 2px solid var(--k-gold); }
+.kelly .area-cell { width: 100%; height: 58px; padding: 0 4px; font-size: 28px; border-width: 4px; }
+.area-combine { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 2px dashed var(--k-edge); }
+.area-lead { font: 800 18px var(--k-body); color: var(--k-gold); }
+.area-sums { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.kelly .area-sum { width: 76px; height: 54px; padding: 0 4px; font-size: 28px; border-width: 4px; }
+.area-plus, .area-pow { font: 800 26px var(--k-body); color: #fff; }
+.area-pad .eqn-key { min-height: 52px; font-size: 24px; }
+.area-pad .eqn-keycheck { min-height: 50px; font-size: 18px; }
+.kelly .area-after .final-expr { font-size: 22px; }
+.area-after .cub-actions { margin-top: 8px; }
+@media (max-width: 860px) {
+  .area-play { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .area-pad { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+}
+.area-after .work { max-height: min(250px, 34vh); overflow-y: auto; }
+.area-play.answered .area-cell { height: 50px; }
+@media (max-width: 760px) {
+  .kelly .area-poly { font-size: 20px; margin-top: 2px; }
+  .area-panel .wager-line { display: none; }
+  .kelly .area-play .felt { padding: 8px; margin: 4px 0 4px; }
+  .area { gap: 4px; }
+  .area-head { font-size: 18px; padding: 2px 4px; min-width: 32px; }
+  .kelly .area-cell { height: 42px; font-size: 20px; border-width: 3px; }
+  .area-combine { flex-wrap: nowrap; gap: 6px; margin-top: 6px; padding-top: 6px; }
+  .area-lead { flex: 0 0 auto; width: auto; font-size: 13px; line-height: 1.1; max-width: 76px; }
+  .area-sums { flex-wrap: wrap; gap: 4px; }
+  .kelly .area-sum { width: 46px; height: 40px; font-size: 20px; border-width: 3px; }
+  .area-plus, .area-pow { font-size: 18px; }
+  .area-pad { gap: 5px; }
+  .area-pad .eqn-key { min-height: 38px; font-size: 19px; }
+  .area-pad .eqn-keycheck { min-height: 38px; font-size: 16px; }
+  .kelly .area-after .final-expr { font-size: 16px; }
+  .area-play.answered .area-poly { display: none; }
+  .area-play.answered .area-cell { height: 32px; font-size: 16px; }
+  .area-play.answered .area-sum { height: 30px; font-size: 16px; }
+  .area-after .work { max-height: none; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .kelly .area-poly { display: none; }                        /* the two polynomials are the headings outside the rectangle, so the line above it is not needed */
+  .kelly .area-play .felt { padding: 5px; }
+  .area { gap: 3px; }
+  .kelly .area-cell { height: 34px; font-size: 18px; }
+  .kelly .area-sum { height: 32px; font-size: 18px; }
+  .area-head { font-size: 16px; padding: 1px 3px; }
+  .area-pad { gap: 4px; }
+  .area-pad .eqn-key { min-height: 32px; font-size: 17px; }
+  .area-pad .eqn-keycheck { min-height: 32px; font-size: 15px; }
+  .area-after .cub-actions { margin-top: 4px; } .area-after .cub-actions .btn { padding: 7px 10px; font-size: 14px; }
+  .kelly .area-after .final { padding: 4px 8px; } .kelly .area-after .final-label { font-size: 11px; }
+  .kelly .area-play .hint { display: none; }
+  .area-play.answered .area-cell { height: 28px; font-size: 15px; }
+  .area-play.answered .area-sum { height: 26px; font-size: 15px; }
 }

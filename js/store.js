@@ -29,6 +29,7 @@ const Store = (() => {
     readerFont: 2,           // the reader's text size, 0 (smallest) to 4
     remyPets: 0,             // how many times Remy has been petted, over the whole life of the save. The player is never shown this.
     remyQuest: { step: 'none', answers: 0 },   // Remy's Eye, the quest the tenth pet starts (js/remy-quest.js cleans and reads it)
+    daily: { day: '', id: '', need: 0, base: 0, done: false },   // today's daily quest: the day (YYYY-MM-DD), the game, how many right answers it asks, the game's count when the day began, and whether it is finished (js/daily.js)
     dorm: [],                // the furniture in your dorm room: { type, x, z, rot } (Dorm.sanitize makes sure it fits)
     owned: [...FREE_IDS],
     equipped: { ...C.FREE },
@@ -60,6 +61,7 @@ const Store = (() => {
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
     state.remyQuest = state.remyQuest && typeof state.remyQuest === 'object' && typeof state.remyQuest.step === 'string' ? { step: state.remyQuest.step, answers: whole(state.remyQuest.answers) } : { step: 'none', answers: 0 };
+    { const d = state.daily && typeof state.daily === 'object' ? state.daily : {}; state.daily = { day: typeof d.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.day) ? d.day : '', id: typeof d.id === 'string' && /^[a-z]{2,12}$/.test(d.id) ? d.id : '', need: Math.min(99, whole(d.need)), base: whole(d.base), done: d.done === true }; }
     state.reading = state.reading && typeof state.reading === 'object' && !Array.isArray(state.reading)
       ? Object.fromEntries(Object.entries(state.reading).filter(([k, v]) => /^[a-z]{2,12}$/.test(k) && whole(v) >= 1).map(([k, v]) => [k, Math.min(9999, whole(v))])) : {};
     state.readerFont = Math.min(4, Math.max(0, Number.isInteger(state.readerFont) ? state.readerFont : 2));

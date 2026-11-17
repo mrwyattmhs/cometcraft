@@ -6,7 +6,7 @@
    Medium  the first 36, and ten well-known heavier ones (silver, tin, iodine, barium, tungsten, platinum, gold, mercury, lead, xenon): many have symbols that do not match their English names
    Hard    all 118, with the lanthanides and actinides in their two rows underneath */
 const Elements = (() => {
-  const BUILD = 47; // bump together with the ?v= numbers in index.html
+  const BUILD = 50; // bump together with the ?v= numbers in index.html
   const RAW = 'H Hydrogen,He Helium,Li Lithium,Be Beryllium,B Boron,C Carbon,N Nitrogen,O Oxygen,F Fluorine,Ne Neon,Na Sodium,Mg Magnesium,Al Aluminum,Si Silicon,P Phosphorus,S Sulfur,Cl Chlorine,Ar Argon,' +
     'K Potassium,Ca Calcium,Sc Scandium,Ti Titanium,V Vanadium,Cr Chromium,Mn Manganese,Fe Iron,Co Cobalt,Ni Nickel,Cu Copper,Zn Zinc,Ga Gallium,Ge Germanium,As Arsenic,Se Selenium,Br Bromine,Kr Krypton,' +
     'Rb Rubidium,Sr Strontium,Y Yttrium,Zr Zirconium,Nb Niobium,Mo Molybdenum,Tc Technetium,Ru Ruthenium,Rh Rhodium,Pd Palladium,Ag Silver,Cd Cadmium,In Indium,Sn Tin,Sb Antimony,Te Tellurium,I Iodine,Xe Xenon,' +
