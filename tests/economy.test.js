@@ -8,13 +8,13 @@ assert.deepStrictEqual(E.LEVELS, ['Easy', 'Medium', 'Hard', 'Expert']);
 assert.deepStrictEqual(E.PAY, {
   practice: { 2: 10, 3: 25, 4: 50 },
   radical: [10, 25, 50, 100], trinomial: [10, 25, 50, 100], parabola: [25, 50, 100], vertex: [25, 50, 100], coaster: { easy: 10, factor: 20 }, lines: 25,
-  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200], mines: [100, 200, 300], cubes: [10, 25], polymul: [10, 25, 50], polyadd: [10, 25], missing: [10, 25, 50], muldiv: [10, 25, 50], numbers: [10, 25, 50], elements: [10, 25, 50], cells: [10, 25, 50], atoms: [10, 25, 50], clock: [10, 25, 50],
+  arithmetic: { add: 2, sub: 2, mul: 4, div: 5 }, map: 5, blueprint: [50, 100, 150, 200], mines: [100, 200, 300], cubes: [10, 25], polymul: [10, 25, 50], polyadd: [10, 25], missing: [10, 25, 50], muldiv: [10, 25, 50], numbers: [10, 25, 50], elements: [10, 25, 50], cells: [10, 25, 50], atoms: [10, 25, 50], chess: [100, 200, 300], clock: [10, 25, 50],
 });
 assert.deepStrictEqual([1, 2, 3, 4, 0, 9].map(l => E.levelName(l)), ['Easy', 'Medium', 'Hard', 'Expert', 'Easy', 'Expert'], 'names, kept in range');
 
 // the easiest of anything that has levels is the same small number, and each level pays more than the one before it
 [E.PAY.radical, E.PAY.trinomial].forEach(p => assert.strictEqual(p[0], 10, 'the easiest casino level pays 10'));
-Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, cubes: E.PAY.cubes, polymul: E.PAY.polymul, polyadd: E.PAY.polyadd, missing: E.PAY.missing, muldiv: E.PAY.muldiv, numbers: E.PAY.numbers, elements: E.PAY.elements, cells: E.PAY.cells, atoms: E.PAY.atoms, clock: E.PAY.clock, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, mines: E.PAY.mines, practice: Object.values(E.PAY.practice) })
+Object.entries({ radical: E.PAY.radical, trinomial: E.PAY.trinomial, cubes: E.PAY.cubes, polymul: E.PAY.polymul, polyadd: E.PAY.polyadd, missing: E.PAY.missing, muldiv: E.PAY.muldiv, numbers: E.PAY.numbers, elements: E.PAY.elements, cells: E.PAY.cells, atoms: E.PAY.atoms, chess: E.PAY.chess, clock: E.PAY.clock, parabola: E.PAY.parabola, vertex: E.PAY.vertex, blueprint: E.PAY.blueprint, mines: E.PAY.mines, practice: Object.values(E.PAY.practice) })
   .forEach(([game, pay]) => pay.forEach((v, i) => { if (i) assert.ok(v > pay[i - 1], `${game}: each level pays more than the one before`); assert.ok(Number.isInteger(v) && v > 0); }));
 assert.deepStrictEqual(E.PAY.blueprint, [50, 100, 150, 200], 'the sandbox pays the most');
 // the Cubes Table (Easy and Medium) pays exactly what the first two levels of the other Factoring tables pay: 10 and 25 chips

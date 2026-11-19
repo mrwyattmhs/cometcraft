@@ -3,12 +3,12 @@ const assert = require('assert');
 const D = require('../js/daily.js'), T = require('../js/trophies.js');
 
 /* ---------- the topics ---------- */
-assert.strictEqual(D.REWARD, 200); assert.strictEqual(D.TOPICS.length, 24);
+assert.strictEqual(D.REWARD, 200); assert.strictEqual(D.TOPICS.length, 25);
 assert.deepStrictEqual(D.TOPICS.map(x => x.id).sort(), T.IDS.slice().sort(), 'a topic for every game that has a trophy, and no others (a new game must be added here, or left out on purpose)');
-assert.strictEqual(new Set(D.TOPICS.map(x => x.id)).size, 24);
-const NEED = { coaster: 3, blueprint: 3, mines: 3, practice: 5 };
+assert.strictEqual(new Set(D.TOPICS.map(x => x.id)).size, 25);
+const NEED = { coaster: 3, blueprint: 3, mines: 3, practice: 5, chess: 1 };
 for (const x of D.TOPICS) { assert.strictEqual(x.need, NEED[x.id] || 10, `${x.id}: ${NEED[x.id] || 10} right answers`); assert.ok(x.need >= 1 && x.need <= 10); assert.ok(typeof x.task === 'function' && x.task(x.need).includes(String(x.need)) && x.task(7).includes('7'), `${x.id}: the task says how many`); assert.ok(x.where.length > 20 && !/undefined/.test(x.where)); assert.strictEqual(D.byId[x.id], x); assert.ok(/^[A-Z]/.test(x.task(x.need)) && !x.task(x.need).endsWith('.')); }
-assert.strictEqual(new Set(D.TOPICS.map(x => x.task(10))).size, 24, 'every task reads differently');
+assert.strictEqual(new Set(D.TOPICS.map(x => x.task(10))).size, 25, 'every task reads differently');
 assert.strictEqual(D.byId.mines.task(3), 'Win 3 games of Minesweeper'); assert.strictEqual(D.byId.blueprint.task(3), 'Solve 3 blueprints in the Sandbox'); assert.strictEqual(D.byId.polymul.task(10), 'Get 10 Multiply Table problems right'); assert.strictEqual(D.byId.clock.task(10), 'Read 10 clocks correctly'); assert.strictEqual(D.byId.coaster.task(3), 'Build 3 Polynomial Coaster tracks that work');
 for (const id of ['add', 'sub', 'mul', 'div', 'map']) assert.ok(/Arithmetic Academy/.test(D.byId[id].where), `${id} is in the Academy`); for (const id of ['practice', 'radical', 'trinomial', 'cubes']) assert.ok(/Factoring wing/.test(D.byId[id].where)); for (const id of ['lines', 'parabola', 'vertex']) assert.ok(/Graphing wing/.test(D.byId[id].where)); for (const id of ['polymul', 'polyadd', 'coaster']) assert.ok(/Polynomials wing/.test(D.byId[id].where));
 for (const id of ['missing', 'muldiv', 'numbers']) assert.ok(/House of Algebra/.test(D.byId[id].where)); for (const id of ['elements', 'cells', 'atoms']) assert.ok(/Science Lab/.test(D.byId[id].where)); assert.ok(/Sandbox/.test(D.byId.blueprint.where) && /minefield/.test(D.byId.mines.where));
@@ -21,13 +21,13 @@ assert.strictEqual(D.dayNumber('2026-03-09') - D.dayNumber('2026-03-08'), 1, 'da
 
 /* ---------- the order of the days ---------- */
 const ids = D.TOPICS.map(x => x.id).slice().sort();
-for (let c = 0; c < 400; c++) { const o = D.orderOf(c); assert.deepStrictEqual(o.slice().sort(), ids, `cycle ${c} has every game once`); assert.deepStrictEqual(D.orderOf(c), o, 'the same every time'); if (c > 0) assert.notStrictEqual(o[0], D.orderOf(c - 1)[23], `cycle ${c} does not start with the game the last one ended on`); }
+for (let c = 0; c < 400; c++) { const o = D.orderOf(c); assert.deepStrictEqual(o.slice().sort(), ids, `cycle ${c} has every game once`); assert.deepStrictEqual(D.orderOf(c), o, 'the same every time'); if (c > 0) assert.notStrictEqual(o[0], D.orderOf(c - 1)[24], `cycle ${c} does not start with the game the last one ended on`); }
 assert.notDeepStrictEqual(D.orderOf(0), D.orderOf(1)); assert.notDeepStrictEqual(D.orderOf(0), D.TOPICS.map(x => x.id), 'not simply the list in order'); assert.ok(new Set(Array.from({ length: 60 }, (_, c) => D.orderOf(c).join())).size === 60, 'every cycle is shuffled differently');
 { let day = D.dayNumber('2026-01-01'), prev = null; const perCycle = {}; const counts = {};
-  for (let i = 0; i < 24 * 80; i++, day++) { const key = new Date(Date.UTC(1970, 0, 1 + day)).toISOString().slice(0, 10), top = D.topicFor(key); assert.ok(top && D.byId[top.id] === top); if (prev) assert.notStrictEqual(top.id, prev, `${key}: the same game two days running`); prev = top.id; const c = Math.floor(day / 24); (perCycle[c] = perCycle[c] || []).push(top.id); counts[top.id] = (counts[top.id] || 0) + 1; assert.strictEqual(D.topicFor(key), top, 'the same every time'); }
-  for (const [c, list] of Object.entries(perCycle)) if (list.length === 24) assert.deepStrictEqual(list.slice().sort(), ids, `a whole cycle (${c}) plays every game once`);
+  for (let i = 0; i < 25 * 80; i++, day++) { const key = new Date(Date.UTC(1970, 0, 1 + day)).toISOString().slice(0, 10), top = D.topicFor(key); assert.ok(top && D.byId[top.id] === top); if (prev) assert.notStrictEqual(top.id, prev, `${key}: the same game two days running`); prev = top.id; const c = Math.floor(day / 24); (perCycle[c] = perCycle[c] || []).push(top.id); counts[top.id] = (counts[top.id] || 0) + 1; assert.strictEqual(D.topicFor(key), top, 'the same every time'); }
+  for (const [c, list] of Object.entries(perCycle)) if (list.length === 25) assert.deepStrictEqual(list.slice().sort(), ids, `a whole cycle (${c}) plays every game once`);
   assert.ok(Math.max(...Object.values(counts)) - Math.min(...Object.values(counts)) <= 2, 'over 80 cycles every game came up about as often as every other'); }
-assert.strictEqual(D.topicFor('1970-01-01'), D.byId[D.orderOf(0)[0]], 'the first day there was'); assert.strictEqual(D.topicFor('2026-11-16').id, D.orderOf(Math.floor(D.dayNumber('2026-11-16') / 24))[D.dayNumber('2026-11-16') % 24]);
+assert.strictEqual(D.topicFor('1970-01-01'), D.byId[D.orderOf(0)[0]], 'the first day there was'); assert.strictEqual(D.topicFor('2026-11-16').id, D.orderOf(Math.floor(D.dayNumber('2026-11-16') / 25))[D.dayNumber('2026-11-16') % 25]);
 
 /* ---------- the save ---------- */
 const solved = { polymul: 7, add: 3 }, day = '2026-11-16', top = D.topicFor(day);

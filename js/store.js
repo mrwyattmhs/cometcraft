@@ -15,6 +15,8 @@ const Store = (() => {
     missingWins: 0, missingLosses: 0,                                           // the House of Algebra: the Missing Number booth
     muldivWins: 0, muldivLosses: 0,                                             // and the Multiply and Divide booth
     numbersWins: 0, numbersLosses: 0,                                           // and the Numbers Game booth
+    chessWins: 0, chessLosses: 0, chessDraws: 0,                                // chess against the computer
+    chess: { level: '', human: 0, uci: [], over: false, result: '' },           // the game at the chess table, so that leaving the table (or reloading) does not lose it: the level, which side you play (0 white, 1 black), the moves so far ("e2e4"), and how it ended (js/chess-game.js replays and checks it)
     clockWins: 0, clockLosses: 0,                                               // reading the clock
     elementsWins: 0, elementsLosses: 0, cellsWins: 0, cellsLosses: 0, atomsWins: 0, atomsLosses: 0,        // the Science Lab: Element Match, Cell Lab, Atom Builder
     parabolaWins: 0, parabolaLosses: 0, vertexWins: 0, vertexLosses: 0, linesWins: 0, linesLosses: 0, coasterWins: 0, coasterDerails: 0,
@@ -56,11 +58,14 @@ const Store = (() => {
     state.missingWins = whole(state.missingWins); state.missingLosses = whole(state.missingLosses);
     state.muldivWins = whole(state.muldivWins); state.muldivLosses = whole(state.muldivLosses);
     state.numbersWins = whole(state.numbersWins); state.numbersLosses = whole(state.numbersLosses);
-    ['clock', 'elements', 'cells', 'atoms'].forEach(k => { state[`${k}Wins`] = whole(state[`${k}Wins`]); state[`${k}Losses`] = whole(state[`${k}Losses`]); });
+    ['chess', 'clock', 'elements', 'cells', 'atoms'].forEach(k => { state[`${k}Wins`] = whole(state[`${k}Wins`]); state[`${k}Losses`] = whole(state[`${k}Losses`]); });
     state.polymulWins = whole(state.polymulWins); state.polymulLosses = whole(state.polymulLosses); state.polyaddWins = whole(state.polyaddWins); state.polyaddLosses = whole(state.polyaddLosses);
     state.mapBestStreak = whole(state.mapBestStreak);
     state.remyPets = whole(state.remyPets);
     state.remyQuest = state.remyQuest && typeof state.remyQuest === 'object' && typeof state.remyQuest.step === 'string' ? { step: state.remyQuest.step, answers: whole(state.remyQuest.answers) } : { step: 'none', answers: 0 };
+    { const c = state.chess && typeof state.chess === 'object' && !Array.isArray(state.chess) ? state.chess : {}, level = ['easy', 'medium', 'hard'].includes(c.level) ? c.level : '';
+      state.chess = level ? { level, human: c.human === 1 ? 1 : 0, uci: (Array.isArray(c.uci) ? c.uci : []).filter(m => typeof m === 'string' && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m)).slice(0, 600), over: c.over === true, result: ['win', 'loss', 'draw'].includes(c.result) ? c.result : '' } : { level: '', human: 0, uci: [], over: false, result: '' }; }
+    state.chessDraws = whole(state.chessDraws);
     { const d = state.daily && typeof state.daily === 'object' ? state.daily : {}; state.daily = { day: typeof d.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.day) ? d.day : '', id: typeof d.id === 'string' && /^[a-z]{2,12}$/.test(d.id) ? d.id : '', need: Math.min(99, whole(d.need)), base: whole(d.base), done: d.done === true }; }
     state.reading = state.reading && typeof state.reading === 'object' && !Array.isArray(state.reading)
       ? Object.fromEntries(Object.entries(state.reading).filter(([k, v]) => /^[a-z]{2,12}$/.test(k) && whole(v) >= 1).map(([k, v]) => [k, Math.min(9999, whole(v))])) : {};

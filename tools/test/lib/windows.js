@@ -17,6 +17,7 @@ const WINDOWS = {
   missing:   { open: `EquationGame.open()`, root: '#eqn', wing: true },     muldiv:    { open: `MulDivGame.open()`, root: '#eqm', wing: true },
   numbers:   { open: `NumbersGame.open()`, root: '#nbg', wing: true },
   clock:     { open: `ClockGame.open()`, root: '#clk', wing: true },
+  chess:     { open: `ChessGame.open()`, root: '#chess', wing: true },
   elements:  { open: `ElementGame.open()`, root: '#elm', wing: true },   cells:     { open: `CellGame.open()`, root: '#cel', wing: true },   atoms:     { open: `AtomsGame.open()`, root: '#abd', wing: true },
   mines:     { open: `__primeTime.minesMenu.open()`, root: '#mines' },               lesson:    { open: `(typeof LessonPanel !== 'undefined') && LessonPanel.open()`, root: '#lesson' },
 };
@@ -34,6 +35,7 @@ const STATES = [
   ['missing:menu', open(WINDOWS.missing.open)], ['missing:play', seq(open(WINDOWS.missing.open), click('#eqn-levels .bet'))],
   ['muldiv:menu', open(WINDOWS.muldiv.open)], ['muldiv:play', seq(open(WINDOWS.muldiv.open), click('#eqm-levels .bet'))],
   ['numbers:menu', open(WINDOWS.numbers.open)], ['numbers:play', seq(open(WINDOWS.numbers.open), click('#nbg-levels .bet:nth-child(3)'))],
+  ['chess:menu', open(WINDOWS.chess.open)], ['chess:play', seq(open(WINDOWS.chess.open), click('#chess-start'))],
   ['clock:menu', open(WINDOWS.clock.open)], ['clock:play', seq(open(WINDOWS.clock.open), click('#clk-levels .bet:nth-child(3)'))],
   ['elements:menu', open(WINDOWS.elements.open)], ['elements:play', seq(open(WINDOWS.elements.open), click('#elm-levels .bet:nth-child(3)'))],
   ['cells:menu', open(WINDOWS.cells.open)], ['cells:play', seq(open(WINDOWS.cells.open), click('#cel-levels .bet:nth-child(3)'))],

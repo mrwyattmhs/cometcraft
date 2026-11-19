@@ -8,7 +8,7 @@
    No DOM here, so it is all unit tested in Node. Like the other booths' modules it has LEVELS, problem, isCorrect, answerOf, steps, done and text, and a view() that tells the window
    to draw a row of three labelled boxes (and `ordered`, because here the first box can only be the protons: each box is marked on its own place). */
 const AtomBuilder = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const E = typeof Elements !== 'undefined' ? Elements : require('./elements.js');
   const MINUS = '\u2212';
   /** The common mass number of each element used (the standard atomic mass, rounded). */

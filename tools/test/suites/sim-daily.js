@@ -68,6 +68,13 @@ module.exports = { name: 'sim:daily', tier: 'sim', covers: ['js/daily.js', 'js/s
   assert.strictEqual(chips() - start, 10 * 10 + 200, 'ten Easy answers at 10 chips each, and the quest\'s 200'); assert.ok(dlg().open && dlg().title === 'Quest complete!', 'the quest popup comes up over the game window'); closeDlg(); M.close();
   assert.strictEqual(solved('polymul'), 10); ctx.log('ten real Multiply Table answers finish the quest: 100 chips from the table and 200 from the quest');
 
+  /* ---------- a real game: one chess win finishes a "win a game of chess" quest ---------- */
+  { let day2 = null; for (let k = 0; k < 80; k++) { const dt = new Date(new Date(2026, 10, 20).getTime() + k * 86400000); if (D.topicFor(D.dayKey(dt)).id === 'chess') { day2 = dt; break; } } assert.ok(day2, 'chess comes up within 80 days');
+    Clock.setNow(() => new Date(day2.getFullYear(), day2.getMonth(), day2.getDate(), 12)); Store.reset(); assert.strictEqual(Store.get().daily.id, 'chess'); assert.strictEqual(tracker(), 'Win 1 game of chess (0/1)'); const CG = T.ChessGame, c1 = chips(), script = ['f2f3', 'g2g4'];
+    CG.config.delay = () => 0; CG.config.engine = g => ({ move: g.pos.fromUci(script.shift()) }); CG.open(); CG.startGame('medium', 'b'); const settle = async () => { for (let i = 0; i < 400 && CG.thinking; i++) await new Promise(r => setTimeout(r, 5)); };
+    await settle(); const press = (type, e) => e.dispatchEvent(new w.MouseEvent(type, { bubbles: true })), sqEl = n => doc.getElementById(`chess-sq-${(n.charCodeAt(0) - 97) + (n.charCodeAt(1) - 49) * 16}`), tapSq = n => { press('pointerdown', sqEl(n)); press('pointerup', $('chess-board')); };
+    tapSq('e7'); tapSq('e5'); await settle(); tapSq('d8'); tapSq('h4'); await settle(); assert.strictEqual(CG.over && CG.over.result, 'win'); assert.strictEqual(chips() - c1, 200 + 200, 'a Medium win pays 200 and the quest 200'); assert.ok(Store.get().daily.done, 'the quest is done'); assert.ok($('daily').classList.contains('hidden'), 'and its tracker is gone');
+    assert.ok(dlg().open && dlg().title === 'Quest complete!', 'the quest popup comes up over the chess window'); closeDlg(); CG.close(); }
   /* ---------- paused (the tests\' switch): nothing pays, nothing pops up ---------- */
   Store.reset(); const pt = Store.get().daily.id; G.daily.pause(); assert.strictEqual(G.daily.paused, true); const p0 = chips(); award(pt, D.byId[pt].need + 2); assert.strictEqual(chips(), p0, 'paused: no reward'); assert.ok(!dlg().open, 'and no popup');
   G.daily.resume(); assert.strictEqual(chips() - p0, 200, 'resumed: the quest finishes'); closeDlg();

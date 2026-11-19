@@ -3,15 +3,15 @@ const assert = require('assert');
 const T = require('../js/trophies.js');
 
 /* ---------- one trophy for each game ---------- */
-assert.deepStrictEqual(T.IDS, ['add', 'sub', 'mul', 'div', 'practice', 'radical', 'trinomial', 'cubes', 'polymul', 'polyadd', 'missing', 'muldiv', 'numbers', 'elements', 'cells', 'atoms', 'clock', 'lines', 'parabola', 'vertex', 'coaster', 'map', 'blueprint', 'mines']);
-assert.strictEqual(T.GAMES.length, 24); assert.strictEqual(new Set(T.IDS).size, 24);
+assert.deepStrictEqual(T.IDS, ['add', 'sub', 'mul', 'div', 'practice', 'radical', 'trinomial', 'cubes', 'polymul', 'polyadd', 'missing', 'muldiv', 'numbers', 'elements', 'cells', 'atoms', 'chess', 'clock', 'lines', 'parabola', 'vertex', 'coaster', 'map', 'blueprint', 'mines']);
+assert.strictEqual(T.GAMES.length, 25); assert.strictEqual(new Set(T.IDS).size, 25);
 T.GAMES.forEach(g => { assert.ok(g.name && g.noun && Number.isInteger(g.goal) && g.goal > 0 && Number.isInteger(g.color)); assert.strictEqual(T.byId[g.id], g); });
 assert.strictEqual(T.byId.lines.goal, 100, 'the lines trophy takes 100 lines, in any of the three forms'); assert.strictEqual(T.byId.lines.symbol, 'linegraph');
 assert.deepStrictEqual([T.byId.coaster.goal, T.byId.coaster.symbol, T.byId.coaster.noun], [100, 'coaster', 'rides cleared'], 'the coaster trophy takes 100 cleared rides');
-assert.deepStrictEqual(T.GAMES.filter(g => g.goal !== 100).map(g => [g.id, g.goal]), [['blueprint', 25], ['mines', 25]], '100 right everywhere, except 25 blueprints in the sandbox and 25 Minesweeper wins');
+assert.deepStrictEqual(T.GAMES.filter(g => g.goal !== 100).map(g => [g.id, g.goal]), [['chess', 10], ['blueprint', 25], ['mines', 25]], '100 right everywhere, except 10 chess wins, 25 blueprints in the sandbox and 25 Minesweeper wins');
 // each trophy carries its table's symbol
 assert.deepStrictEqual(T.GAMES.map(g => typeof g.symbol === 'string' ? g.symbol : g.symbol.words.join(' ')),
-  ['plus', 'minus', 'times', 'divide', 'd20', 'sqrt', 'STANDARD FORM', 'cube', 'MULTIPLY POLY', 'ADD/SUB POLY', 'MISSING NUMBER', 'MULTIPLY DIVIDE', 'NUMBERS GAME', 'ELEMENT MATCH', 'CELL LAB', 'ATOM BUILDER', 'READ THE CLOCK', 'linegraph', 'parabola', 'VERTEX FORM', 'coaster', 'map', 'blocks', 'flag']);
+  ['plus', 'minus', 'times', 'divide', 'd20', 'sqrt', 'STANDARD FORM', 'cube', 'MULTIPLY POLY', 'ADD/SUB POLY', 'MISSING NUMBER', 'MULTIPLY DIVIDE', 'NUMBERS GAME', 'ELEMENT MATCH', 'CELL LAB', 'ATOM BUILDER', 'knight', 'READ THE CLOCK', 'linegraph', 'parabola', 'VERTEX FORM', 'coaster', 'map', 'blocks', 'flag']);
 assert.deepStrictEqual(T.GAMES.filter(g => g.symbol.words).map(g => [g.id, g.symbol.words.join(' ')]), [['trinomial', 'STANDARD FORM'], ['polymul', 'MULTIPLY POLY'], ['polyadd', 'ADD/SUB POLY'], ['missing', 'MISSING NUMBER'], ['muldiv', 'MULTIPLY DIVIDE'], ['numbers', 'NUMBERS GAME'], ['elements', 'ELEMENT MATCH'], ['cells', 'CELL LAB'], ['atoms', 'ATOM BUILDER'], ['clock', 'READ THE CLOCK'], ['vertex', 'VERTEX FORM']], 'eleven trophies are plates with words: the two formula tables (Standard Form and Vertex Form), the two Polynomials tables, the three booths of the House of Algebra, the three stations of the Science Lab and the clock');
 // the colors are the table colors
 assert.deepStrictEqual(['add', 'sub', 'mul', 'div'].map(id => T.byId[id].color), [0xf7e98e, 0xf6b0c8, 0xa8d8f0, 0xcdb8f0]);
@@ -42,7 +42,7 @@ assert.deepStrictEqual(T.shelves(['mul', 'add']), [['mul', 'add']], 'in the orde
 const ten = T.IDS.slice(0, 10), eleven = T.IDS.slice(0, 11), all = T.IDS;
 assert.strictEqual(T.shelves(ten).length, 1, 'ten fit on the first shelf');
 assert.deepStrictEqual(T.shelves(eleven).map(row => row.length), [10, 1], 'the eleventh starts a second shelf below');
-assert.deepStrictEqual(T.shelves(all).map(row => row.length), [10, 10, 4], 'all twenty-four: ten, ten and four (the third shelf only exists once it is needed)');
+assert.deepStrictEqual(T.shelves(all).map(row => row.length), [10, 10, 5], 'all twenty-four: ten, ten and four (the third shelf only exists once it is needed)');
 assert.strictEqual(T.MAX_SHELVES, 3); assert.deepStrictEqual(T.shelves(T.IDS.slice(0, 20)).map(row => row.length), [10, 10], 'twenty fill two shelves exactly'); assert.deepStrictEqual(T.shelves(T.IDS.slice(0, 21)).map(row => row.length), [10, 10, 1], 'the twenty-first starts the third shelf');
 assert.deepStrictEqual(T.shelves(all).flat(), all, 'nothing lost and nothing reordered');
 assert.deepStrictEqual(T.shelves(['add', 'add', 'sub', 'nope']), [['add', 'sub']], 'duplicates and unknown ids are dropped');
@@ -58,7 +58,7 @@ assert.strictEqual(T.progressText({ add: 140 }, ['add'], 'add'), 'Trophy earned!
 let sv = {}, tr = [], order = [...T.IDS].sort((a, b) => (a.charCodeAt(1) * 7 + a.length) - (b.charCodeAt(1) * 7 + b.length)), earnedLog = [];
 for (const id of order) for (let i = 0; i < T.byId[id].goal; i++) { const x = T.apply(sv, tr, id); sv = x.solved; tr = x.trophies; if (x.earned) earnedLog.push(x.earned.id); }
 assert.deepStrictEqual(earnedLog, order, 'each is earned exactly once, as its count reaches the goal'); assert.deepStrictEqual(tr, order);
-assert.deepStrictEqual(T.shelves(tr).map(row => row.length), [10, 10, 4]);
+assert.deepStrictEqual(T.shelves(tr).map(row => row.length), [10, 10, 5]);
 /* ---------- every trophy can be DRAWN: in the trophy case and on the dorm shelf (each keeps its own list of the voxel symbols it can draw, and a trophy left off one list shows an empty base) ---------- */
 {
   const fs = require('fs'), path = require('path');
@@ -105,7 +105,7 @@ console.log('trophy tests passed');
 {
   const empty = T.entries({}, []);
   assert.deepStrictEqual(empty.map(e => e.id), T.IDS, 'every trophy there is, in table order');
-  assert.strictEqual(empty.length, 24);
+  assert.strictEqual(empty.length, 25);
   assert.ok(empty.every(e => !e.earned && e.count === 0 && e.percent === 0), 'none earned and no progress at the start');
   assert.ok(empty.every((e, i) => e.name === T.GAMES[i].name && e.goal === T.GAMES[i].goal && e.symbol === T.GAMES[i].symbol && e.color === T.GAMES[i].color && e.noun === T.GAMES[i].noun), 'each carries its own name, goal, symbol and colour');
   // progress, and what counts as earned
@@ -118,9 +118,9 @@ console.log('trophy tests passed');
   assert.deepStrictEqual([by('lines').earned, by('lines').count, by('lines').percent], [true, 100, 100], 'a trophy you have stays full even if the count is lower');
   assert.deepStrictEqual([by('radical').count, by('mul').count], [0, 0], 'junk in the save counts as nothing');
   assert.strictEqual(some.filter(e => e.earned).length, 2, 'unknown and repeated ids are ignored');
-  assert.strictEqual(T.entries(undefined, undefined).length, 24, 'an empty save is fine');
+  assert.strictEqual(T.entries(undefined, undefined).length, 25, 'an empty save is fine');
   assert.strictEqual(T.entries({}, T.IDS).every(e => e.earned && e.percent === 100), true, 'all of them earned');
-  assert.deepStrictEqual([T.earnedCount([]), T.earnedCount(['add', 'add']), T.earnedCount(['add', 'sub', 'nope']), T.earnedCount(T.IDS), T.earnedCount(undefined)], [0, 1, 2, 24, 0]);
+  assert.deepStrictEqual([T.earnedCount([]), T.earnedCount(['add', 'add']), T.earnedCount(['add', 'sub', 'nope']), T.earnedCount(T.IDS), T.earnedCount(undefined)], [0, 1, 2, 25, 0]);
   // the input is not touched
   const solved = { add: 5 }, tr = ['add']; T.entries(solved, tr); assert.deepStrictEqual([solved, tr], [{ add: 5 }, ['add']]);
   // the earned trophies and the entries agree with progressText
@@ -129,7 +129,7 @@ console.log('trophy tests passed');
   // how each is earned: a real sentence, with the real goal, and the right place
   const hows = T.GAMES.map(g => g.how);
   assert.ok(hows.every(h => typeof h === 'string' && h.length > 30 && /\.$/.test(h)), 'a full sentence for each');
-  assert.strictEqual(new Set(hows).size, 24, 'no two the same');
+  assert.strictEqual(new Set(hows).size, 25, 'no two the same');
   T.GAMES.forEach(g => assert.ok(g.how.includes(String(g.goal)), `${g.id}: the sentence says the goal (${g.goal})`));
   T.GAMES.forEach(g => { assert.ok(!/\bbet|wager|gambl/i.test(g.how), `${g.id}: no talk of betting`); });
   const C = require('../js/casino-interior.js');

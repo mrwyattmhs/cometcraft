@@ -12,7 +12,7 @@
    Two parts. The first is the maths of it with no DOM and no game: dayKey, topicFor, sync, progress, step and every word it says, unit tested in Node (tests/daily.test.js). The second, attach(),
    connects it to the game: the save, the tracker, the popups, the reward and the midnight check. */
 const DailyQuest = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const REWARD = 200;
   const G = typeof Trophies !== 'undefined' ? Trophies : require('./trophies.js');
   const whole = v => Math.max(0, Math.floor(Number(v)) || 0);
@@ -37,6 +37,7 @@ const DailyQuest = (() => {
     t('vertex', 10, n => `Get ${n} Vertex Table problems right`, `${GRAPHING}: the Vertex table`),
     t('polymul', 10, n => `Get ${n} Multiply Table problems right`, `${POLYS}: the Multiply table`),
     t('polyadd', 10, n => `Get ${n} Add/Sub Table problems right`, `${POLYS}: the Add/Sub table`),
+    t('chess', 1, n => `Win ${n} game${n === 1 ? '' : 's'} of chess`, 'the chess table in the park, next to the little library'),
     t('coaster', 3, n => `Build ${n} Polynomial Coaster tracks that work`, `${POLYS}: the Polynomial Coaster`),
     t('missing', 10, n => `Get ${n} Missing Number problems right`, `${HOUSE}: the Missing Number booth`),
     t('muldiv', 10, n => `Get ${n} Multiply & Divide problems right`, `${HOUSE}: the Multiply & Divide booth`),

@@ -1287,3 +1287,45 @@ div.pair-box { cursor: default; }
   .area-play.answered .area-cell { height: 28px; font-size: 15px; }
   .area-play.answered .area-sum { height: 26px; font-size: 15px; }
 }
+
+/* ---------- the chess table: a plain 2D board on a panel with no world around it ---------- */
+#chess.overlay { background: #0c2210; --bs: min(calc(100vw - 64px), calc(100svh - 270px), 560px); }
+.chess-panel { width: min(1000px, 100%); }
+.ch-ico { width: 56px; height: 56px; } .kelly .bet.picked { outline: 4px solid #fff3cf; outline-offset: 2px; }
+.ch-seg { display: flex; gap: 8px; margin: 6px 0 12px; } .ch-seg .btn { flex: 1; min-height: 44px; } .ch-seg .btn.on { background: #ffc45c; color: #1a1100; border-color: #fff3cf; }
+.ch-start { width: 100%; min-height: 52px; font-size: 20px; }
+.ch-play { display: grid; grid-template-columns: auto minmax(230px, 300px); gap: 20px; justify-content: center; align-items: start; }
+.ch-left { width: calc(var(--bs) + 22px); }
+.ch-bar { height: 34px; display: flex; align-items: center; gap: 8px; padding-left: 22px; font-weight: 800; font-size: 16px; color: #fff; }
+.ch-who { white-space: nowrap; } .ch-taken { display: flex; align-items: center; height: 24px; margin-left: 6px; } .ch-cap { width: 22px; height: 22px; margin-right: -10px; } .ch-adv { color: #fff3cf; font-size: 14px; margin-left: 14px; }
+.ch-turn { margin-left: auto; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff3cf; } .ch-turn.on { background: #81e04c; border-color: #81e04c; }
+.ch-boardwrap { display: grid; grid-template-columns: 22px var(--bs); grid-template-rows: var(--bs) 22px; }
+.ch-ranks, .ch-files { display: grid; font-size: 14px; font-weight: 800; color: #fff3cf; text-align: center; } .ch-ranks { grid-template-rows: repeat(8, 1fr); align-items: center; } .ch-files { grid-template-columns: repeat(8, 1fr); align-items: center; }
+.ch-board { position: relative; width: var(--bs); height: var(--bs); display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); border-radius: 4px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 6px 24px rgba(0, 0, 0, .45); }
+.ch-board:focus-visible { outline: 3px solid #fff3cf; outline-offset: 3px; }
+.ch-sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; } .ch-sq.l { background: #ebecd0; } .ch-sq.d { background: #779556; }
+.ch-sq.last::before, .ch-sq.sel::before, .ch-sq.check::before { content: ''; position: absolute; inset: 0; } .ch-sq.last::before { background: rgba(255, 235, 60, .5); } .ch-sq.sel::before { background: rgba(20, 85, 30, .5); }
+.ch-sq.check::before { background: radial-gradient(ellipse at center, #ff0000 0%, #e70000 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%); }
+.ch-board:focus .ch-sq.cur { box-shadow: inset 0 0 0 calc(var(--bs) / 90) #fff3cf; }
+.ch-pc { position: relative; width: 94%; height: 94%; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); }
+.ch-hint { position: absolute; width: 32%; height: 32%; border-radius: 50%; background: rgba(20, 20, 20, .22); pointer-events: none; } .ch-hint.cap { width: 92%; height: 92%; background: transparent; border: calc(var(--bs) / 80) solid rgba(20, 20, 20, .25); }
+.ch-sq.target:hover { box-shadow: inset 0 0 0 calc(var(--bs) / 100) rgba(255, 255, 255, .8); }
+.ch-ghost { position: fixed; z-index: 60; pointer-events: none; width: calc(var(--bs) / 8 * 1.15); height: calc(var(--bs) / 8 * 1.15); transform: translate(-50%, -50%); } .ch-ghost svg { width: 100%; height: 100%; }
+.ch-banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20; min-width: 66%; padding: 14px 18px; text-align: center; background: #12351a; color: #fff; border: 3px solid #6cc84a; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); }
+.ch-banner.win { border-color: #ffc45c; } .ch-banner h3 { margin: 0 0 4px; font-size: 22px; } .ch-banner p { margin: 0 0 12px; color: #fff3cf; font-size: 15px; line-height: 1.25; } .ch-banner-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; } .ch-banner-row .btn { min-height: 42px; }
+.ch-promo { position: absolute; z-index: 25; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; gap: 6px; padding: 8px; background: #12351a; border: 3px solid #ffc45c; border-radius: 10px; box-shadow: 0 8px 30px rgba(0, 0, 0, .55); }
+.ch-promo .btn { width: calc(var(--bs) / 8); height: calc(var(--bs) / 8); min-width: 44px; min-height: 44px; padding: 3px; background: #ebecd0; } .ch-promo .btn:hover { background: #fff; } .ch-promo svg { width: 100%; height: 100%; }
+.ch-right { display: flex; flex-direction: column; gap: 10px; }
+.ch-status { margin: 0; min-height: 26px; font-weight: 800; font-size: 17px; color: #fff; }
+.ch-moves { background: rgba(0, 0, 0, .25); border-radius: 8px; padding: 6px 10px; height: 230px; overflow-y: auto; font-size: 15px; font-weight: 700; color: #fff; display: grid; grid-template-columns: 30px 1fr 1fr; align-content: start; row-gap: 3px; }
+.ch-moves .n { color: #fff3cf; } .ch-moves .m.cur { background: rgba(0, 0, 0, .4); border-radius: 4px; }      /* a dark highlight: a light one costs the white text its contrast */
+.ch-actions { display: flex; gap: 8px; } .ch-actions .btn { flex: 1; min-height: 44px; }
+@media (max-width: 860px) {
+  .ch-play { grid-template-columns: auto; justify-content: center; gap: 8px; }
+  .ch-right { width: calc(var(--bs) + 22px); } .ch-moves { height: 70px; }
+}
+@media (max-width: 760px) {
+  #chess.overlay { --bs: min(calc(100vw - 56px), calc(100svh - 300px)); }
+  .ch-bar { height: 30px; font-size: 14px; } .ch-status { font-size: 15px; min-height: 22px; } .ch-banner h3 { font-size: 18px; } .ch-banner p { font-size: 13px; margin-bottom: 8px; }
+}
+@media (max-width: 760px) and (max-height: 700px) { #chess.overlay { --bs: min(calc(100vw - 56px), calc(100svh - 270px)); } .ch-moves { display: none; } .ch-bar { height: 26px; } }

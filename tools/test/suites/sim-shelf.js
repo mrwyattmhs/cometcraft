@@ -8,10 +8,10 @@ module.exports = { name: 'sim:shelf', tier: 'sim', covers: ['js/dormroom.js', 'j
   const s = ctx.sim(), { T, G } = s, { Store, Trophies, Dorm } = T, room = G.dorm.dormRoom, THREE = s.w.THREE; s.start(); await s.frames(2);
   const box = o => { o.updateWorldMatrix(true, true); return new THREE.Box3().setFromObject(o); }, boards = () => room.shelf.root.children.filter(o => o.geometry && o.geometry.parameters && Math.abs(o.geometry.parameters.width - 6.0) < 1e-6), rowsOf = () => Trophies.shelves(Store.get().trophies);
   Store.set({ trophies: Trophies.IDS.slice() }); await s.frames(2);
-  assert.deepStrictEqual(plain(rowsOf().map(r => r.length)), [10, 10, 4], '24 trophies: ten, ten and four'); assert.strictEqual(boards().length, 3, 'three boards, drawn'); assert.strictEqual(room.shelf.boards(), 3, 'and the room says so');
+  assert.deepStrictEqual(plain(rowsOf().map(r => r.length)), [10, 10, 5], '25 trophies: ten, ten and five'); assert.strictEqual(boards().length, 3, 'three boards, drawn'); assert.strictEqual(room.shelf.boards(), 3, 'and the room says so');
   const ys = Array.from(boards().map(b => +b.position.y.toFixed(3))).sort((a, b) => b - a); assert.deepStrictEqual(ys, [3.15, 2.75, 2.35], 'the boards are 0.4 apart, top to bottom'); assert.ok(ys[0] + 0.04 + 0.4 < 3.6, 'the top board and its trophies fit under the 3.6 ceiling');
   /* ----- every trophy is on its board, under the board above, and clear of its neighbours ----- */
-  const trophies = [...room.shelf.trophies.children]; assert.strictEqual(trophies.length, 24);
+  const trophies = [...room.shelf.trophies.children]; assert.strictEqual(trophies.length, 25);
   rowsOf().forEach((row, r) => {
     const y = ys[r], mine = trophies.filter(t => row.includes(t.userData.trophy)).map(t => ({ t, b: box(t) })).sort((p, q) => p.b.min.x - q.b.min.x);
     assert.strictEqual(mine.length, row.length, `row ${r + 1}: all its trophies are drawn`);
@@ -29,5 +29,5 @@ module.exports = { name: 'sim:shelf', tier: 'sim', covers: ['js/dormroom.js', 'j
     f.forEach(b => parts.forEach(p => assert.ok(!b.intersectsBox(p), `a ${type} turned ${rot} at ${x},${z} pokes through the trophy shelf`)));
   }
   room.set([]); assert.ok(tried > 150 && fitted === tried, `${tried} placements tried across the five kinds of furniture`);
-  assert.deepStrictEqual(s.errors, [], 'no errors'); ctx.log(`24 trophies in three rows (10, 10, 4), each on its board and clear of the one above; ${tried} furniture placements, none touching the shelf`);
+  assert.deepStrictEqual(s.errors, [], 'no errors'); ctx.log(`25 trophies in three rows (10, 10, 5), each on its board and clear of the one above; ${tried} furniture placements, none touching the shelf`);
 } };

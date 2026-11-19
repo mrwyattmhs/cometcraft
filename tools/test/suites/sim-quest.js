@@ -14,7 +14,7 @@ module.exports = { name: 'sim:quest', tier: 'sim', covers: ['js/remy-quest.js', 
   const goTo = async (x, z) => { Player.teleport(x, z, 0); await s.frames(4); };
 
   /* ---------- before: nothing shows ---------- */
-  assert.strictEqual(step(), 'none'); assert.strictEqual(tracker(), null); assert.ok(!patch(remy.avatar), 'Remy has both eyes'); assert.ok(!spot('Wash the eyeball')); assert.ok(spot('Browse the Pet Corner')); const base = hub.interactables.length; assert.strictEqual(base, 14);
+  assert.strictEqual(step(), 'none'); assert.strictEqual(tracker(), null); assert.ok(!patch(remy.avatar), 'Remy has both eyes'); assert.ok(!spot('Wash the eyeball')); assert.ok(spot('Browse the Pet Corner')); const base = hub.interactables.length; assert.strictEqual(base, 15);
   for (let n = 1; n <= 9; n++) { pet(); assert.strictEqual(Store.get().remyPets, n); assert.strictEqual(toast(), 'Remy purrs.'); assert.strictEqual(dlg(), null); assert.strictEqual(step(), 'none'); }
   pet(500); assert.strictEqual(Store.get().remyPets, 9, 'a pet inside the two-second cooldown is not counted'); assert.strictEqual(step(), 'none', 'and cannot start the quest');
 

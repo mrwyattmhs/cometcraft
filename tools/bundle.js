@@ -62,7 +62,7 @@ function zipProject() { return zipOf(projectFiles().map(f => [`prime-time/${f}`,
 
 function build() { return { html: Buffer.from(singleFile()), zip: zipProject() }; }
 
-module.exports = { versions, singleFile, zipProject, zipOf, projectFiles, build, ROOT };
+module.exports = { versions, singleFile, zipProject, projectFiles, build, ROOT };
 
 if (require.main === module) {
   const args = process.argv.slice(2), v = versions();

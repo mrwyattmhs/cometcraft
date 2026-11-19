@@ -5,7 +5,7 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 10, MAX_SHELVES = 3; // trophies on one shelf; the eleventh starts a second shelf below it and the twenty-first a third (three shelves hold 30)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two
@@ -28,6 +28,7 @@ const Trophies = (() => {
     { id: 'elements', name: 'Element Match', symbol: { words: ['ELEMENT', 'MATCH'] }, color: 0x4ad8c8, goal: 100, noun: 'found', how: "Find 100 elements correctly at the Element Match station in the Science Lab." },
     { id: 'cells', name: 'Cell Lab', symbol: { words: ['CELL', 'LAB'] }, color: 0x7ee06a, goal: 100, noun: 'found', how: "Click 100 cell parts correctly at the Cell Lab station in the Science Lab." },
     { id: 'atoms', name: 'Atom Builder', symbol: { words: ['ATOM', 'BUILDER'] }, color: 0xff6ad5, goal: 100, noun: 'built', how: "Build 100 atoms correctly at the Atom Builder station in the Science Lab." },
+    { id: 'chess', name: 'Chess', symbol: 'knight', color: 0xf0d9a0, goal: 10, noun: 'games won', how: "Win 10 games of chess against the computer at the chess table in the park, next to the little library." },
     { id: 'clock', name: 'Read the Clock', symbol: { words: ['READ THE', 'CLOCK'] }, color: 0xffd24a, goal: 100, noun: 'read', how: "Read 100 clocks correctly at the classroom clock in the Arithmetic Academy (or at the clock in the Science Lab)." },
     { id: 'lines', name: 'Lines Table', symbol: 'linegraph', color: 0x4fe0c0, goal: 100, noun: 'lines graphed', how: "Graph 100 lines at the Lines Table in the casino's Graphing wing, in any form. A line that needed the answer shown doesn't count." },
     { id: 'parabola', name: 'Parabola Table', symbol: 'parabola', color: 0xd58bff, goal: 100, noun: 'solved', how: "Get 100 correct answers at the Parabola Table in the casino's Graphing wing." },

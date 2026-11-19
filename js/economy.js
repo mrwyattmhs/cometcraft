@@ -3,7 +3,7 @@
 
    Levels run Easy, Medium, Hard, Expert. A game with three levels uses Easy, Medium, Hard. */
 const Economy = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const LEVELS = ['Easy', 'Medium', 'Hard', 'Expert'];
   const PAY = {
     // casino tables (chips for each correct answer, by level)
@@ -18,6 +18,7 @@ const Economy = (() => {
     elements: [10, 25, 50],                // the Science Lab's three stations: Element Match (the periodic table),
     cells: [10, 25, 50],                   //   Cell Lab (click the part of a cell),
     atoms: [10, 25, 50],
+    chess: [100, 200, 300],                // winning a game of chess against the computer at the table in the park: Easy 100, Medium 200, Hard 300 (a draw or a loss pays nothing)
     clock: [10, 25, 50],                   // reading the clock (the Arithmetic Academy's classroom clock, and the Science Lab's): the same scale                   //   and Atom Builder (protons, neutrons and electrons): the same scale as the House of Algebra's booths                  // the House of Algebra's second table (multiply and divide), the same scale as the first                 // the House of Algebra's first table (the missing number): Easy 10, Medium 25, Hard 50, like the other three-level tables
     cubes: [10, 25],                       // the Cubes Table has two levels, so it pays like the first two of the other Factoring tables: Easy 10, Medium 25
     parabola: [25, 50, 100],

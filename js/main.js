@@ -51,6 +51,7 @@
     openMap: () => MapGame.open(),
     openMines: () => minesMenu.open(),
     openLibrary: () => LittleLibrary.open(),
+    openChess: () => ChessGame.open(),
     openTable: m => {
       if (m === 'trinomial') TrinomialGame.open();
       else if (m === 'cubes') CubesGame.open();
@@ -292,6 +293,7 @@
       else if (TrinomialGame.isOpen()) TrinomialGame.close();
       else if (CubesGame.isOpen()) CubesGame.close();
       else if (PolyMulGame.isOpen()) PolyMulGame.close();
+      else if (ChessGame.isOpen()) ChessGame.close();
       else if (PolyAddGame.isOpen()) PolyAddGame.close();
       else if (EquationGame.isOpen()) EquationGame.close();
       else if (MulDivGame.isOpen()) MulDivGame.close();

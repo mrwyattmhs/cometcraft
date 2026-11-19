@@ -1107,6 +1107,34 @@ const World = (() => {
     return { x: bx, z: bz };
   }
 
+  /** A chess table on the lawn beside the little library: a wooden table with a chessboard on it, the pieces set out in their starting places, a stool at each side and a sign. Press E to sit down
+      and play (js/chess-game.js). The board is the way a player sees it: White's pieces on the south side. */
+  function addChessTable(zone, actions, tx, tz) {
+    const g = zone.group, wood = lambert(0x7a5230), dark = lambert(0x4a3220), SQ = 0.145, top = 0.826, half = SQ * 4;
+    [[-0.58, -0.58], [0.58, -0.58], [-0.58, 0.58], [0.58, 0.58]].forEach(([dx, dz]) => box(g, wood, 0.1, 0.74, 0.1, tx + dx, 0.37, tz + dz));
+    box(g, wood, 1.4, 0.08, 1.4, tx, 0.78, tz); box(g, dark, 1.24, 0.02, 1.24, tx, 0.815, tz);                  // the table top, and a dark frame for the board
+    const board = textPlane(SQ * 8, SQ * 8, (c, cv) => { const n = cv.width / 8; for (let r = 0; r < 8; r++) for (let f = 0; f < 8; f++) { c.fillStyle = (r + f) % 2 ? '#779556' : '#ebecd0'; c.fillRect(f * n, r * n, n, n); } }, 90);
+    board.rotation.x = -Math.PI / 2; board.position.set(tx, top + 0.001, tz); g.add(board);
+    // the pieces: little blocks, in the game's own style
+    const pieceAt = (type, color, f, rank) => {
+      const mat = lambert(color ? 0x2a2622 : 0xf4efe0), x = tx - half + (f + 0.5) * SQ, z = tz + half - (rank + 0.5) * SQ, put = (w, h, d, y, dx = 0) => box(g, mat, w, h, d, x + dx, top + y + h / 2, z);
+      put(0.1, 0.02, 0.1, 0);
+      if (type === 'p') { put(0.05, 0.06, 0.05, 0.02); put(0.04, 0.04, 0.04, 0.08); }
+      else if (type === 'r') { put(0.07, 0.1, 0.07, 0.02); put(0.095, 0.03, 0.095, 0.12); }
+      else if (type === 'n') { put(0.06, 0.09, 0.06, 0.02); put(0.1, 0.045, 0.055, 0.11, color ? 0.015 : -0.015); }
+      else if (type === 'b') { put(0.06, 0.11, 0.06, 0.02); put(0.04, 0.05, 0.04, 0.13); }
+      else if (type === 'q') { put(0.07, 0.14, 0.07, 0.02); put(0.095, 0.03, 0.095, 0.16); put(0.035, 0.035, 0.035, 0.19); }
+      else { put(0.07, 0.14, 0.07, 0.02); put(0.022, 0.08, 0.022, 0.16); put(0.06, 0.022, 0.022, 0.19); }
+    };
+    'rnbqkbnr'.split('').forEach((t, f) => { pieceAt(t, 0, f, 0); pieceAt(t, 1, f, 7); pieceAt('p', 0, f, 1); pieceAt('p', 1, f, 6); });
+    [-1.15, 1.15].forEach(dz => { box(g, wood, 0.42, 0.07, 0.42, tx, 0.43, tz + dz); [[-0.15, -0.15], [0.15, -0.15], [-0.15, 0.15], [0.15, 0.15]].forEach(([a, b]) => box(g, dark, 0.06, 0.4, 0.06, tx + a, 0.2, tz + dz + b)); solid(zone, tx, tz + dz, 0.5, 0.5); });
+    box(g, wood, 0.12, 1.0, 0.12, tx - 1.3, 0.5, tz);                                                            // a sign on a post
+    const sign = makeSign({ w: 1.0, h: 0.42, title: 'CHESS', sub: 'sit down and play', fg: '#fff3c4', bg: '#3b2a1a', border: '#e8c878' }); sign.rotation.y = Math.PI / 2; sign.position.set(tx - 1.23, 1.0, tz); g.add(sign);
+    solid(zone, tx, tz, 1.5, 1.5); solid(zone, tx - 1.3, tz, 0.2, 0.2);
+    interact(zone, tx, tz, 2.7, 'Sit down and play chess', () => actions.openChess());
+    return { x: tx, z: tz };
+  }
+
   function buildPark(zone, actions) {
     const g = zone.group, { cx, cz, inner, outer } = PARK, wide = outer - inner, mid = (outer + inner) / 2;
     box(g, lambert(0x5a3c24), 7.4, 0.06, 7.4, cx, 0.03, cz);                                 // the planting bed under the tree
@@ -1135,7 +1163,9 @@ const World = (() => {
     [-1, 1].forEach(sx => { addShrub(zone, cx + sx * 3.1, plazaZ + 3.1, 1.3); shrubs.push({ x: cx + sx * 3.1, z: plazaZ + 3.1 }); });
     // a little free library on the lawn just west of the plaza's north-west corner, its glass door facing the fountain
     const library = addLittleLibrary(zone, actions, cx - 5.2, plazaZ - 2.7);
-    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches }, library };
+    // and a chess table just beyond it, on the lawn to the south-west
+    const chess = addChessTable(zone, actions, library.x - 3.4, library.z + 2.0);
+    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches }, library, chess };
   }
 
   /* ---------- inside Wilson Hall: one hallway, one open room, everything else locked ---------- */
@@ -1432,6 +1462,9 @@ const World = (() => {
     return { cells, w: 12, h: rows.length };
   };
 
+  /** A chess knight, facing left, in pixels (the trophy for the chess table). */
+  const KNIGHT_ART = ['......##.#....', '.....#######..', '....#########.', '...##########.', '..###.########', '.#############', '##############', '#############.', '####.########.', '.###.#######..', '......#######.', '......#######.', '.....#########', '....##########', '...###########', '..############', '..############'];
+  const knightCells = () => { const cells = []; KNIGHT_ART.forEach((row, r) => [...row].forEach((ch, c) => { if (ch === '#') cells.push([c, KNIGHT_ART.length - 1 - r]); })); return { cells, w: 14, h: KNIGHT_ART.length }; };
   const SYMBOLS = {
     question: { shape: questionCells, u: 0.19, mirrorBack: false },
     sqrt:      { shape: radicalCells,   u: 0.1,   mirrorBack: false },
@@ -1445,6 +1478,7 @@ const World = (() => {
     box:       { shape: boxCells,      u: 0.1,   mirrorBack: false },
     guitar:    { shape: guitarCells,   u: 0.1,   mirrorBack: false },
     flask:     { shape: flaskCells,    u: 0.1,   mirrorBack: false },
+    knight:    { shape: knightCells,   u: 0.1,   mirrorBack: false },
     plus:  { shape: plusCells,  u: 0.11, mirrorBack: false },
     minus: { shape: minusCells, u: 0.11, mirrorBack: false },
     times: { shape: timesCells, u: 0.11, mirrorBack: false },

@@ -7,7 +7,7 @@
    Medium  the box first, taken from:     [ ] - 4 = 9         or the number first:   3 + [ ] = 11
    Hard    all four shapes, bigger numbers, the box taken away (15 - [ ] = 6), and sometimes the equation turned round:  7 = [ ] + 5 */
 const Equations = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const MINUS = '\u2212';
   const LEVELS = [
     { level: 1, name: 'Easy', sample: '[ ] + 5 = 7', desc: 'Find the number that was added on, like [ ] + 5 = 7', forms: ['add1'] },

@@ -8,7 +8,7 @@
    Medium  both numbers negative:          multiply to 32, add to -18       (-16 and -2)
    Hard    one of each (a negative product, so the "sum" is a difference of the factors), mixed with the first two kinds:   multiply to -32, add to 14   (16 and -2) */
 const NumberPairs = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const MINUS = '\u2212', TIMES = '\u00d7';
   const LEVELS = [
     { level: 1, name: 'Easy', sample: `${TIMES} 32, + 18`, desc: 'Both numbers are positive, like 16 and 2', kinds: ['pp'], maxProduct: 48, signed: false },

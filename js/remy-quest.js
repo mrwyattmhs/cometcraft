@@ -12,7 +12,7 @@
    Two parts. The first is the story as a state machine with every word it says: no DOM, no game, unit tested in Node (tests/remy-quest.test.js). The second, attach(), connects it to the
    world: Remy's eye patch, the save, the tracker on screen, the reminders, the fountain's prompt, the Pet Corner, and the cat on the bed. */
 const RemyQuest = (() => {
-  const BUILD = 50; // bump together with the ?v= numbers in index.html
+  const BUILD = 51; // bump together with the ?v= numbers in index.html
   const PETS_TO_START = 10, ANSWERS = 5, REWARD = 250;
   const STEPS = ['none', 'find', 'wash', 'vet', 'answers', 'report', 'visit', 'done'];
   const OK_LINE = 'Remy is ok, she will get used to one eye.';
