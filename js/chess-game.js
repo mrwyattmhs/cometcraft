@@ -7,7 +7,7 @@
    over stays over (it cannot be paid twice). A save that is not a legal game is thrown away, never half-believed.
    For tests: ChessGame.config.engine (who plays the computer's moves) and ChessGame.config.delay (how long a move is held back so it does not feel instant) can be replaced. */
 const ChessGame = (() => {
-  const BUILD = 51; // bump together with the ?v= numbers in index.html
+  const BUILD = 52; // bump together with the ?v= numbers in index.html
   const P = 'chess', $ = id => document.getElementById(`${P}-${id}`), LEVELS = ['easy', 'medium', 'hard'], WIN = Economy.PAY.chess, C = Chess;
   const config = { engine: (g, level) => C.chooseMove(g, level), delay: level => ({ easy: 450, medium: 600, hard: 350 }[level] || 400) };
   const ABOUT = {

@@ -1072,10 +1072,11 @@ const World = (() => {
       (to the left as you face the park from the road) a short walk leads to a small plaza with a fountain and two benches. */
   const PARK = { cx: -15.5, cz: DORM.zc, inner: 4, outer: 6 };
 
-  /** A little free library like the ones in parks: a big blue mailbox on a post with a glass door and books inside. It stands by the
-      fountain, facing it. Press E to open it. The three real books (Flatland, Alice, A Tangled Tale) are among the spines you can see. */
-  function addLittleLibrary(zone, actions, bx, bz) {
-    const g = zone.group, T_ = T, wood = lambert(0x6b4a2b), blue = lambert(0x3a6ea5), cream = lambert(0xf3e8c9), gold = lambert(0xc9a24a);
+  /** A little free library like the ones in parks: a big blue mailbox on a post with a glass door and books inside. It stands on the tiled terrace south of the fountain,
+      facing north toward it (it is built facing east, in its own group, and the group is turned). Press E to open it. The three real books (Flatland, Alice, A Tangled Tale)
+      are among the spines you can see. (wx, wz) is where it stands. */
+  function addLittleLibrary(zone, actions, wx, wz) {
+    const g = new T.Group(), bx = 0, bz = 0, T_ = T, wood = lambert(0x6b4a2b), blue = lambert(0x3a6ea5), cream = lambert(0xf3e8c9), gold = lambert(0xc9a24a);
     box(g, wood, 0.18, 1.25, 0.18, bx, 0.625, bz);                                           // the post
     // the body is hollow and open on the east side (the side you face), so the shelves show through the glass door
     box(g, blue, 0.06, 0.8, 1.1, bx - 0.32, 1.6, bz);                                        // back
@@ -1102,12 +1103,13 @@ const World = (() => {
     box(g, wood, 0.05, 0.5, 1.1, bx + 0.12, 0.8, bz);
     const sign = makeSign({ w: 1.04, h: 0.44, title: 'LITTLE LIBRARY', sub: 'take one, read one', fg: '#fff3c4', bg: '#2f5885', border: '#f3e8c9' });
     sign.rotation.y = Math.PI / 2; sign.position.set(bx + 0.175, 0.8, bz); g.add(sign);       // 3 cm in front of the board
-    solid(zone, bx + 0.03, bz, 0.85, 1.2);
-    interact(zone, bx + 1.1, bz, 1.7, 'Open the Little Library', () => actions.openLibrary());
-    return { x: bx, z: bz };
+    g.position.set(wx, 0, wz); g.rotation.y = Math.PI / 2; zone.group.add(g);                 // turned a quarter: the door that faced east now faces north
+    solid(zone, wx, wz - 0.03, 1.2, 0.85);                                                    // (the footprint is turned with it: 1.2 across, 0.85 deep)
+    interact(zone, wx, wz - 1.1, 1.7, 'Open the Little Library', () => actions.openLibrary());      // the prompt is on the north side, where you stand to look in
+    return { x: wx, z: wz, turn: g.rotation.y };      // (turn: which way its door faces, in the same terms as a mesh rotation: a quarter turn is north)
   }
 
-  /** A chess table on the lawn beside the little library: a wooden table with a chessboard on it, the pieces set out in their starting places, a stool at each side and a sign. Press E to sit down
+  /** A chess table on the tiled terrace beside the little library: a wooden table with a chessboard on it, the pieces set out in their starting places, a stool at each side and a sign. Press E to sit down
       and play (js/chess-game.js). The board is the way a player sees it: White's pieces on the south side. */
   function addChessTable(zone, actions, tx, tz) {
     const g = zone.group, wood = lambert(0x7a5230), dark = lambert(0x4a3220), SQ = 0.145, top = 0.826, half = SQ * 4;
@@ -1161,11 +1163,14 @@ const World = (() => {
     const fountain = addMiniFountain(zone, cx, plazaZ);
     const fountainBenches = [[cx - 3.5, plazaZ, 'E'], [cx + 3.5, plazaZ, 'W']].map(([x, z, way]) => { addBenchFacing(zone, x, z, way); return { x, z, way }; });
     [-1, 1].forEach(sx => { addShrub(zone, cx + sx * 3.1, plazaZ + 3.1, 1.3); shrubs.push({ x: cx + sx * 3.1, z: plazaZ + 3.1 }); });
-    // a little free library on the lawn just west of the plaza's north-west corner, its glass door facing the fountain
-    const library = addLittleLibrary(zone, actions, cx - 5.2, plazaZ - 2.7);
-    // and a chess table just beyond it, on the lawn to the south-west
-    const chess = addChessTable(zone, actions, library.x - 3.4, library.z + 2.0);
-    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, fountain: { ...fountain, benches: fountainBenches }, library, chess };
+    // the park goes on south of the fountain plaza as a tiled terrace (12 wide, 7 deep, the same paving as the paths and the plaza): the little free library stands on its south edge,
+    // its glass door facing north toward the fountain, and the chess table sits on the tile beside it, with a lamp and a shrub at each end
+    const terrace = { x0: cx - 6, x1: cx + 6, z0: plazaZ + 4, z1: plazaZ + 11 };
+    paths.push(flat(g, 'paving', terrace.x1 - terrace.x0, terrace.z1 - terrace.z0, cx, 0.02, (terrace.z0 + terrace.z1) / 2));
+    const library = addLittleLibrary(zone, actions, cx + 3.4, terrace.z1 - 1.0);
+    const chess = addChessTable(zone, actions, cx - 3.0, terrace.z0 + 3.4);
+    [-1, 1].forEach(sx => addLamp(zone, cx + sx * 6.2, terrace.z1 - 0.4)); [[-4.9, 0.7], [5.7, 0.7]].forEach(([dx, dz]) => { addShrub(zone, cx + dx, terrace.z1 - dz, 1.3); shrubs.push({ x: cx + dx, z: terrace.z1 - dz }); });
+    zone.park = { cx, cz, inner, outer, paths, benches, shrubs, plaza: { x: cx, z: plazaZ, size: 8 }, terrace, fountain: { ...fountain, benches: fountainBenches }, library, chess };
   }
 
   /* ---------- inside Wilson Hall: one hallway, one open room, everything else locked ---------- */
@@ -1248,7 +1253,7 @@ const World = (() => {
   function buildHub(actions) {
     const zone = createZone('Prime Time Village', {
       spawn: { x: 0, z: DORM.zc, yaw: 0 },                              // the dorm is directly on your right
-      bounds: { minX: -74, maxX: 58, minZ: -33, maxZ: 52 },                // (the east edge is 6 blocks further out than it was, to give the sandbox and the minefield room; the west edge is 40 out, for the street on to the Science Lab)
+      bounds: { minX: -74, maxX: 58, minZ: -33, maxZ: 60 },                // (the east edge is 6 blocks further out than it was, to give the sandbox and the minefield room; the west edge is 40 out, for the street on to the Science Lab)
       sky: 0x8fc8f0, fog: [0x8fc8f0, 45, 120],
       wander: { minX: -30, maxX: 22.5, minZ: -17, maxZ: 44 },                // (stops well short of the minefield behind the dorm, which starts at x 30.3)
     });

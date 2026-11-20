@@ -7,7 +7,7 @@
    Every drawn part carries data-key="nucleus" etc. (the window finds what you clicked with that), and a part that appears more than once (the mitochondria, the ribosomes) counts anywhere you click it.
    No DOM here, so it is all unit tested in Node (tests/cells.test.js). */
 const Cells = (() => {
-  const BUILD = 51; // bump together with the ?v= numbers in index.html
+  const BUILD = 52; // bump together with the ?v= numbers in index.html
   /** name: what it is called; job: what it does, as a sentence ("The nucleus holds ..."); clue: the job as a phrase after "the part that" (each clue fits one part only). */
   const PARTS = {
     membrane: { name: 'cell membrane', job: 'controls what goes into and out of the cell', clue: 'controls what goes into and out of the cell' },

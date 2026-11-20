@@ -19,11 +19,14 @@ module.exports = { name: 'browser:chess', tier: 'browser', covers: ['js/chess.js
   const overlayOver = () => q(() => { const o = document.getElementById('chess'); return o.scrollHeight - o.clientHeight; });
 
   /* ---------- walking up to the table, and sitting down ---------- */
-  await page.setViewport({ width: 1280, height: 800 }); await fresh(); await g.at(-21.8, 44.3, Math.PI / 2, 0.1); await g.sleep(500);
+  await page.setViewport({ width: 1280, height: 800 }); await fresh(); await g.at(-15.8, 52.4, Math.PI / 2, 0.1); await g.sleep(500);
   await page.keyboard.down('KeyW'); await g.sleep(3500); await page.keyboard.up('KeyW'); await g.sleep(300); const x = await q(() => Player.x);
-  assert.ok(x > -23.4 && x < -22.5, `the table stops you (you got as far as x ${x.toFixed(2)}; its edge is at -23.35, and you started at -21.8)`); assert.match(await q(() => document.getElementById('prompt').innerText), /Sit down and play chess/, 'the prompt shows beside the table');
+  assert.ok(x > -17.75 && x < -16.4, `the table stops you (you got as far as x ${x.toFixed(2)}; its edge is at -17.75, and you started at -15.8)`); assert.match(await q(() => document.getElementById('prompt').innerText), /Sit down and play chess/, 'the prompt shows beside the table');
   await page.keyboard.press('KeyE'); await g.sleep(500); assert.ok(await q(() => ChessGame.isOpen() && ChessGame.view === 'pick'), 'a real E sits you down at the picker'); assert.ok(await q(() => UI.isOpen()), 'and the world waits');
-  await page.keyboard.press('Escape'); await g.sleep(300); assert.ok(!(await q(() => ChessGame.isOpen())), 'a real Escape leaves the table'); ctx.log('walked up: the table stops you, the prompt shows, E sits you down, Escape leaves');
+  await page.keyboard.press('Escape'); await g.sleep(300); assert.ok(!(await q(() => ChessGame.isOpen())), 'a real Escape leaves the table');
+  /* and the little library, now on the south edge of the terrace and facing north: stand in front of it, look at it, press E */
+  await g.at(-12.1, 53.4, Math.PI, 0.05); await g.sleep(500); assert.match(await q(() => document.getElementById('prompt').innerText), /Open the Little Library/, 'the library\'s prompt shows on its north side'); await page.keyboard.press('KeyE'); await g.sleep(500); assert.ok(await q(() => LittleLibrary.isOpen()), 'and E opens it'); await page.keyboard.press('Escape'); await g.sleep(300); assert.ok(!(await q(() => LittleLibrary.isOpen())));
+  ctx.log('walked up: the table stops you, the prompt shows, E sits you down, Escape leaves; the library opens from its north side');
 
   /* ---------- real clicks, a real drag, and the real computer ---------- */
   await fresh(); await real(); await q(() => { ChessGame.open(); document.querySelector('#chess-levels [data-level="easy"]').click(); document.querySelector('#chess-colors [data-color="w"]').click(); document.getElementById('chess-start').click(); }); await g.sleep(300);      // (the window remembers the side you chose last, so say White)

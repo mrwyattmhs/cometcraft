@@ -12,7 +12,7 @@
    Two parts. The first is the maths of it with no DOM and no game: dayKey, topicFor, sync, progress, step and every word it says, unit tested in Node (tests/daily.test.js). The second, attach(),
    connects it to the game: the save, the tracker, the popups, the reward and the midnight check. */
 const DailyQuest = (() => {
-  const BUILD = 51; // bump together with the ?v= numbers in index.html
+  const BUILD = 52; // bump together with the ?v= numbers in index.html
   const REWARD = 200;
   const G = typeof Trophies !== 'undefined' ? Trophies : require('./trophies.js');
   const whole = v => Math.max(0, Math.floor(Number(v)) || 0);

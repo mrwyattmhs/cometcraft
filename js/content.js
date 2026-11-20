@@ -32,7 +32,7 @@ const CONTENT = {
       <p><b>Chess:</b> there is a chess table in the park, next to the little library. Sit down and play the computer at Easy, Medium or Hard. A win pays <b>100, 200 or 300 chips</b>, and ten wins earn a trophy. Your game is saved if you leave the table.</p>
       <p><b>The daily quest:</b> each day there is one quest, a topic to practise (like ten Multiply Table problems, or three games of Minesweeper). Press <b>Q</b> any time to see today's quest and where to go. Finish it before midnight for <b>200 extra chips</b>.</p>
       <p><b>Trophies:</b> get 100 right at any table and you win a trophy for the shelf in your room in Wilson Hall.</p>
-      <p><b>Little Library:</b> by the fountain in the park. Take a book and read it on the full screen: <i>Flatland</i>, <i>Alice's Adventures in Wonderland</i>, or <i>A Tangled Tale</i>. Your page is saved.</p>
+      <p><b>Little Library:</b> in the park, on the tiled terrace just south of the fountain. Take a book and read it on the full screen: <i>Flatland</i>, <i>Alice's Adventures in Wonderland</i>, or <i>A Tangled Tale</i>. Your page is saved.</p>
       <p>Across the road from the shops is the <b>Arithmetic Academy</b>: timed practice tables for adding, subtracting, multiplying, and dividing.</p>
       <p>Follow the stone path round the south side of the school to the <b>Sandbox</b>. Build the shape that matches the blueprint board.</p>
       <p>Spend your chips on clothes, pencils, graphing calculators, and pets in the shops. The Style Shop's top line is the <b>Kelly Green set with gold outlines</b>: 5,000 chips a piece. Press <b>C</b> any time to open your closet.</p>`,

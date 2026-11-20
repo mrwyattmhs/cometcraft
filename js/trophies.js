@@ -5,7 +5,7 @@
    The logic here is pure (no DOM), so it is unit tested in Node (tests/trophies.test.js). award() and chip() are the only parts that
    touch the game: they read and write the save in Store and show the progress line and the "trophy earned" banner. */
 const Trophies = (() => {
-  const BUILD = 51; // bump together with the ?v= numbers in index.html
+  const BUILD = 52; // bump together with the ?v= numbers in index.html
   const SHELF_CAPACITY = 10, MAX_SHELVES = 3; // trophies on one shelf; the eleventh starts a second shelf below it and the twenty-first a third (three shelves hold 30)
 
   /** In the order they appear on the table list. symbol: the shape on the table (see SYMBOLS in world.js), or a few words for the two

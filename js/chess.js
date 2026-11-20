@@ -6,7 +6,7 @@
      LEVELS         easy / medium / hard: how deep, how long, how much noise, and (Medium) how often it has a lapse and plays like Easy for a move
    The engine thinks on the main thread for at most LEVELS[...].ms, so a window should let the page paint "thinking" first (a setTimeout of a few ms) before calling it. */
 const Chess = (() => {
-  const BUILD = 51; // bump together with the ?v= numbers in index.html
+  const BUILD = 52; // bump together with the ?v= numbers in index.html
   const P = 1, N = 2, B = 3, R = 4, Q = 5, K = 6;                       // piece types; a black piece is the type + 8
   const FILES = 'abcdefgh', LETTER = ' PNBRQK';
   const sqName = s => FILES[s & 7] + ((s >> 4) + 1), sqOf = n => (n.charCodeAt(0) - 97) + (n.charCodeAt(1) - 49) * 16;

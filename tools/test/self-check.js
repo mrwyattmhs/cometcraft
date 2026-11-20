@@ -155,7 +155,11 @@ const MUTATIONS = [
   ['the chess quest asks for five wins', 'js/daily.js', "t('chess', 1,", "t('chess', 5,", 'unit:daily'],
   ['the chess trophy takes a hundred wins', 'js/trophies.js', "symbol: 'knight', color: 0xf0d9a0, goal: 10,", "symbol: 'knight', color: 0xf0d9a0, goal: 100,", 'unit:trophies'],
   ['you can walk through the chess table', 'js/world.js', 'solid(zone, tx, tz, 1.5, 1.5); solid(zone, tx - 1.3, tz, 0.2, 0.2);', 'solid(zone, tx - 1.3, tz, 0.2, 0.2);', 'sim:world'],
-  ['the chess table is built far from the library', 'js/world.js', 'library.x - 3.4, library.z + 2.0', 'library.x - 13.4, library.z + 2.0', 'sim:world'],
+  ['the chess table is built far from the library', 'js/world.js', 'addChessTable(zone, actions, cx - 3.0, terrace.z0 + 3.4)', 'addChessTable(zone, actions, cx - 13.0, terrace.z0 + 3.4)', 'sim:world'],
+  ['the little library still faces east', 'js/world.js', 'g.rotation.y = Math.PI / 2; zone.group.add(g);', 'g.rotation.y = 0; zone.group.add(g);', 'sim:world'],
+  ['the library\'s solid footprint is not turned with it', 'js/world.js', 'solid(zone, wx, wz - 0.03, 1.2, 0.85);', 'solid(zone, wx, wz - 0.03, 0.85, 1.2);', 'sim:world'],
+  ['the terrace is not paved like the rest of the park', 'js/world.js', 'paths.push(flat(g, \'paving\', terrace.x1', '(flat(g, \'paving\', terrace.x1', 'sim:world'],
+  ['the village\'s south wall was not moved back for the terrace', 'js/world.js', 'bounds: { minX: -74, maxX: 58, minZ: -33, maxZ: 60 },', 'bounds: { minX: -74, maxX: 58, minZ: -33, maxZ: 52 },', 'sim:world'],
   // the daily quest
   ['the daily reward is 100, not 200', 'js/daily.js', 'const REWARD = 200;', 'const REWARD = 100;', 'unit:daily'],
   ['a cycle can start with the game the last one ended on (the same game two days running)', 'js/daily.js', 'if (cycle > 0 && ids[0] ===', 'if (false && ids[0] ===', 'unit:daily'],
